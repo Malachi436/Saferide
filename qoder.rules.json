@@ -5,6 +5,15 @@
     "description": "School Transport Management System",
     "version": "1.0.0"
   },
+  "projectType": "monorepo",
+  "rootDirectories": ["frontend", "backend"],
+  "safeMode": "strict",
+  "patchMode": {
+    "enabled": true,
+    "requireApproval": true,
+    "patchFolder": "qoder_patches",
+    "naming": "patch_<timestamp>_<summary>"
+  },
   "monorepo": {
     "structure": {
       "frontend": {
@@ -15,7 +24,8 @@
       "backend": {
         "path": "backend",
         "technology": "NestJS + Prisma + Postgres + Redis + WebSockets + BullMQ",
-        "purpose": "API backend with real-time capabilities and background processing"
+        "purpose": "API backend with real-time capabilities and background processing",
+        "protected": true
       }
     }
   },
@@ -280,13 +290,17 @@
   },
   "database": {
     "prisma": {
+      "version": "5.22.0",
       "schemaProtection": {
         "rules": [
           "DO NOT modify schema.prisma unless explicitly asked",
           "All schema changes must be reviewed",
           "Migrations must be generated using Prisma CLI",
-          "Bidirectional relations must be explicitly defined"
-        ]
+          "Bidirectional relations must be explicitly defined",
+          "Schema changes require explicit approval"
+        ],
+        "locked": true,
+        "allowFormatOnly": true
       },
       "namingConventions": {
         "models": "PascalCase",
@@ -326,7 +340,8 @@
         "analytics"
       ],
       "integration": "Worker processes must follow BullMQ integration patterns",
-      "monitoring": "Queue monitoring and error handling required"
+      "monitoring": "Queue monitoring and error handling required",
+      "protected": true
     }
   },
   "docker": {
@@ -334,6 +349,11 @@
       "No editing Docker setup unless explicitly instructed",
       "Docker Compose files must maintain current service definitions",
       "Environment variables must be properly mapped"
+    ],
+    "protected": true,
+    "forbiddenChanges": [
+      "docker-compose.dev.yml",
+      "Dockerfile"
     ]
   },
   "api": {
@@ -357,6 +377,80 @@
       "unitTests": "Jest testing framework",
       "e2eTests": "Supertest for API testing",
       "coverage": "Minimum 80% coverage recommended"
-    }
+    },
+    "allowedChanges": ["Jest tests", "e2e tests"],
+    "forbiddenChanges": ["Deleting test directories"]
+  },
+  "frontend": {
+    "path": "frontend",
+    "language": "TypeScript",
+    "framework": "React Native (Expo)",
+    "allowedChanges": [
+      "screens",
+      "components",
+      "navigation",
+      "hooks",
+      "api integration",
+      "state management",
+      "utility functions"
+    ],
+    "forbiddenChanges": [
+      "replacing project root",
+      "modifying .env files",
+      "modifying Metro config",
+      "changing package.json dependencies without justification"
+    ]
+  },
+  "backend": {
+    "path": "backend",
+    "language": "TypeScript",
+    "framework": "NestJS",
+    "allowedChanges": [
+      "creating new modules",
+      "adding DTOs",
+      "adding services",
+      "adding controllers",
+      "improving typings",
+      "adding tests"
+    ],
+    "forbiddenChanges": [
+      "modifying prisma/schema.prisma unless explicitly instructed",
+      "changing Docker configs",
+      "changing database connection config",
+      "editing migrations manually",
+      "modifying .env variables",
+      "touching the worker queue implementation without approval",
+      "modifying database setup",
+      "modifying backend configs",
+      "modifying backend core logic without approval"
+    ],
+    "protected": true
+  },
+  "apiIntegration": {
+    "backendUrl": "http://localhost:3000",
+    "integrationMode": "strict",
+    "rules": [
+      "Qoder must not invent API routes",
+      "Qoder must respect existing NestJS controller paths",
+      "Qoder must not modify API response shapes unless asked"
+    ]
+  },
+  "generalRules": {
+    "neverModify": [
+      ".gitignore",
+      ".gitattributes",
+      ".env",
+      "*.lock",
+      "node_modules"
+    ],
+    "requireConfirmationFor": [
+      "dependency upgrades",
+      "schema changes",
+      "Docker config changes",
+      "authentication logic changes",
+      "WebSocket gateway changes"
+    ],
+    "generatePatchesOnly": true,
+    "analysisRequiredBeforeChanges": true
   }
 }

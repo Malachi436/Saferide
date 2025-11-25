@@ -1,0 +1,362 @@
+{
+  "$schema": "https://qoder.ai/rules/schema.json",
+  "project": {
+    "name": "ROSAgo",
+    "description": "School Transport Management System",
+    "version": "1.0.0"
+  },
+  "monorepo": {
+    "structure": {
+      "frontend": {
+        "path": "frontend",
+        "technology": "Expo React Native",
+        "purpose": "Mobile application for parents, drivers, and administrators"
+      },
+      "backend": {
+        "path": "backend",
+        "technology": "NestJS + Prisma + Postgres + Redis + WebSockets + BullMQ",
+        "purpose": "API backend with real-time capabilities and background processing"
+      }
+    }
+  },
+  "modules": {
+    "backend": {
+      "boundaries": {
+        "AuthModule": {
+          "path": "src/modules/auth",
+          "responsibilities": [
+            "JWT access and refresh token management",
+            "User authentication flows",
+            "Password hashing and validation"
+          ],
+          "routes": ["/auth"],
+          "exports": ["AuthService", "JwtStrategy"]
+        },
+        "UsersModule": {
+          "path": "src/modules/users",
+          "responsibilities": [
+            "User CRUD operations",
+            "User profile management",
+            "User role assignments"
+          ],
+          "exports": ["UsersService"]
+        },
+        "DriversModule": {
+          "path": "src/modules/drivers",
+          "responsibilities": [
+            "Driver profile management",
+            "Driver-bus assignments",
+            "Driver availability tracking"
+          ],
+          "exports": ["DriversService"]
+        },
+        "ChildrenModule": {
+          "path": "src/modules/children",
+          "responsibilities": [
+            "Child profile management",
+            "Parent-child relationships",
+            "Child route assignments"
+          ],
+          "exports": ["ChildrenService"]
+        },
+        "BusesModule": {
+          "path": "src/modules/buses",
+          "responsibilities": [
+            "Bus fleet management",
+            "Bus capacity tracking",
+            "Bus-driver assignments"
+          ],
+          "exports": ["BusesService"]
+        },
+        "RoutesModule": {
+          "path": "src/modules/routes",
+          "responsibilities": [
+            "Route planning and management",
+            "Route stops definition",
+            "Route scheduling"
+          ],
+          "exports": ["RoutesService"]
+        },
+        "TripsModule": {
+          "path": "src/modules/trips",
+          "responsibilities": [
+            "Trip scheduling",
+            "Trip status tracking",
+            "Trip history management"
+          ],
+          "exports": ["TripsService"]
+        },
+        "GpsModule": {
+          "path": "src/modules/gps",
+          "responsibilities": [
+            "Real-time GPS tracking",
+            "Location data processing",
+            "Bus location updates"
+          ],
+          "exports": ["GpsService"]
+        },
+        "AttendanceModule": {
+          "path": "src/modules/attendance",
+          "responsibilities": [
+            "Child pickup/drop-off tracking",
+            "Attendance records",
+            "Attendance reporting"
+          ],
+          "exports": ["AttendanceService"]
+        },
+        "NotificationsModule": {
+          "path": "src/modules/notifications",
+          "responsibilities": [
+            "Push notifications",
+            "SMS notifications",
+            "Email notifications",
+            "Notification preferences"
+          ],
+          "exports": ["NotificationsService"]
+        },
+        "PaymentsModule": {
+          "path": "src/modules/payments",
+          "responsibilities": [
+            "MoMo Hubtle payment integration",
+            "Payment processing",
+            "Payment history tracking",
+            "Subscription management"
+          ],
+          "exports": ["PaymentsService"]
+        },
+        "AnalyticsModule": {
+          "path": "src/modules/analytics",
+          "responsibilities": [
+            "Usage analytics",
+            "Performance metrics",
+            "Reporting dashboards",
+            "Data insights"
+          ],
+          "exports": ["AnalyticsService"]
+        },
+        "AdminModule": {
+          "path": "src/modules/admin",
+          "responsibilities": [
+            "System administration",
+            "User management",
+            "Configuration settings",
+            "Audit logging"
+          ],
+          "exports": ["AdminService"]
+        },
+        "TenancyModule": {
+          "path": "src/modules/tenancy",
+          "responsibilities": [
+            "Multi-tenancy support",
+            "Company/school isolation",
+            "Tenant-specific configurations"
+          ],
+          "exports": ["TenancyService"]
+        },
+        "RealtimeModule": {
+          "path": "src/modules/realtime",
+          "responsibilities": [
+            "WebSocket connections",
+            "Real-time event broadcasting",
+            "Location streaming",
+            "Client subscriptions"
+          ],
+          "exports": ["RealtimeGateway"]
+        },
+        "PrismaModule": {
+          "path": "src/prisma",
+          "responsibilities": [
+            "Database connectivity",
+            "ORM operations",
+            "Transaction management"
+          ],
+          "exports": ["PrismaService"],
+          "global": true
+        }
+      }
+    }
+  },
+  "routing": {
+    "backend": {
+      "prefix": "/api",
+      "modules": {
+        "auth": "/auth",
+        "users": "/users",
+        "drivers": "/drivers",
+        "children": "/children",
+        "buses": "/buses",
+        "routes": "/routes",
+        "trips": "/trips",
+        "gps": "/gps",
+        "attendance": "/attendance",
+        "notifications": "/notifications",
+        "payments": "/payments",
+        "analytics": "/analytics",
+        "admin": "/admin"
+      },
+      "constraints": {
+        "authRoutes": {
+          "prefix": "/auth",
+          "protected": false,
+          "methods": ["POST"]
+        },
+        "protectedRoutes": {
+          "prefix": "/api",
+          "protected": true,
+          "exceptions": ["/auth"]
+        }
+      }
+    }
+  },
+  "build": {
+    "backend": {
+      "commands": {
+        "install": "npm install",
+        "build": "npm run build",
+        "dev": "npm run start:dev",
+        "prod": "npm run start:prod",
+        "test": "npm run test",
+        "testWatch": "npm run test:watch",
+        "testCoverage": "npm run test:cov",
+        "prismaGenerate": "npm run prisma:generate",
+        "prismaMigrate": "npm run prisma:migrate",
+        "prismaStudio": "npm run prisma:studio"
+      },
+      "entry": "src/main.ts",
+      "output": "dist"
+    },
+    "frontend": {
+      "commands": {
+        "install": "npm install",
+        "dev": "npx expo start",
+        "android": "npx expo run:android",
+        "ios": "npx expo run:ios",
+        "web": "npx expo start --web"
+      }
+    }
+  },
+  "environment": {
+    "backend": {
+      "files": [".env", ".env.example"],
+      "requiredVariables": [
+        "DATABASE_URL",
+        "REDIS_URL",
+        "JWT_ACCESS_SECRET",
+        "JWT_REFRESH_SECRET",
+        "JWT_ACCESS_EXPIRES_IN",
+        "JWT_REFRESH_EXPIRES_IN",
+        "PORT",
+        "NODE_ENV",
+        "HUBTLE_API_KEY",
+        "HUBTLE_WEBHOOK_SECRET"
+      ]
+    },
+    "frontend": {
+      "files": [".env", ".env.example"],
+      "requiredVariables": [
+        "EXPO_PUBLIC_API_URL"
+      ]
+    }
+  },
+  "integration": {
+    "frontendToBackend": {
+      "apiBaseUrl": "/api",
+      "authentication": {
+        "method": "Bearer Token",
+        "header": "Authorization",
+        "tokenRefresh": "/auth/refresh"
+      },
+      "dataFlow": {
+        "realtime": {
+          "protocol": "WebSocket",
+          "endpoint": "/gateway"
+        },
+        "rest": {
+          "protocol": "HTTP/HTTPS",
+          "contentType": "application/json"
+        }
+      }
+    }
+  },
+  "database": {
+    "prisma": {
+      "schemaProtection": {
+        "rules": [
+          "DO NOT modify schema.prisma unless explicitly asked",
+          "All schema changes must be reviewed",
+          "Migrations must be generated using Prisma CLI",
+          "Bidirectional relations must be explicitly defined"
+        ]
+      },
+      "namingConventions": {
+        "models": "PascalCase",
+        "fields": "camelCase",
+        "enums": "PascalCase",
+        "relations": "Explicitly defined"
+      },
+      "constraints": {
+        "serviceInjection": "PrismaService must remain global and imported into all modules using @Global()",
+        "providerPattern": "Maintain all existing provider injection patterns"
+      }
+    }
+  },
+  "realtime": {
+    "websocket": {
+      "constraints": [
+        "WebSocket gateway must be implemented in RealtimeModule",
+        "JWT authentication required for all connections",
+        "Event broadcasting must use appropriate rooms/channels",
+        "Connection management must handle disconnects gracefully",
+        "Rate limiting should be implemented for event emissions"
+      ],
+      "events": {
+        "busLocation": "locationUpdate",
+        "tripStatus": "tripUpdate",
+        "attendance": "attendanceUpdate",
+        "notifications": "newNotification"
+      }
+    }
+  },
+  "workers": {
+    "bullmq": {
+      "queues": [
+        "gps.heartbeat",
+        "notification.outbound",
+        "payment.process_webhook",
+        "analytics"
+      ],
+      "integration": "Worker processes must follow BullMQ integration patterns",
+      "monitoring": "Queue monitoring and error handling required"
+    }
+  },
+  "docker": {
+    "constraints": [
+      "No editing Docker setup unless explicitly instructed",
+      "Docker Compose files must maintain current service definitions",
+      "Environment variables must be properly mapped"
+    ]
+  },
+  "api": {
+    "contracts": {
+      "constraints": [
+        "All backend API contracts must remain consistent unless instructed",
+        "Breaking changes require explicit approval",
+        "Versioning should follow semantic versioning"
+      ]
+    }
+  },
+  "ui": {
+    "constraints": [
+      "No frontend UI modifications without explicit request",
+      "Existing navigation structure must be preserved",
+      "Component reusability should be maintained"
+    ]
+  },
+  "testing": {
+    "backend": {
+      "unitTests": "Jest testing framework",
+      "e2eTests": "Supertest for API testing",
+      "coverage": "Minimum 80% coverage recommended"
+    }
+  }
+}

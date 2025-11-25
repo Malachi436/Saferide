@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaPg as PrismaPostgreSQL } from '@prisma/adapter-pg';
 import { hash } from 'bcrypt';
 
-const adapter = new PrismaPg(process.env.DATABASE_URL!);
+const adapter = new PrismaPostgreSQL(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {

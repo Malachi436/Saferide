@@ -3,8 +3,8 @@
  * Main dashboard for parents showing children, pickup status, driver info, and quick actions
  */
 
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { CompositeNavigationProp } from "@react-navigation/native";
@@ -21,7 +21,8 @@ import { ChildTile } from "../../components/shared/ChildTile";
 import { DriverInfoBanner } from "../../components/shared/DriverInfoBanner";
 import { ETAChip } from "../../components/shared/ETAChip";
 import { useAuthStore } from "../../state/authStore";
-import { mockChildren, mockDriver, mockBuses, mockNotifications } from "../../mock/data";
+import { childrenService, notificationsService, gpsService } from "../../api";
+import { Child, Driver, Bus } from "../../types/models";
 import { ParentStackParamList, ParentTabParamList } from "../../navigation/ParentNavigator";
 
 type NavigationProp = CompositeNavigationProp<
@@ -34,20 +35,40 @@ export default function ParentHomeScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
-  // TODO: Replace with actual API call to fetch parent's children
-  const children = mockChildren.filter((c) => c.parentId === user?.id);
+  const [children, setChildren] = useState<Child[]>([]);
+  const [driver, setDriver] = useState<Driver | null>(null);
+  const [bus, setBus] = useState<Bus | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [estimatedArrival, setEstimatedArrival] = useState(12); // Mock ETA in minutes
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Replace with actual API call to fetch driver
-  const driver = mockDriver;
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  // TODO: Replace with actual API call to fetch bus details
-  const bus = mockBuses[0];
+  const fetchData = async () => {
+    if (!user) return;
 
-  // TODO: Replace with actual API call to fetch unread notifications count
-  const unreadCount = mockNotifications.filter((n) => !n.read).length;
-
-  // Mock ETA (in minutes)
-  const estimatedArrival = 12;
+    try {
+      setLoading(true);
+      
+      // Fetch parent's children
+      const fetchedChildren = await childrenService.getChildrenByParent(user.id);
+      setChildren(fetchedChildren);
+      
+      // Fetch unread notifications count
+      const unreadNotifications = await notificationsService.getUnreadCount(user.id);
+      setUnreadCount(unreadNotifications);
+      
+      // TODO: Fetch driver and bus details
+      // This would require additional API endpoints to get driver/bus info by child
+      
+    } catch (error) {
+      Alert.alert("Error", "Failed to load data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -113,7 +134,11 @@ export default function ParentHomeScreen() {
           <Animated.View entering={FadeInDown.delay(200).duration(500)}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Your Driver</Text>
-              <DriverInfoBanner driver={driver} busPlateNumber={bus.plateNumber} />
+              {driver ? (
+                <DriverInfoBanner driver={driver} busPlateNumber={bus?.plateNumber || ""} />
+              ) : (
+                <Text>Loading driver information...</Text>
+              )}
             </View>
           </Animated.View>
 

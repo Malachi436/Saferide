@@ -30,6 +30,8 @@ export interface User {
   phone: string;
   role: UserRole;
   avatar?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 export interface Parent extends User {

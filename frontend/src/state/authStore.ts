@@ -8,7 +8,10 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserRole, Parent, Driver } from "../types/models";
 
-type User = Parent | Driver;
+type User = (Parent | Driver) & {
+  accessToken: string;
+  refreshToken: string;
+};
 
 interface AuthState {
   user: User | null;

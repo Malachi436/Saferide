@@ -10,11 +10,12 @@ import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { useAuthStore } from "../../state/authStore";
-import { mockParent, mockDriver } from "../../mock/data";
 import { colors } from "../../theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { authService } from "../../api";
+import { Parent, Driver } from "../../types/models";
 
 type RootStackParamList = {
   Login: undefined;
@@ -40,15 +41,34 @@ export default function LoginScreen({ navigation }: Props) {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock logic: if email contains "driver", login as driver, else parent
-      // In production, this will be determined by backend JWT/API response
-      if (email.toLowerCase().includes("driver")) {
-        login(mockDriver);
+      // Call the real API for authentication
+      const user = await authService.login({ email, password });
+      
+      // Create proper user object based on role
+      if (user.role === "driver") {
+        const driverUser: Driver & { accessToken: string; refreshToken: string } = {
+          ...user,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone || "",
+          role: "driver",
+          licenseNumber: ""
+        };
+        login(driverUser);
+        navigation.navigate("DriverApp");
       } else {
-        login(mockParent);
+        const parentUser: Parent & { accessToken: string; refreshToken: string } = {
+          ...user,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone || "",
+          role: "parent",
+          children: []
+        };
+        login(parentUser);
+        navigation.navigate("ParentApp");
       }
     } catch (error) {
       Alert.alert("Error", "Invalid credentials. Please try again.");

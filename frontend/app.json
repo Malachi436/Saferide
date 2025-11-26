@@ -22,6 +22,7 @@
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "platforms": ["ios", "android"]
   }
 }

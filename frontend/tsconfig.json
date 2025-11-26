@@ -8,7 +8,8 @@
     "**/*.ts",
     "**/*.tsx",
     "nativewind-env.d.ts",
-    "custom-types.d.ts"
+    "custom-types.d.ts",
+    "types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",

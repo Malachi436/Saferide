@@ -13,7 +13,7 @@ interface RootStore {
 // Make sure to persist the store using the persist middleware.
 const useRootStore = create<RootStore>()(
   persist(
-    (set, get) => ({
+    (set: any, get: any) => ({
       someData: 0,
       addSomeData: () => set({ someData: get().someData + 1 }),
     }),

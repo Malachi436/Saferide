@@ -7,15 +7,18 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { mockTrip, mockChildren, mockDriver } from "../../mock/data";
 import { useAuthStore } from "../../state/authStore";
+import { useRoute } from "@react-navigation/native";
+import { RouteProp } from "@react-navigation/native";
+import { ParentTabParamList } from "../../navigation/ParentNavigator";
 
 export default function LiveTrackingScreen() {
-  const user = useAuthStore((s) => s.user);
+  const route = useRoute<RouteProp<ParentTabParamList, "Tracking">>();
+  const user = useAuthStore((s: any) => s.user);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
   // TODO: Replace with actual API call
@@ -96,9 +99,8 @@ export default function LiveTrackingScreen() {
             contentContainerStyle={styles.childSelectorContent}
           >
             {userChildren.map((child, index) => (
-              <Animated.View
+              <View
                 key={child.id}
-                entering={FadeInDown.delay(100 + index * 50).springify()}
               >
                 <Pressable
                   onPress={() => setSelectedChildId(child.id)}
@@ -134,13 +136,13 @@ export default function LiveTrackingScreen() {
                     {child.name.split(" ")[0]}
                   </Text>
                 </Pressable>
-              </Animated.View>
+              </View>
             ))}
           </ScrollView>
         )}
 
         {/* Status Card */}
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <View>
           <LiquidGlassCard intensity="heavy" className="mb-4">
             <View style={styles.statusCard}>
               <View style={styles.statusHeader}>
@@ -179,10 +181,10 @@ export default function LiveTrackingScreen() {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Driver Info */}
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
+        <View>
           <LiquidGlassCard intensity="medium">
             <View style={styles.driverCard}>
               <View style={styles.driverAvatar}>
@@ -203,7 +205,7 @@ export default function LiveTrackingScreen() {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
       </View>
     </View>
   );

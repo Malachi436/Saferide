@@ -8,7 +8,6 @@ import { View, Text, StyleSheet, Pressable, ScrollView, Linking, Platform } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -135,9 +134,8 @@ export default function RouteMapScreen() {
             );
 
             return (
-              <Animated.View
+              <View
                 key={stop.id}
-                entering={FadeInDown.delay(100 + index * 50).springify()}
                 style={styles.stopItem}
               >
                 <LiquidGlassCard intensity="medium">
@@ -205,7 +203,7 @@ export default function RouteMapScreen() {
                     </Pressable>
                   </View>
                 </LiquidGlassCard>
-              </Animated.View>
+              </View>
             );
           })}
         </ScrollView>

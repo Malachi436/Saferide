@@ -44,7 +44,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
   markPickedUp: (tripId, childId) => {
     const state = get();
     const tripRecords = state.tripAttendance[tripId] || [];
-    const existingIndex = tripRecords.findIndex((r) => r.childId === childId);
+    const existingIndex = tripRecords.findIndex((r: AttendanceRecord) => r.childId === childId);
 
     const updatedRecord: AttendanceRecord = {
       childId,
@@ -74,7 +74,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
   markDroppedOff: (tripId, childId) => {
     const state = get();
     const tripRecords = state.tripAttendance[tripId] || [];
-    const existingIndex = tripRecords.findIndex((r) => r.childId === childId);
+    const existingIndex = tripRecords.findIndex((r: AttendanceRecord) => r.childId === childId);
 
     const updatedRecord: AttendanceRecord = {
       childId,
@@ -104,7 +104,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
   updateAttendanceStatus: (tripId, childId, status) => {
     const state = get();
     const tripRecords = state.tripAttendance[tripId] || [];
-    const existingIndex = tripRecords.findIndex((r) => r.childId === childId);
+    const existingIndex = tripRecords.findIndex((r: AttendanceRecord) => r.childId === childId);
 
     const updatedRecord: AttendanceRecord = {
       childId,
@@ -130,22 +130,22 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
     });
   },
 
-  getAttendanceForTrip: (tripId) => {
+  getAttendanceForTrip: (tripId: string) => {
     const state = get();
     return state.tripAttendance[tripId] || [];
   },
 
-  getTripStats: (tripId, childIds) => {
+  getTripStats: (tripId: string, childIds: string[]) => {
     const state = get();
     const attendance = state.tripAttendance[tripId] || [];
 
     const pickedUp = attendance.filter(
-      (a) => childIds.includes(a.childId) &&
+      (a: AttendanceRecord) => childIds.includes(a.childId) &&
       (a.status === "picked_up" || a.status === "on_way" || a.status === "dropped_off")
     ).length;
 
     const droppedOff = attendance.filter(
-      (a) => childIds.includes(a.childId) && a.status === "dropped_off"
+      (a: AttendanceRecord) => childIds.includes(a.childId) && a.status === "dropped_off"
     ).length;
 
     return {

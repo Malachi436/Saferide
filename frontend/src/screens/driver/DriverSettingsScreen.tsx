@@ -9,7 +9,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -20,8 +19,8 @@ type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
 
 export default function DriverSettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s: any) => s.user);
+  const logout = useAuthStore((s: any) => s.logout);
 
   const [notifications, setNotifications] = useState(true);
   const [locationSharing, setLocationSharing] = useState(true);
@@ -39,14 +38,14 @@ export default function DriverSettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Section */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <View>
           <LiquidGlassCard intensity="heavy" className="mb-4">
             <View style={styles.profileCard}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>
                   {user?.name
                     .split(" ")
-                    .map((n) => n[0])
+                    .map((n: string) => n[0])
                     .join("")}
                 </Text>
               </View>
@@ -57,10 +56,10 @@ export default function DriverSettingsScreen() {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Trip Settings */}
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Trip Settings</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -115,10 +114,10 @@ export default function DriverSettingsScreen() {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Notifications */}
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Notifications</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -147,10 +146,10 @@ export default function DriverSettingsScreen() {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Account Actions */}
-        <Animated.View entering={FadeInDown.delay(400).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Support</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -187,10 +186,10 @@ export default function DriverSettingsScreen() {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* About */}
-        <Animated.View entering={FadeInDown.delay(500).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>About</Text>
           <LiquidGlassCard intensity="light" className="mb-4">
             <View style={styles.aboutCard}>
@@ -198,10 +197,10 @@ export default function DriverSettingsScreen() {
               <Text style={styles.versionText}>Version 1.0.0</Text>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Logout Button */}
-        <Animated.View entering={FadeInDown.delay(600).springify()}>
+        <View>
           <Pressable onPress={handleLogout} style={styles.logoutButton}>
             <LiquidGlassCard intensity="medium">
               <View style={styles.logoutContent}>
@@ -210,7 +209,7 @@ export default function DriverSettingsScreen() {
               </View>
             </LiquidGlassCard>
           </Pressable>
-        </Animated.View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

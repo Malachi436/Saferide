@@ -16,8 +16,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { NativeStackScreenProps, NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -26,9 +26,14 @@ import { ParentStackParamList } from "../../navigation/ParentNavigator";
 import { useAuthStore } from "../../state/authStore";
 
 type Props = NativeStackScreenProps<ParentStackParamList, "EditProfile">;
+type NavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
-export default function EditProfileScreen({ navigation }: Props) {
-  const user = useAuthStore((s) => s.user);
+export default function EditProfileScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<RouteProp<ParentStackParamList, "EditProfile">>();
+  
+  const user = useAuthStore((s: any) => s.user);
+  const logout = useAuthStore((s: any) => s.logout);
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -76,22 +81,22 @@ export default function EditProfileScreen({ navigation }: Props) {
           keyboardShouldPersistTaps="handled"
         >
           {/* Avatar Section */}
-          <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <View>
             <View style={styles.avatarSection}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>
                   {formData.name
                     .split(" ")
-                    .map((n) => n[0])
+                    .map((n: string) => n[0])
                     .join("")}
                 </Text>
               </View>
               <Text style={styles.changePhotoText}>Tap to change photo</Text>
             </View>
-          </Animated.View>
+          </View>
 
           {/* Form */}
-          <Animated.View entering={FadeInDown.delay(150).springify()}>
+          <View>
             <Text style={styles.sectionTitle}>Personal Information</Text>
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.formSection}>
@@ -156,17 +161,17 @@ export default function EditProfileScreen({ navigation }: Props) {
                 </View>
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Submit Button */}
-          <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <View>
             <LargeCTAButton
               title={isSubmitting ? "Saving..." : "Save Changes"}
               onPress={handleSubmit}
               disabled={isSubmitting}
               variant="primary"
             />
-          </Animated.View>
+          </View>
 
           <View style={{ height: 40 }} />
         </ScrollView>

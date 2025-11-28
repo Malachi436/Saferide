@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -200,9 +199,8 @@ export default function NotificationsScreen() {
         contentContainerStyle={styles.filterScrollContent}
       >
         {filters.map((filter, index) => (
-          <Animated.View
+          <View
             key={filter.key}
-            entering={FadeInDown.delay(100 + index * 50).springify()}
           >
             <Pressable
               onPress={() => setSelectedFilter(filter.key)}
@@ -229,7 +227,7 @@ export default function NotificationsScreen() {
                 {filter.label}
               </Text>
             </Pressable>
-          </Animated.View>
+          </View>
         ))}
       </ScrollView>
 
@@ -247,8 +245,7 @@ export default function NotificationsScreen() {
         }
       >
         {filteredNotifications.length === 0 ? (
-          <Animated.View
-            entering={FadeInDown.delay(200).springify()}
+          <View
             style={styles.emptyState}
           >
             <View style={styles.emptyIcon}>
@@ -264,15 +261,14 @@ export default function NotificationsScreen() {
                 ? "You are all caught up!"
                 : `No ${selectedFilter} notifications`}
             </Text>
-          </Animated.View>
+          </View>
         ) : (
           filteredNotifications.map((notification, index) => {
             const iconConfig = getNotificationIcon(notification.type);
 
             return (
-              <Animated.View
+              <View
                 key={notification.id}
-                entering={FadeInDown.delay(200 + index * 50).springify()}
               >
                 <Pressable
                   onPress={() => {
@@ -319,7 +315,7 @@ export default function NotificationsScreen() {
                     </View>
                   </LiquidGlassCard>
                 </Pressable>
-              </Animated.View>
+              </View>
             );
           })
         )}

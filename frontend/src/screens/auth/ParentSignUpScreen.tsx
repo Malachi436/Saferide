@@ -17,7 +17,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { colors } from "../../theme";
@@ -185,7 +184,7 @@ export default function ParentSignUpScreen({ navigation }: Props) {
             keyboardShouldPersistTaps="handled"
           >
             {/* Header */}
-            <Animated.View entering={FadeInDown.delay(100).springify()}>
+            <View>
               <View style={styles.header}>
                 <Ionicons name="person-add" size={48} color={colors.neutral.pureWhite} />
                 <Text style={styles.headerTitle}>Create Parent Account</Text>
@@ -193,10 +192,10 @@ export default function ParentSignUpScreen({ navigation }: Props) {
                   Sign up to track your children and manage transportation
                 </Text>
               </View>
-            </Animated.View>
+            </View>
 
             {/* Sign Up Form */}
-            <Animated.View entering={FadeInDown.delay(200).springify()}>
+            <View>
               <LiquidGlassCard intensity="heavy" className="mb-6">
                 <View style={styles.formSection}>
                   {renderInput("fullName", "Full Name", "Enter your full name", {
@@ -220,20 +219,20 @@ export default function ParentSignUpScreen({ navigation }: Props) {
                   })}
                 </View>
               </LiquidGlassCard>
-            </Animated.View>
+            </View>
 
             {/* Submit Button */}
-            <Animated.View entering={FadeInDown.delay(300).springify()}>
+            <View>
               <LargeCTAButton
                 title={isSubmitting ? "Creating Account..." : "Create Account"}
                 onPress={handleSignUp}
                 disabled={isSubmitting}
                 variant="success"
               />
-            </Animated.View>
+            </View>
 
             {/* Back to Login */}
-            <Animated.View entering={FadeInDown.delay(400).springify()}>
+            <View>
               <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account?</Text>
                 <Text
@@ -243,7 +242,7 @@ export default function ParentSignUpScreen({ navigation }: Props) {
                   Login here
                 </Text>
               </View>
-            </Animated.View>
+            </View>
 
             <View style={{ height: 40 }} />
           </ScrollView>

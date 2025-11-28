@@ -7,8 +7,8 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { NativeStackScreenProps, NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -17,9 +17,11 @@ import { mockChildren } from "../../mock/data";
 import { useAuthStore } from "../../state/authStore";
 
 type Props = NativeStackScreenProps<ParentStackParamList, "ManageChildren">;
+type NavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
-export default function ManageChildrenScreen({ navigation }: Props) {
-  const user = useAuthStore((s) => s.user);
+export default function ManageChildrenScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const user = useAuthStore((s: any) => s.user);
   const children = mockChildren.filter((c) => c.parentId === user?.id);
 
   return (
@@ -30,7 +32,7 @@ export default function ManageChildrenScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         {/* Add Child Button */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <View>
           <Pressable onPress={() => navigation.navigate("AddChild")}>
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.addChildCard}>
@@ -47,7 +49,7 @@ export default function ManageChildrenScreen({ navigation }: Props) {
               </View>
             </LiquidGlassCard>
           </Pressable>
-        </Animated.View>
+        </View>
 
         {/* Children List */}
         <Text style={styles.sectionTitle}>Your Children ({children.length})</Text>
@@ -59,9 +61,8 @@ export default function ManageChildrenScreen({ navigation }: Props) {
             .join("");
 
           return (
-            <Animated.View
+            <View
               key={child.id}
-              entering={FadeInDown.delay(150 + index * 50).springify()}
             >
               <LiquidGlassCard intensity="medium" className="mb-3">
                 <View style={styles.childCard}>
@@ -79,7 +80,7 @@ export default function ManageChildrenScreen({ navigation }: Props) {
                   </Pressable>
                 </View>
               </LiquidGlassCard>
-            </Animated.View>
+            </View>
           );
         })}
       </ScrollView>

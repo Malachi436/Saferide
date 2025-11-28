@@ -7,25 +7,25 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { NativeStackScreenProps, NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import { CompositeScreenProps } from "@react-navigation/native";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { ParentTabParamList, ParentStackParamList } from "../../navigation/ParentNavigator";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { useAuthStore } from "../../state/authStore";
-import { ParentTabParamList } from "../../navigation/ParentNavigator";
-import { CompositeScreenProps } from "@react-navigation/native";
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { ParentStackParamList } from "../../navigation/ParentNavigator";
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<ParentTabParamList, "Settings">,
   NativeStackScreenProps<ParentStackParamList>
 >;
 
-export default function SettingsScreen({ navigation }: Props) {
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+export default function SettingsScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<ParentStackParamList>>();
+  const user = useAuthStore((s: any) => s.user);
+  const logout = useAuthStore((s: any) => s.logout);
 
   const [notifications, setNotifications] = useState(true);
   const [pickupAlerts, setPickupAlerts] = useState(true);
@@ -44,19 +44,19 @@ export default function SettingsScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <View>
           <Text style={styles.headerTitle}>Settings</Text>
-        </Animated.View>
+        </View>
 
         {/* Profile Section */}
-        <Animated.View entering={FadeInDown.delay(150).springify()}>
+        <View>
           <LiquidGlassCard intensity="heavy" className="mb-4">
             <View style={styles.profileCard}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>
                   {user?.name
                     .split(" ")
-                    .map((n) => n[0])
+                    .map((n: string) => n[0])
                     .join("")}
                 </Text>
               </View>
@@ -73,10 +73,10 @@ export default function SettingsScreen({ navigation }: Props) {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Children Management */}
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Children</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <Pressable
@@ -97,10 +97,10 @@ export default function SettingsScreen({ navigation }: Props) {
               <Ionicons name="chevron-forward" size={20} color={colors.neutral.textSecondary} />
             </Pressable>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Notification Settings */}
-        <Animated.View entering={FadeInDown.delay(250).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Notifications</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -127,7 +127,6 @@ export default function SettingsScreen({ navigation }: Props) {
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
-
               <View style={styles.divider} />
 
               <View style={styles.settingItem}>
@@ -153,7 +152,6 @@ export default function SettingsScreen({ navigation }: Props) {
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
-
               <View style={styles.divider} />
 
               <View style={styles.settingItem}>
@@ -179,7 +177,6 @@ export default function SettingsScreen({ navigation }: Props) {
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
-
               <View style={styles.divider} />
 
               <View style={styles.settingItem}>
@@ -207,10 +204,10 @@ export default function SettingsScreen({ navigation }: Props) {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Privacy & Security */}
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Privacy & Security</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -231,7 +228,6 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.neutral.textSecondary} />
               </Pressable>
-
               <View style={styles.divider} />
 
               <Pressable
@@ -251,7 +247,6 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.neutral.textSecondary} />
               </Pressable>
-
               <View style={styles.divider} />
 
               <Pressable
@@ -273,10 +268,10 @@ export default function SettingsScreen({ navigation }: Props) {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Support & Help */}
-        <Animated.View entering={FadeInDown.delay(350).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Support</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -297,7 +292,6 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.neutral.textSecondary} />
               </Pressable>
-
               <View style={styles.divider} />
 
               <Pressable
@@ -317,7 +311,6 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.neutral.textSecondary} />
               </Pressable>
-
               <View style={styles.divider} />
 
               <Pressable style={styles.settingItem}>
@@ -336,10 +329,10 @@ export default function SettingsScreen({ navigation }: Props) {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* About */}
-        <Animated.View entering={FadeInDown.delay(400).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>About</Text>
           <LiquidGlassCard intensity="light" className="mb-4">
             <View style={styles.aboutCard}>
@@ -347,10 +340,10 @@ export default function SettingsScreen({ navigation }: Props) {
               <Text style={styles.versionText}>Version 1.0.0</Text>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Logout Button */}
-        <Animated.View entering={FadeInDown.delay(450).springify()}>
+        <View>
           <Pressable onPress={handleLogout} style={styles.logoutButton}>
             <LiquidGlassCard intensity="medium">
               <View style={styles.logoutContent}>
@@ -359,7 +352,7 @@ export default function SettingsScreen({ navigation }: Props) {
               </View>
             </LiquidGlassCard>
           </Pressable>
-        </Animated.View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

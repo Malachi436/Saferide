@@ -19,7 +19,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -256,7 +255,7 @@ export default function AddChildScreen({ navigation }: Props) {
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <View>
             <View style={styles.header}>
               <Ionicons name="person-add" size={32} color={colors.primary.blue} />
               <Text style={styles.headerTitle}>Add New Child</Text>
@@ -264,10 +263,10 @@ export default function AddChildScreen({ navigation }: Props) {
                 Fill in the details below to add your child to the system
               </Text>
             </View>
-          </Animated.View>
+          </View>
 
           {/* Basic Information */}
-          <Animated.View entering={FadeInDown.delay(150).springify()}>
+          <View>
             <Text style={styles.sectionTitle}>Basic Information</Text>
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.formSection}>
@@ -328,10 +327,10 @@ export default function AddChildScreen({ navigation }: Props) {
                 </View>
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Medical Information */}
-          <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <View>
             <Text style={styles.sectionTitle}>Medical Information</Text>
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.formSection}>
@@ -349,10 +348,10 @@ export default function AddChildScreen({ navigation }: Props) {
                 )}
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Emergency Contact */}
-          <Animated.View entering={FadeInDown.delay(250).springify()}>
+          <View>
             <Text style={styles.sectionTitle}>Emergency Contact</Text>
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.formSection}>
@@ -375,10 +374,10 @@ export default function AddChildScreen({ navigation }: Props) {
                 )}
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Route Information */}
-          <Animated.View entering={FadeInDown.delay(300).springify()}>
+          <View>
             <Text style={styles.sectionTitle}>Pickup & Dropoff</Text>
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.formSection}>
@@ -527,10 +526,10 @@ export default function AddChildScreen({ navigation }: Props) {
                 )}
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Submit Button */}
-          <Animated.View entering={FadeInDown.delay(350).springify()}>
+          <View>
             <LargeCTAButton
               title={isSubmitting ? "Adding Child..." : "Add Child"}
               onPress={handleSubmit}
@@ -538,7 +537,7 @@ export default function AddChildScreen({ navigation }: Props) {
               variant="success"
               style={styles.submitButton}
             />
-          </Animated.View>
+          </View>
 
           <View style={{ height: 40 }} />
         </ScrollView>

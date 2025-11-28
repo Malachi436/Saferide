@@ -6,7 +6,6 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { useAuthStore } from "../../state/authStore";
@@ -27,10 +26,12 @@ type RootStackParamList = {
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export default function LoginScreen({ navigation }: Props) {
-  const login = useAuthStore((s) => s.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const login = useAuthStore((s: any) => s.login);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -38,7 +39,7 @@ export default function LoginScreen({ navigation }: Props) {
       return;
     }
 
-    setIsLoading(true);
+    setLoading(true);
 
     try {
       // Call the real API for authentication
@@ -73,7 +74,7 @@ export default function LoginScreen({ navigation }: Props) {
     } catch (error) {
       Alert.alert("Error", "Invalid credentials. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -91,14 +92,14 @@ export default function LoginScreen({ navigation }: Props) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
+          <View style={styles.header}>
             <View style={styles.logoContainer}>
               <Text style={styles.logoText}>ROSAgo</Text>
             </View>
             <Text style={styles.subtitle}>Premium School Transport</Text>
-          </Animated.View>
+          </View>
 
-          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.loginSection}>
+          <View style={styles.loginSection}>
             <LiquidGlassCard intensity="heavy">
               <View style={styles.formContainer}>
                 <Text style={styles.formTitle}>Login</Text>
@@ -151,18 +152,18 @@ export default function LoginScreen({ navigation }: Props) {
 
                 {/* Login Button */}
                 <LargeCTAButton
-                  title={isLoading ? "Logging in..." : "Login"}
+                  title={loading ? "Logging in..." : "Login"}
                   onPress={handleLogin}
                   variant="primary"
-                  disabled={isLoading}
+                  disabled={loading}
                   style={styles.loginButton}
                 />
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Sign Up Section */}
-          <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.signupSection}>
+          <View style={styles.signupSection}>
             <LiquidGlassCard intensity="medium">
               <View style={styles.signupContainer}>
                 <Text style={styles.signupTitle}>New Parent?</Text>
@@ -177,15 +178,15 @@ export default function LoginScreen({ navigation }: Props) {
                 />
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Info Box */}
-          <Animated.View entering={FadeInDown.delay(400).duration(600)} style={styles.infoBox}>
+          <View style={styles.infoBox}>
             <Ionicons name="information-circle" size={20} color={colors.neutral.creamWhite} />
             <Text style={styles.infoText}>
               Driver accounts are created by your company admin. Contact your administrator for login credentials.
             </Text>
-          </Animated.View>
+          </View>
 
           <View style={{ height: 40 }} />
         </ScrollView>

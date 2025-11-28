@@ -26,9 +26,9 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const role = useAuthStore((s) => s.role);
-  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated);
+  const role = useAuthStore((s: any) => s.role);
+  const hasHydrated = useAuthStore((s: any) => s.hasHydrated);
 
   // Show loading screen while hydrating from AsyncStorage
   if (!hasHydrated) {

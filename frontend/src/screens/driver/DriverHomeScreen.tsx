@@ -22,8 +22,8 @@ type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
 
 export default function DriverHomeScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s: any) => s.user);
+  const logout = useAuthStore((s: any) => s.logout);
 
   // TODO: Replace with actual API call to fetch today's trip
   const trip = mockTrip;

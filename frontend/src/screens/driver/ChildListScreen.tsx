@@ -9,7 +9,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -21,18 +20,20 @@ type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
 type ChildListRouteProp = RouteProp<DriverStackParamList, "ChildList">;
 
 export default function ChildListScreen() {
-  const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ChildListRouteProp>();
-  const filter = route.params?.filter || "all";
-
-  const markPickedUp = useAttendanceStore((s) => s.markPickedUp);
-  const markDroppedOff = useAttendanceStore((s) => s.markDroppedOff);
-  const getAttendanceForTrip = useAttendanceStore((s) => s.getAttendanceForTrip);
-  const getTripStats = useAttendanceStore((s) => s.getTripStats);
+  const navigation = useNavigation<NavigationProp>();
+  
+  const markPickedUp = useAttendanceStore((s: any) => s.markPickedUp);
+  const markDroppedOff = useAttendanceStore((s: any) => s.markDroppedOff);
+  const getAttendanceForTrip = useAttendanceStore((s: any) => s.getAttendanceForTrip);
+  const getTripStats = useAttendanceStore((s: any) => s.getTripStats);
 
   // TODO: Replace with actual API call to fetch today's trip
   const trip = mockTrip;
   const childrenOnTrip = mockChildren.filter((c) => trip.childIds.includes(c.id));
+  
+  // Get filter from route params, default to "all"
+  const filter = route.params?.filter || "all";
 
   const attendance = getAttendanceForTrip(trip.id);
   const stats = useMemo(() => {
@@ -44,7 +45,7 @@ export default function ChildListScreen() {
     if (filter === "all") return childrenOnTrip;
 
     return childrenOnTrip.filter((child) => {
-      const attendanceRecord = attendance.find((a) => a.childId === child.id);
+      const attendanceRecord = attendance.find((a: any) => a.childId === child.id);
       const status = attendanceRecord?.status || child.status;
 
       if (filter === "waiting") {
@@ -180,7 +181,7 @@ export default function ChildListScreen() {
           </View>
         ) : (
           filteredChildren.map((child, index) => {
-            const attendanceRecord = attendance.find((a) => a.childId === child.id);
+            const attendanceRecord = attendance.find((a: any) => a.childId === child.id);
             const status = attendanceRecord?.status || child.status;
 
             let statusColor: string = colors.neutral.textSecondary;
@@ -198,9 +199,8 @@ export default function ChildListScreen() {
             }
 
             return (
-              <Animated.View
+              <View
                 key={child.id}
-                entering={FadeInDown.delay(100 + index * 50).springify()}
                 style={styles.childItem}
               >
                 <LiquidGlassCard intensity="medium">
@@ -279,7 +279,7 @@ export default function ChildListScreen() {
                     </View>
                   </View>
                 </LiquidGlassCard>
-              </Animated.View>
+              </View>
             );
           })
         )}

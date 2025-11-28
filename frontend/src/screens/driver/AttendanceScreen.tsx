@@ -8,9 +8,9 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { RouteProp } from "@react-navigation/native";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -21,9 +21,11 @@ import { DriverStackParamList } from "../../navigation/DriverNavigator";
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
 
 export default function AttendanceScreen() {
+  const route = useRoute<RouteProp<DriverStackParamList, "Attendance">>();
   const navigation = useNavigation<NavigationProp>();
-  const getTripStats = useAttendanceStore((s) => s.getTripStats);
-  const getAttendanceForTrip = useAttendanceStore((s) => s.getAttendanceForTrip);
+  
+  const getTripStats = useAttendanceStore((s: any) => s.getTripStats);
+  const getAttendanceForTrip = useAttendanceStore((s: any) => s.getAttendanceForTrip);
 
   // TODO: Replace with actual API call to fetch today's trip
   const trip = mockTrip;
@@ -66,7 +68,7 @@ export default function AttendanceScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Trip Info */}
-          <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <View>
             <Text style={styles.routeName}>Osu - Greenfield Route</Text>
             <Text style={styles.dateText}>
               {new Date().toLocaleDateString("en-US", {
@@ -76,13 +78,12 @@ export default function AttendanceScreen() {
                 day: "numeric",
               })}
             </Text>
-          </Animated.View>
+          </View>
 
           {/* Summary Stats Cards */}
           <View style={styles.statsContainer}>
             {/* Total Children Card */}
-            <Animated.View
-              entering={FadeInDown.delay(200).springify()}
+            <View
               style={styles.statCard}
             >
               <Pressable onPress={() => navigation.navigate("ChildList", { filter: "all" })}>
@@ -101,11 +102,10 @@ export default function AttendanceScreen() {
                   </View>
                 </LiquidGlassCard>
               </Pressable>
-            </Animated.View>
+            </View>
 
             {/* Picked Up Card */}
-            <Animated.View
-              entering={FadeInDown.delay(300).springify()}
+            <View
               style={styles.statCard}
             >
               <Pressable onPress={() => navigation.navigate("ChildList", { filter: "picked_up" })}>
@@ -139,11 +139,10 @@ export default function AttendanceScreen() {
                   </View>
                 </LiquidGlassCard>
               </Pressable>
-            </Animated.View>
+            </View>
 
             {/* Dropped Off Card */}
-            <Animated.View
-              entering={FadeInDown.delay(400).springify()}
+            <View
               style={styles.statCard}
             >
               <Pressable onPress={() => navigation.navigate("ChildList", { filter: "dropped_off" })}>
@@ -177,15 +176,15 @@ export default function AttendanceScreen() {
                   </View>
                 </LiquidGlassCard>
               </Pressable>
-            </Animated.View>
+            </View>
           </View>
 
           {/* Children List */}
-          <Animated.View entering={FadeInDown.delay(500).springify()}>
+          <View>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Children List</Text>
               {childrenOnTrip.map((child, index) => {
-                const attendanceRecord = attendance.find((a) => a.childId === child.id);
+                const attendanceRecord = attendance.find((a: any) => a.childId === child.id);
                 const status = attendanceRecord?.status || child.status;
 
                 let statusColor: string = colors.neutral.textSecondary;
@@ -203,9 +202,8 @@ export default function AttendanceScreen() {
                 }
 
                 return (
-                  <Animated.View
+                  <View
                     key={child.id}
-                    entering={FadeInDown.delay(600 + index * 50).springify()}
                     style={styles.childItem}
                   >
                     <LiquidGlassCard intensity="medium">
@@ -218,7 +216,7 @@ export default function AttendanceScreen() {
                             <Text style={styles.avatarText}>
                               {child.name
                                 .split(" ")
-                                .map((n) => n[0])
+                                .map((n: string) => n[0])
                                 .join("")}
                             </Text>
                           </View>
@@ -237,14 +235,14 @@ export default function AttendanceScreen() {
                         </View>
                       </Pressable>
                     </LiquidGlassCard>
-                  </Animated.View>
+                  </View>
                 );
               })}
             </View>
-          </Animated.View>
+          </View>
 
           {/* Quick Actions */}
-          <Animated.View entering={FadeInDown.delay(700).springify()}>
+          <View>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Quick Actions</Text>
               <Pressable
@@ -264,7 +262,7 @@ export default function AttendanceScreen() {
                 </LiquidGlassCard>
               </Pressable>
             </View>
-          </Animated.View>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>

@@ -25,12 +25,12 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set: any) => ({
       user: null,
       role: null,
       isAuthenticated: false,
       hasHydrated: false,
-      login: (user) =>
+      login: (user: User) =>
         set({
           user,
           role: user.role,
@@ -42,12 +42,12 @@ export const useAuthStore = create<AuthState>()(
           role: null,
           isAuthenticated: false,
         }),
-      setHasHydrated: (state) => set({ hasHydrated: state }),
+      setHasHydrated: (state: boolean) => set({ hasHydrated: state }),
     }),
     {
       name: "rosago-auth",
       storage: createJSONStorage(() => AsyncStorage),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => (state: any) => {
         state?.setHasHydrated(true);
       },
     }

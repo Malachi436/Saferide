@@ -7,7 +7,6 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -26,7 +25,7 @@ export default function PrivacySecurityScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Privacy Settings */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Privacy</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -107,10 +106,10 @@ export default function PrivacySecurityScreen() {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Security Settings */}
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Security</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -156,10 +155,10 @@ export default function PrivacySecurityScreen() {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Data & Storage */}
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Data & Storage</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -196,10 +195,10 @@ export default function PrivacySecurityScreen() {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Legal */}
-        <Animated.View entering={FadeInDown.delay(400).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Legal</Text>
           <LiquidGlassCard intensity="light" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -230,7 +229,7 @@ export default function PrivacySecurityScreen() {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

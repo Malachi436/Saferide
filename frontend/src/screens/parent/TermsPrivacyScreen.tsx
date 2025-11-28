@@ -6,7 +6,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -20,7 +19,7 @@ export default function TermsPrivacyScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Terms of Service */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Terms of Service</Text>
           <LiquidGlassCard intensity="light" className="mb-4">
             <View style={styles.textContent}>
@@ -63,10 +62,10 @@ export default function TermsPrivacyScreen() {
               </Text>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Privacy Policy */}
-        <Animated.View entering={FadeInDown.delay(150).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Privacy Policy</Text>
           <LiquidGlassCard intensity="light" className="mb-4">
             <View style={styles.textContent}>
@@ -122,10 +121,10 @@ export default function TermsPrivacyScreen() {
               </Text>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Contact */}
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Contact Us</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.contactContent}>
@@ -137,7 +136,7 @@ export default function TermsPrivacyScreen() {
               <Text style={styles.lastUpdated}>Last updated: January 2025</Text>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

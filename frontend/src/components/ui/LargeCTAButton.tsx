@@ -5,15 +5,7 @@
 
 import React from "react";
 import { Text, Pressable, StyleSheet, ViewStyle } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
 import { colors } from "../../theme";
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface LargeCTAButtonProps {
   title: string;
@@ -31,22 +23,6 @@ export function LargeCTAButton({
   disabled = false,
   style,
 }: LargeCTAButtonProps) {
-  const scale = useSharedValue(1);
-  const opacity = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.95, { damping: 15 });
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15 });
-  };
-
   const backgroundColor = {
     primary: colors.primary.blue,
     secondary: colors.primary.teal,
@@ -55,21 +31,18 @@ export function LargeCTAButton({
   }[variant];
 
   return (
-    <AnimatedPressable
+    <Pressable
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
       disabled={disabled}
       style={[
         styles.button,
         { backgroundColor },
         disabled && styles.disabled,
-        animatedStyle,
         style,
       ]}
     >
       <Text style={styles.text}>{title}</Text>
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 

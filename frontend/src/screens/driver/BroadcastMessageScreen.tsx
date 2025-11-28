@@ -19,7 +19,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -146,7 +145,7 @@ export default function BroadcastMessageScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Header Info */}
-          <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <View>
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.headerCard}>
                 <View style={styles.iconCircle}>
@@ -160,16 +159,15 @@ export default function BroadcastMessageScreen() {
                 </View>
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Quick Messages */}
-          <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <View>
             <Text style={styles.sectionTitle}>Quick Messages</Text>
             <View style={styles.quickMessages}>
               {QUICK_MESSAGES.map((quickMsg, index) => (
-                <Animated.View
+                <View
                   key={quickMsg.id}
-                  entering={FadeInDown.delay(300 + index * 50).springify()}
                   style={styles.quickMessageItem}
                 >
                   <Pressable
@@ -187,13 +185,13 @@ export default function BroadcastMessageScreen() {
                       </View>
                     </LiquidGlassCard>
                   </Pressable>
-                </Animated.View>
+                </View>
               ))}
             </View>
-          </Animated.View>
+          </View>
 
           {/* Custom Message */}
-          <Animated.View entering={FadeInDown.delay(500).springify()}>
+          <View>
             <Text style={styles.sectionTitle}>Custom Message</Text>
             <LiquidGlassCard intensity="medium">
               <View style={styles.inputCard}>
@@ -221,10 +219,10 @@ export default function BroadcastMessageScreen() {
                 </View>
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Recipients Selection */}
-          <Animated.View entering={FadeInDown.delay(600).springify()}>
+          <View>
             <View style={styles.recipientHeader}>
               <Text style={styles.sectionTitle}>Select Recipients</Text>
               <Pressable onPress={toggleSelectAll} style={styles.selectAllButton}>
@@ -251,9 +249,8 @@ export default function BroadcastMessageScreen() {
                   const isSelected = isParentSelected(parentId);
 
                   return (
-                    <Animated.View
+                    <View
                       key={parentId}
-                      entering={FadeInDown.delay(700 + index * 50).springify()}
                     >
                       <Pressable
                         onPress={() => toggleParentSelection(parentId)}
@@ -292,21 +289,21 @@ export default function BroadcastMessageScreen() {
                           <Text style={styles.childrenBadgeText}>{children.length}</Text>
                         </View>
                       </Pressable>
-                    </Animated.View>
+                    </View>
                   );
                 })}
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
         </ScrollView>
 
         {/* Send Button */}
         <View style={styles.footer}>
           {showSuccess ? (
-            <Animated.View entering={FadeInDown.springify()} style={styles.successBanner}>
+            <View style={styles.successBanner}>
               <Ionicons name="checkmark-circle" size={24} color={colors.accent.successGreen} />
               <Text style={styles.successText}>Message sent successfully!</Text>
-            </Animated.View>
+            </View>
           ) : (
             <LargeCTAButton
               title={isSending ? "Sending..." : "Send Message"}

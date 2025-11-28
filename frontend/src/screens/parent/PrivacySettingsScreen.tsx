@@ -7,7 +7,6 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Switch, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -26,7 +25,7 @@ export default function PrivacySettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Privacy */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Privacy</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -116,10 +115,10 @@ export default function PrivacySettingsScreen() {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Security */}
-        <Animated.View entering={FadeInDown.delay(150).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Security</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -153,10 +152,10 @@ export default function PrivacySettingsScreen() {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Data & Storage */}
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Data & Storage</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -201,7 +200,7 @@ export default function PrivacySettingsScreen() {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

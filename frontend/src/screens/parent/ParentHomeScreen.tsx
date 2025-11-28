@@ -11,7 +11,6 @@ import { CompositeNavigationProp } from "@react-navigation/native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { colors } from "../../theme";
@@ -32,8 +31,8 @@ type NavigationProp = CompositeNavigationProp<
 
 export default function ParentHomeScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s: any) => s.user);
+  const logout = useAuthStore((s: any) => s.logout);
 
   const [children, setChildren] = useState<Child[]>([]);
   const [driver, setDriver] = useState<Driver | null>(null);
@@ -115,7 +114,7 @@ export default function ParentHomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Pickup Status Card */}
-          <Animated.View entering={FadeInDown.delay(100).duration(500)}>
+          <View>
             <LiquidGlassCard className="mb-4" intensity="heavy">
               <View style={styles.statusCard}>
                 <View style={styles.statusHeader}>
@@ -128,10 +127,10 @@ export default function ParentHomeScreen() {
                 </View>
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Driver Info */}
-          <Animated.View entering={FadeInDown.delay(200).duration(500)}>
+          <View>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Your Driver</Text>
               {driver ? (
@@ -140,10 +139,10 @@ export default function ParentHomeScreen() {
                 <Text>Loading driver information...</Text>
               )}
             </View>
-          </Animated.View>
+          </View>
 
           {/* Children List */}
-          <Animated.View entering={FadeInDown.delay(300).duration(500)}>
+          <View>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Your Children</Text>
@@ -152,21 +151,20 @@ export default function ParentHomeScreen() {
                 </Pressable>
               </View>
               {children.map((child, index) => (
-                <Animated.View
+                <View
                   key={child.id}
-                  entering={FadeInDown.delay(400 + index * 100).duration(500)}
                 >
                   <ChildTile
                     child={child}
                     onPress={() => navigation.navigate("Tracking")}
                   />
-                </Animated.View>
+                </View>
               ))}
             </View>
-          </Animated.View>
+          </View>
 
           {/* Quick Actions */}
-          <Animated.View entering={FadeInDown.delay(600).duration(500)}>
+          <View>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Quick Actions</Text>
               <View style={styles.actionsGrid}>
@@ -216,10 +214,10 @@ export default function ParentHomeScreen() {
                 </Pressable>
               </View>
             </View>
-          </Animated.View>
+          </View>
 
           {/* Payment Banner */}
-          <Animated.View entering={FadeInDown.delay(700).duration(500)}>
+          <View>
             <LiquidGlassCard className="mb-6" intensity="heavy">
               <View style={styles.paymentBanner}>
                 <View style={styles.paymentInfo}>
@@ -235,11 +233,12 @@ export default function ParentHomeScreen() {
                 />
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>
   );
+
 }
 
 const styles = StyleSheet.create({

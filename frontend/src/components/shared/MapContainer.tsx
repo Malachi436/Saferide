@@ -33,7 +33,7 @@ export function MapContainer({
   children,
   onMarkerPress,
 }: MapContainerProps) {
-  const mapRef = useRef<typeof MapView>(null);
+  const mapRef = useRef(null);
 
   // Center map on bus location when it changes
   useEffect(() => {
@@ -70,7 +70,6 @@ export function MapContainer({
   return (
     <View style={styles.container}>
       <MapView
-        ref={mapRef as any}
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         initialRegion={{

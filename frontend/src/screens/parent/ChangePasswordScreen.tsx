@@ -18,7 +18,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -84,7 +83,7 @@ export default function ChangePasswordScreen({ navigation }: Props) {
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <View>
             <View style={styles.header}>
               <View style={styles.iconCircle}>
                 <Ionicons name="key" size={32} color={colors.status.warningYellow} />
@@ -94,10 +93,10 @@ export default function ChangePasswordScreen({ navigation }: Props) {
                 Enter your current password and choose a new one
               </Text>
             </View>
-          </Animated.View>
+          </View>
 
           {/* Form */}
-          <Animated.View entering={FadeInDown.delay(150).springify()}>
+          <View>
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.formSection}>
                 {/* Current Password */}
@@ -192,17 +191,17 @@ export default function ChangePasswordScreen({ navigation }: Props) {
                 </View>
               </View>
             </LiquidGlassCard>
-          </Animated.View>
+          </View>
 
           {/* Submit Button */}
-          <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <View>
             <LargeCTAButton
               title={isSubmitting ? "Changing Password..." : "Change Password"}
               onPress={handleSubmit}
               disabled={isSubmitting}
               variant="primary"
             />
-          </Animated.View>
+          </View>
 
           <View style={{ height: 40 }} />
         </ScrollView>

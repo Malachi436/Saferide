@@ -7,7 +7,6 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
@@ -56,7 +55,7 @@ export default function HelpSupportScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Contact Support */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Contact Support</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.contactGrid}>
@@ -82,10 +81,10 @@ export default function HelpSupportScreen() {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* Quick Help */}
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Quick Help</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.settingsGroup}>
@@ -139,15 +138,14 @@ export default function HelpSupportScreen() {
               </Pressable>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* FAQ */}
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
           {FAQ_ITEMS.map((faq, index) => (
-            <Animated.View
+            <View
               key={faq.id}
-              entering={FadeInDown.delay(400 + index * 50).springify()}
             >
               <LiquidGlassCard intensity="light" className="mb-3">
                 <View style={styles.faqCard}>
@@ -162,12 +160,12 @@ export default function HelpSupportScreen() {
                   <Text style={styles.faqAnswer}>{faq.answer}</Text>
                 </View>
               </LiquidGlassCard>
-            </Animated.View>
+            </View>
           ))}
-        </Animated.View>
+        </View>
 
         {/* Emergency Contacts */}
-        <Animated.View entering={FadeInDown.delay(600).springify()}>
+        <View>
           <Text style={styles.sectionTitle}>Emergency Contacts</Text>
           <LiquidGlassCard intensity="medium" className="mb-4">
             <View style={styles.emergencyCard}>
@@ -210,10 +208,10 @@ export default function HelpSupportScreen() {
               </View>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
 
         {/* App Info */}
-        <Animated.View entering={FadeInDown.delay(700).springify()}>
+        <View>
           <LiquidGlassCard intensity="light" className="mb-4">
             <View style={styles.infoCard}>
               <Text style={styles.infoTitle}>ROSAgo Driver Support</Text>
@@ -223,7 +221,7 @@ export default function HelpSupportScreen() {
               <Text style={styles.infoEmail}>support@rosago.com</Text>
             </View>
           </LiquidGlassCard>
-        </Animated.View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

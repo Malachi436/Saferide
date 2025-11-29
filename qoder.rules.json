@@ -384,22 +384,278 @@
   "frontend": {
     "path": "frontend",
     "language": "TypeScript",
-    "framework": "React Native (Expo)",
+    "framework": "React Native (Expo SDK 54)",
+    "expoVersion": "~54.0.0",
+    "reactVersion": "19.1.0",
+    "reactNativeVersion": "0.81.5",
+    "criticalConfigFiles": {
+      "babel.config.js": {
+        "locked": true,
+        "protectionLevel": "CRITICAL",
+        "reason": "NativeWind v4 Babel plugin conflict - caused 4 days of debugging",
+        "rules": [
+          "NEVER add 'nativewind/babel' plugin (NativeWind v4 does not use Babel plugin)",
+          "NEVER add any plugins before 'react-native-reanimated/plugin'",
+          "'react-native-reanimated/plugin' MUST be the last plugin in the array",
+          "DO NOT add worklets plugins",
+          "DO NOT modify preset order",
+          "DO NOT remove reanimated plugin",
+          "Any modification will cause: '.plugins is not a valid Plugin property' error"
+        ],
+        "workingConfiguration": {
+          "presets": [["babel-preset-expo", { "lazyImports": true }]],
+          "plugins": ["react-native-reanimated/plugin"]
+        },
+        "forbiddenPlugins": [
+          "nativewind/babel",
+          "react-native-worklets/plugin",
+          "any other babel plugins"
+        ]
+      },
+      "package.json": {
+        "locked": true,
+        "protectionLevel": "CRITICAL",
+        "lockedDependencies": {
+          "expo": "~54.0.0",
+          "react": "19.1.0",
+          "react-native": "0.81.5",
+          "nativewind": "^4.0.1",
+          "react-native-reanimated": "~4.1.1",
+          "react-native-worklets": "0.5.1",
+          "react-native-web": "~0.21.2",
+          "@react-native-async-storage/async-storage": "2.2.0",
+          "expo-blur": "~15.0.7",
+          "expo-camera": "~17.0.9",
+          "expo-status-bar": "~3.0.8",
+          "react-native-safe-area-context": "~5.6.0",
+          "react-native-screens": "~4.16.0",
+          "react-native-svg": "15.12.1",
+          "@types/react": "~19.1.10",
+          "typescript": "~5.9.2"
+        },
+        "rules": [
+          "NEVER change React version from 19.1.0 (React Native 0.81.5 requires React 19.1.0)",
+          "NEVER downgrade to React 18.x",
+          "NEVER change Expo SDK version from ~54.0.0",
+          "NEVER change React Native version from 0.81.5",
+          "NEVER remove react-native-worklets (required peer dependency for Reanimated 4.1.x)",
+          "NEVER change NativeWind version (must stay on v4.x)",
+          "NEVER change @types/react version (must be ~19.1.x for compatibility)",
+          "Use 'npx expo install <package>' to add new packages, NOT 'npm install'",
+          "Any version change will cause ERESOLVE peer dependency conflicts"
+        ],
+        "allowedChanges": [
+          "Adding new business logic packages using 'npx expo install'",
+          "Adding utility libraries compatible with Expo SDK 54"
+        ]
+      },
+      "metro.config.js": {
+        "locked": true,
+        "protectionLevel": "CRITICAL",
+        "rules": [
+          "DO NOT modify - keep Expo's default Metro configuration",
+          "DO NOT add custom transformers",
+          "DO NOT modify resolver settings",
+          "DO NOT override default config",
+          "Any modification will break Metro bundler"
+        ],
+        "workingConfiguration": "Must use getDefaultConfig from 'expo/metro-config'"
+      },
+      ".npmrc": {
+        "locked": true,
+        "protectionLevel": "CRITICAL",
+        "content": "legacy-peer-deps=true",
+        "rules": [
+          "DO NOT remove this file",
+          "DO NOT change to legacy-peer-deps=false",
+          "Required for Expo SDK 54 dependency resolution",
+          "Prevents ERESOLVE errors during npm install"
+        ]
+      },
+      "app.json": {
+        "locked": false,
+        "protectionLevel": "MODERATE",
+        "lockedFields": {
+          "expo.scheme": "rosago",
+          "expo.icon": "./assets/icon.png",
+          "expo.splash.image": "./assets/splash.png",
+          "expo.android.adaptiveIcon.foregroundImage": "./assets/adaptive-icon.png",
+          "expo.web.favicon": "./assets/favicon.png",
+          "expo.extra.eas.projectId": "9c979fed-a1db-4e4c-ac6a-e4841682d37a"
+        },
+        "rules": [
+          "DO NOT change 'scheme' value (breaks deep linking)",
+          "DO NOT change asset file paths unless files are moved",
+          "DO NOT remove EAS project ID",
+          "Asset files referenced must exist"
+        ],
+        "allowedChanges": [
+          "name (display name)",
+          "version (app version)",
+          "orientation",
+          "permissions",
+          "backgroundColor",
+          "iOS/Android specific settings"
+        ]
+      },
+      "tailwind.config.js": {
+        "locked": false,
+        "protectionLevel": "LOW",
+        "lockedSettings": {
+          "presets": "[require('nativewind/preset')]"
+        },
+        "rules": [
+          "DO NOT remove 'require(nativewind/preset)' from presets array",
+          "DO NOT change content paths (styles won't work)"
+        ],
+        "allowedChanges": [
+          "Add custom colors in theme.extend",
+          "Add custom fonts",
+          "Add spacing, borders, shadows",
+          "Add Tailwind plugins"
+        ]
+      },
+      "tsconfig.json": {
+        "locked": false,
+        "protectionLevel": "LOW",
+        "lockedSettings": {
+          "extends": "expo/tsconfig.base"
+        },
+        "rules": [
+          "MUST extend 'expo/tsconfig.base'",
+          "DO NOT change module resolution to incompatible settings"
+        ],
+        "allowedChanges": [
+          "Strict mode settings",
+          "Path aliases",
+          "Include/exclude patterns"
+        ]
+      },
+      ".gitignore": {
+        "locked": false,
+        "protectionLevel": "LOW",
+        "requiredEntries": [
+          "node_modules/",
+          ".expo/",
+          ".expo-shared/"
+        ],
+        "rules": [
+          "DO NOT remove .expo/ entry (prevents committing machine-specific state)",
+          "DO NOT remove node_modules/ entry"
+        ]
+      }
+    },
+    "nativeWindVersion": "4.0.1",
+    "nativeWindRules": [
+      "NativeWind v4 does NOT use a Babel plugin",
+      "NativeWind v4 works through Metro config, not Babel",
+      "NEVER add 'nativewind/babel' to babel.config.js",
+      "Old tutorials showing 'nativewind/babel' are for v3, not v4"
+    ],
+    "requiredAssets": {
+      "files": [
+        "assets/icon.png",
+        "assets/splash.png",
+        "assets/adaptive-icon.png",
+        "assets/favicon.png"
+      ],
+      "rules": [
+        "All asset files must exist",
+        "Asset paths in app.json must match actual files",
+        "Missing assets will cause expo-doctor validation errors"
+      ]
+    },
+    "developmentWorkflow": {
+      "startCommand": "npx expo start --go --clear",
+      "expoGoMode": true,
+      "clearCacheOnStart": true,
+      "rules": [
+        "Always start with --clear flag to avoid cached errors",
+        "Use --go flag for Expo Go mode on physical devices",
+        "Use --tunnel flag if same Wi-Fi network doesn't work"
+      ]
+    },
     "allowedChanges": [
-      "screens",
-      "components",
-      "navigation",
-      "hooks",
-      "api integration",
-      "state management",
-      "utility functions"
+      "All files in src/ directory (screens, components, navigation, stores, utils)",
+      "UI/UX modifications in components",
+      "Navigation structure (routes, stacks, tabs)",
+      "State management (Zustand stores)",
+      "API integration code",
+      "TypeScript types and interfaces",
+      "Theme customization (colors, fonts in tailwind.config.js)",
+      "Asset files (images, icons)",
+      "Business logic",
+      "Styles using Tailwind classes"
     ],
     "forbiddenChanges": [
-      "replacing project root",
-      "modifying .env files",
-      "modifying Metro config",
-      "changing package.json dependencies without justification"
-    ]
+      "babel.config.js (LOCKED - NativeWind v4 compatibility)",
+      "package.json dependency versions (LOCKED - Expo SDK 54 requirements)",
+      "metro.config.js (LOCKED - Expo defaults)",
+      ".npmrc (LOCKED - peer dependency resolution)",
+      "Core React/React Native/Expo versions",
+      "Adding Babel plugins",
+      "Modifying build configurations",
+      "Changing module resolution",
+      "Replacing NativeWind",
+      "Downgrading to React 18.x",
+      "Upgrading/downgrading Expo SDK"
+    ],
+    "errorRecovery": {
+      "commonErrors": {
+        ".plugins is not a valid Plugin property": {
+          "cause": "Invalid or non-existent Babel plugin in babel.config.js",
+          "solution": "Remove 'nativewind/babel' - NativeWind v4 doesn't use it",
+          "prevention": "Never modify babel.config.js"
+        },
+        "ERESOLVE could not resolve": {
+          "cause": "Peer dependency conflicts in package.json",
+          "solution": "Restore locked dependency versions, run 'npm install --legacy-peer-deps'",
+          "prevention": "Never change core package versions"
+        },
+        "Metro bundler failed": {
+          "cause": "Metro configuration issue",
+          "solution": "Restore metro.config.js to Expo defaults",
+          "prevention": "Never modify metro.config.js"
+        },
+        "Cannot find module 'expo/tsconfig.base'": {
+          "cause": "tsconfig.json not extending Expo base",
+          "solution": "Restore 'extends': 'expo/tsconfig.base'",
+          "prevention": "Always extend expo/tsconfig.base"
+        }
+      },
+      "recoverySteps": [
+        "1. Identify which critical file was modified",
+        "2. Run 'git restore <file>' to restore from Git",
+        "3. Clear all caches: Remove .expo and node_modules/.cache",
+        "4. Reinstall: npm install --legacy-peer-deps",
+        "5. Test: npx expo start --go --clear"
+      ]
+    },
+    "packageInstallation": {
+      "rules": [
+        "ALWAYS use 'npx expo install <package>' NOT 'npm install <package>'",
+        "Expo install ensures SDK 54 compatibility",
+        "After installing packages, always test with --clear flag",
+        "Check expo-doctor after package changes: npx expo-doctor"
+      ]
+    },
+    "testing": {
+      "physicalDevice": {
+        "method": "Expo Go",
+        "setup": [
+          "Install Expo Go from Play Store/App Store",
+          "Connect phone and PC to same Wi-Fi network",
+          "Scan QR code from terminal",
+          "Wait 30-60 seconds for initial bundle"
+        ],
+        "troubleshooting": [
+          "If QR doesn't work: Use tunnel mode (npx expo start --tunnel)",
+          "If connection fails: Check Windows Firewall allows Node.js",
+          "If bundling fails: Clear cache with --clear flag"
+        ]
+      }
+    },
+    "historyNote": "This configuration was locked after resolving a 4-day debugging session caused by NativeWind v4 Babel plugin conflict. DO NOT modify critical files without extreme caution."
   },
   "backend": {
     "path": "backend",
@@ -441,16 +697,44 @@
       ".gitattributes",
       ".env",
       "*.lock",
-      "node_modules"
+      "node_modules",
+      "frontend/babel.config.js",
+      "frontend/metro.config.js",
+      "frontend/.npmrc"
     ],
+    "criticalProtections": {
+      "frontend": [
+        "babel.config.js is LOCKED - caused 4 days of debugging",
+        "package.json core dependencies are LOCKED - Expo SDK 54 requirements",
+        "metro.config.js is LOCKED - Expo defaults only",
+        ".npmrc is LOCKED - required for peer dependency resolution",
+        "NEVER add 'nativewind/babel' plugin - NativeWind v4 doesn't use it",
+        "NEVER change React from 19.1.0 or React Native from 0.81.5",
+        "ALWAYS use 'npx expo install' for new packages, NOT 'npm install'"
+      ],
+      "backend": [
+        "Prisma schema is LOCKED unless explicitly instructed",
+        "Docker configs are LOCKED",
+        "Database setup is LOCKED",
+        "Worker queue implementation requires approval"
+      ]
+    },
     "requireConfirmationFor": [
       "dependency upgrades",
       "schema changes",
       "Docker config changes",
       "authentication logic changes",
-      "WebSocket gateway changes"
+      "WebSocket gateway changes",
+      "frontend build configuration changes",
+      "Babel/Metro configuration changes",
+      "Expo SDK version changes"
     ],
     "generatePatchesOnly": true,
-    "analysisRequiredBeforeChanges": true
+    "analysisRequiredBeforeChanges": true,
+    "emergencyRecovery": {
+      "frontendBabelError": "If '.plugins is not a valid Plugin property' error: restore babel.config.js from Git, remove .expo/, run: npx expo start --clear",
+      "peerDependencyError": "If 'ERESOLVE' error: restore package.json from Git, run: npm install --legacy-peer-deps",
+      "generalRecovery": "Always commit working state before modifying critical config files"
+    }
   }
 }

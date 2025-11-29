@@ -2,11 +2,16 @@
   "expo": {
     "name": "rosago",
     "slug": "rosago",
-    "scheme": "rosago",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "scheme": "rosago",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.rosago.app"
@@ -19,10 +24,13 @@
       "package": "com.rosago.app"
     },
     "web": {
-      "bundler": "metro",
-      "output": "single",
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single"
     },
-    "platforms": ["ios", "android"]
+    "extra": {
+      "eas": {
+        "projectId": "9c979fed-a1db-4e4c-ac6a-e4841682d37a"
+      }
+    }
   }
 }

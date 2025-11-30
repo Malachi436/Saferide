@@ -1,14 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useAuthStore } from '../stores/authStore';
-import { LiquidCard, LargeCTAButton } from '../components';
+import { LiquidCard } from '../components';
 import { Ionicons } from '@expo/vector-icons';
 
 export const SettingsScreen = () => {
   const { user, logout } = useAuthStore();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    console.log('[SettingsScreen] Logout pressed');
+    Alert.alert('Logout', 'Are you sure?', [
+      { text: 'Cancel', onPress: () => console.log('Cancelled') },
+      { 
+        text: 'Logout', 
+        onPress: async () => {
+          try {
+            await logout();
+            console.log('[SettingsScreen] Logout completed');
+          } catch (error) {
+            console.log('[SettingsScreen] Logout error:', error);
+          }
+        }
+      }
+    ]);
   };
 
   return (
@@ -39,12 +53,13 @@ export const SettingsScreen = () => {
         </LiquidCard>
       </View>
 
-      <LargeCTAButton
-        title="Log Out"
+      <TouchableOpacity 
+        style={styles.logoutButton}
         onPress={handleLogout}
-        variant="danger"
-        className="mt-8"
-      />
+        activeOpacity={0.7}
+      >
+        <Text style={styles.logoutButtonText}>Log Out</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -127,5 +142,17 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: 16,
     color: '#111827',
+  },
+  logoutButton: {
+    backgroundColor: '#EF4444',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });

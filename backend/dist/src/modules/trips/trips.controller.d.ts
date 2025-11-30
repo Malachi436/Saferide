@@ -9,9 +9,9 @@ export declare class TripsController {
         driverId: string;
         routeId: string;
         status: import(".prisma/client").$Enums.TripStatus;
-        busId: string;
         startTime: Date | null;
         endTime: Date | null;
+        busId: string;
     }>;
     findAll(): Promise<{
         id: string;
@@ -20,9 +20,9 @@ export declare class TripsController {
         driverId: string;
         routeId: string;
         status: import(".prisma/client").$Enums.TripStatus;
-        busId: string;
         startTime: Date | null;
         endTime: Date | null;
+        busId: string;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
@@ -31,9 +31,9 @@ export declare class TripsController {
         driverId: string;
         routeId: string;
         status: import(".prisma/client").$Enums.TripStatus;
-        busId: string;
         startTime: Date | null;
         endTime: Date | null;
+        busId: string;
     }>;
     update(id: string, updateTripDto: any): Promise<{
         id: string;
@@ -42,9 +42,9 @@ export declare class TripsController {
         driverId: string;
         routeId: string;
         status: import(".prisma/client").$Enums.TripStatus;
-        busId: string;
         startTime: Date | null;
         endTime: Date | null;
+        busId: string;
     }>;
     transitionStatus(id: string, statusDto: any): Promise<{
         id: string;
@@ -53,9 +53,9 @@ export declare class TripsController {
         driverId: string;
         routeId: string;
         status: import(".prisma/client").$Enums.TripStatus;
-        busId: string;
         startTime: Date | null;
         endTime: Date | null;
+        busId: string;
     }>;
     remove(id: string): Promise<{
         id: string;
@@ -64,8 +64,8 @@ export declare class TripsController {
         driverId: string;
         routeId: string;
         status: import(".prisma/client").$Enums.TripStatus;
-        busId: string;
         startTime: Date | null;
         endTime: Date | null;
+        busId: string;
     }>;
 }

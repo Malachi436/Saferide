@@ -12,7 +12,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
-import { useAuthStore } from "../../state/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import { ParentTabParamList } from "../../navigation/ParentNavigator";
 import { CompositeScreenProps } from "@react-navigation/native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
@@ -32,8 +32,14 @@ export default function SettingsScreen({ navigation }: Props) {
   const [dropoffAlerts, setDropoffAlerts] = useState(true);
   const [delayAlerts, setDelayAlerts] = useState(true);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    console.log('[SettingsScreen] Logout pressed');
+    try {
+      await logout();
+      console.log('[SettingsScreen] Logout completed');
+    } catch (error) {
+      console.log('[SettingsScreen] Logout error:', error);
+    }
   };
 
   return (

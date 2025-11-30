@@ -12,9 +12,9 @@ export declare class PaymentsController {
         createdAt: Date;
         updatedAt: Date;
         parentId: string;
+        status: string;
         amount: number;
         currency: string;
-        status: string;
         hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
     }>;
@@ -26,9 +26,9 @@ export declare class PaymentsController {
         createdAt: Date;
         updatedAt: Date;
         parentId: string;
+        status: string;
         amount: number;
         currency: string;
-        status: string;
         hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
     }[]>;
@@ -37,9 +37,9 @@ export declare class PaymentsController {
         createdAt: Date;
         updatedAt: Date;
         parentId: string;
+        status: string;
         amount: number;
         currency: string;
-        status: string;
         hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
     }>;

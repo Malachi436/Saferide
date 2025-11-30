@@ -47,6 +47,7 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const users_service_1 = require("../users/users.service");
+const client_1 = require("@prisma/client");
 let AuthService = class AuthService {
     constructor(usersService, jwtService) {
         this.usersService = usersService;
@@ -61,6 +62,22 @@ let AuthService = class AuthService {
         }
         return null;
     }
+    async signup(email, password, firstName, lastName, phone) {
+        const existingUser = await this.usersService.findByEmail(email);
+        if (existingUser) {
+            throw new common_1.ConflictException('User with this email already exists');
+        }
+        const passwordHash = await this.hashPassword(password);
+        const newUser = await this.usersService.create({
+            email,
+            passwordHash,
+            firstName,
+            lastName,
+            phone,
+            role: client_1.Role.PARENT,
+        });
+        return this.login(newUser);
+    }
     async login(user) {
         const payload = {
             email: user.email,
@@ -74,7 +91,15 @@ let AuthService = class AuthService {
             refresh_token: await this.generateRefreshToken(user),
             role: user.role,
             companyId: user.companyId,
-            userId: user.id
+            userId: user.id,
+            user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                role: user.role,
+            }
         };
     }
     async hashPassword(password) {
@@ -122,6 +147,43 @@ let AuthService = class AuthService {
         }
         catch (error) {
             throw new common_1.UnauthorizedException('Invalid refresh token');
+        }
+    }
+    async requestPasswordReset(email) {
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            throw new common_1.BadRequestException('If email exists, password reset link will be sent');
+        }
+        const resetToken = this.jwtService.sign({ sub: user.id, email: user.email, type: 'password-reset' }, {
+            secret: process.env.JWT_REFRESH_SECRET,
+            expiresIn: '1h',
+        });
+        return {
+            resetToken,
+            message: 'Password reset instructions sent to your email',
+        };
+    }
+    async resetPassword(resetToken, newPassword) {
+        try {
+            const payload = this.jwtService.verify(resetToken, {
+                secret: process.env.JWT_REFRESH_SECRET,
+            });
+            if (payload.type !== 'password-reset') {
+                throw new common_1.BadRequestException('Invalid token type');
+            }
+            const user = await this.usersService.findOne(payload.sub);
+            if (!user) {
+                throw new common_1.BadRequestException('User not found');
+            }
+            const passwordHash = await this.hashPassword(newPassword);
+            await this.usersService.update(user.id, { passwordHash });
+            return { message: 'Password reset successfully' };
+        }
+        catch (error) {
+            if (error instanceof common_1.BadRequestException) {
+                throw error;
+            }
+            throw new common_1.BadRequestException('Invalid or expired reset token');
         }
     }
 };

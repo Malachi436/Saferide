@@ -1,63 +1,57 @@
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding database...');
+  console.log('Starting database seed...');
 
-  // Create platform admin
-  const platformAdminPassword = await hash('admin123', 10);
-  const platformAdmin = await prisma.user.create({
-    data: {
-      email: 'admin@rosago.com',
-      passwordHash: platformAdminPassword,
-      firstName: 'Platform',
-      lastName: 'Administrator',
-      role: 'PLATFORM_ADMIN',
-    },
-  });
-
-  // Create a sample company
+  // Create a company
   const company = await prisma.company.create({
     data: {
-      name: 'Greenwood School District',
-      email: 'info@greenwood.edu',
-      phone: '+1234567890',
-      address: '123 Education St, Learning City',
+      name: 'SafeRide Transport Ltd',
+      email: 'admin@saferide.com',
+      phone: '+233 20 123 4567',
+      address: '123 Main Street, Accra',
     },
   });
+
+  console.log(`Created company: ${company.name}`);
 
   // Create a school
   const school = await prisma.school.create({
     data: {
-      name: 'Greenwood Elementary',
+      name: 'Greenfield Academy',
       companyId: company.id,
     },
   });
 
-  // Create company admin
-  const companyAdminPassword = await hash('company123', 10);
-  const companyAdmin = await prisma.user.create({
+  console.log(`Created school: ${school.name}`);
+
+  // Create a company admin
+  const passwordHash = await bcrypt.hash('Test@1234', 10);
+  const adminUser = await prisma.user.create({
     data: {
-      email: 'principal@greenwood.edu',
-      passwordHash: companyAdminPassword,
-      firstName: 'Jane',
-      lastName: 'Principal',
+      email: 'admin@saferide.com',
+      passwordHash,
+      firstName: 'Admin',
+      lastName: 'User',
+      phone: '+233 20 111 1111',
       role: 'COMPANY_ADMIN',
       companyId: company.id,
-      schoolId: school.id,
     },
   });
 
+  console.log(`Created admin user: ${adminUser.email}`);
+
   // Create a driver
-  const driverPassword = await hash('driver123', 10);
   const driverUser = await prisma.user.create({
     data: {
-      email: 'driver1@greenwood.edu',
-      passwordHash: driverPassword,
+      email: 'driver@saferide.com',
+      passwordHash,
       firstName: 'John',
       lastName: 'Driver',
+      phone: '+233 24 222 2222',
       role: 'DRIVER',
       companyId: company.id,
       schoolId: school.id,
@@ -66,95 +60,123 @@ async function main() {
 
   const driver = await prisma.driver.create({
     data: {
-      license: 'DL123456789',
+      license: 'DL-2024-001',
       userId: driverUser.id,
     },
   });
 
-  // Create a parent
-  const parentPassword = await hash('parent123', 10);
-  const parentUser = await prisma.user.create({
+  console.log(`Created driver: ${driverUser.email}`);
+
+  // Create a bus
+  const bus = await prisma.bus.create({
     data: {
-      email: 'parent1@example.com',
-      passwordHash: parentPassword,
-      firstName: 'Parent',
-      lastName: 'One',
-      role: 'PARENT',
-      companyId: company.id,
-      schoolId: school.id,
+      plateNumber: 'GR-2024-001',
+      capacity: 30,
+      driverId: driver.id,
     },
   });
 
-  // Create a child
-  const child = await prisma.child.create({
+  console.log(`Created bus: ${bus.plateNumber}`);
+
+  // Create a route with stops
+  const route = await prisma.route.create({
     data: {
-      firstName: 'Alice',
-      lastName: 'Student',
-      dateOfBirth: new Date('2015-05-15'),
+      name: 'Osu - Greenfield Route',
+      schoolId: school.id,
+      stops: {
+        create: [
+          {
+            name: 'Oxford Street Stop',
+            latitude: 5.5965,
+            longitude: -0.175,
+            order: 1,
+          },
+          {
+            name: 'Cantonments Road Stop',
+            latitude: 5.6015,
+            longitude: -0.182,
+            order: 2,
+          },
+          {
+            name: 'School Gate',
+            latitude: 5.6037,
+            longitude: -0.187,
+            order: 3,
+          },
+        ],
+      },
+    },
+  });
+
+  console.log(`Created route: ${route.name}`);
+
+  // Create a parent user
+  const parentUser = await prisma.user.create({
+    data: {
+      email: 'parent@test.com',
+      passwordHash,
+      firstName: 'Ama',
+      lastName: 'Mensah',
+      phone: '+233 50 555 5555',
+      role: 'PARENT',
+      companyId: company.id,
+    },
+  });
+
+  console.log(`Created parent user: ${parentUser.email}`);
+
+  // Create children for the parent
+  const child1 = await prisma.child.create({
+    data: {
+      firstName: 'Akosua',
+      lastName: 'Mensah',
+      dateOfBirth: new Date('2010-05-15'),
       parentId: parentUser.id,
       schoolId: school.id,
     },
   });
 
-  // Create a bus
-  const bus = await prisma.bus.create({
+  const child2 = await prisma.child.create({
     data: {
-      plateNumber: 'BUS123',
-      capacity: 40,
-      driverId: driver.id,
-    },
-  });
-
-  // Create a route
-  const route = await prisma.route.create({
-    data: {
-      name: 'Morning Route A',
+      firstName: 'Kwabena',
+      lastName: 'Mensah',
+      dateOfBirth: new Date('2012-08-20'),
+      parentId: parentUser.id,
       schoolId: school.id,
     },
   });
 
-  // Create stops
-  const stop1 = await prisma.stop.create({
+  console.log(`Created children: ${child1.firstName}, ${child2.firstName}`);
+
+  // Create a trip
+  const trip = await prisma.trip.create({
     data: {
-      name: 'Stop 1 - Main Street',
-      latitude: 0.347596,
-      longitude: 32.582520,
-      order: 1,
+      busId: bus.id,
       routeId: route.id,
+      driverId: driver.id,
+      status: 'SCHEDULED',
+      startTime: new Date(Date.now() + 3600000), // 1 hour from now
     },
   });
 
-  const stop2 = await prisma.stop.create({
+  console.log(`Created trip: ${trip.id}`);
+
+  // Create attendance records
+  await prisma.childAttendance.create({
     data: {
-      name: 'Stop 2 - Oak Avenue',
-      latitude: 0.348596,
-      longitude: 32.583520,
-      order: 2,
-      routeId: route.id,
+      childId: child1.id,
+      tripId: trip.id,
+      status: 'PICKED_UP',
+      recordedBy: driverUser.id,
     },
   });
 
-  const stop3 = await prisma.stop.create({
-    data: {
-      name: 'Stop 3 - School',
-      latitude: 0.349596,
-      longitude: 32.584520,
-      order: 3,
-      routeId: route.id,
-    },
-  });
-
-  console.log('Seeding completed successfully!');
-  console.log('Created users:');
-  console.log(`- Platform Admin: ${platformAdmin.email} (password: admin123)`);
-  console.log(`- Company Admin: ${companyAdmin.email} (password: company123)`);
-  console.log(`- Driver: ${driverUser.email} (password: driver123)`);
-  console.log(`- Parent: ${parentUser.email} (password: parent123)`);
+  console.log('Database seed completed successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('Seed error:', e);
     process.exit(1);
   })
   .finally(async () => {

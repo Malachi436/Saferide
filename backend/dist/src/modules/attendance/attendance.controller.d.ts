@@ -10,54 +10,54 @@ export declare class AttendanceController {
     private readonly attendanceService;
     constructor(attendanceService: AttendanceService);
     recordAttendance(recordAttendanceDto: RecordAttendanceDto): Promise<{
-        timestamp: Date;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        timestamp: Date;
+        recordedBy: string;
         childId: string;
         tripId: string;
-        recordedBy: string;
     }>;
     updateAttendance(id: string, updateDto: any): Promise<{
-        timestamp: Date;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        timestamp: Date;
+        recordedBy: string;
         childId: string;
         tripId: string;
-        recordedBy: string;
     }>;
     getAttendanceByChild(childId: string): Promise<{
-        timestamp: Date;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        timestamp: Date;
+        recordedBy: string;
         childId: string;
         tripId: string;
-        recordedBy: string;
     }[]>;
     getAttendanceByTrip(tripId: string): Promise<{
-        timestamp: Date;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        timestamp: Date;
+        recordedBy: string;
         childId: string;
         tripId: string;
-        recordedBy: string;
     }[]>;
     getAttendanceById(id: string): Promise<{
-        timestamp: Date;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        timestamp: Date;
+        recordedBy: string;
         childId: string;
         tripId: string;
-        recordedBy: string;
     }>;
 }
 export {};

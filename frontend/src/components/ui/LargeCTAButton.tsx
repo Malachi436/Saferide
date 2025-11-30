@@ -17,7 +17,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface LargeCTAButtonProps {
   title: string;
-  onPress: () => void;
+  onPress: () => void | Promise<void>;
   variant?: "primary" | "secondary" | "success" | "danger";
   disabled?: boolean;
   className?: string;
@@ -47,6 +47,10 @@ export function LargeCTAButton({
     scale.value = withSpring(1, { damping: 15 });
   };
 
+  const handlePress = async () => {
+    await onPress();
+  };
+
   const backgroundColor = {
     primary: colors.primary.blue,
     secondary: colors.primary.teal,
@@ -56,7 +60,7 @@ export function LargeCTAButton({
 
   return (
     <AnimatedPressable
-      onPress={onPress}
+      onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled}

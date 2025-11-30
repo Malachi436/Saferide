@@ -9,7 +9,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
-import { useAuthStore } from "../../state/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import { mockParent, mockDriver } from "../../mock/data";
 import { colors } from "../../theme";
 import { LinearGradient } from "expo-linear-gradient";
@@ -30,6 +30,7 @@ export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -38,19 +39,19 @@ export default function LoginScreen({ navigation }: Props) {
     }
 
     setIsLoading(true);
+    setError("");
 
     try {
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock logic: if email contains "driver", login as driver, else parent
-      if (email.toLowerCase().includes("driver")) {
-        login(mockDriver);
-      } else {
-        login(mockParent);
-      }
-    } catch (error) {
-      Alert.alert("Error", "Invalid credentials. Please try again.");
+      await login({
+        email,
+        password,
+      });
+      // Navigation handled by RootNavigator based on auth state
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Login failed. Please try again.";
+      setError(errorMessage);
+      Alert.alert("Login Error", errorMessage);
     } finally {
       setIsLoading(false);
     }

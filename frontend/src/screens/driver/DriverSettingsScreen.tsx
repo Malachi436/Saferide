@@ -13,7 +13,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
-import { useAuthStore } from "../../state/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
@@ -27,8 +27,14 @@ export default function DriverSettingsScreen() {
   const [locationSharing, setLocationSharing] = useState(true);
   const [autoStartTrip, setAutoStartTrip] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    console.log('[DriverSettingsScreen] Logout pressed');
+    try {
+      await logout();
+      console.log('[DriverSettingsScreen] Logout completed');
+    } catch (error) {
+      console.log('[DriverSettingsScreen] Logout error:', error);
+    }
   };
 
   return (

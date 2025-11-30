@@ -7,7 +7,7 @@
 import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useAuthStore } from "../state/authStore";
+import { useAuthStore } from "../stores/authStore";
 import { colors } from "../theme";
 
 // Import screens
@@ -28,16 +28,6 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const role = useAuthStore((s) => s.role);
-  const hasHydrated = useAuthStore((s) => s.hasHydrated);
-
-  // Show loading screen while hydrating from AsyncStorage
-  if (!hasHydrated) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary.blue} />
-      </View>
-    );
-  }
 
   return (
     <Stack.Navigator

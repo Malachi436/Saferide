@@ -2,18 +2,21 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, UserRole, LoginCredentials, SignUpData } from '../types';
+import { apiClient } from '../utils/api';
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   role: UserRole | null;
   isLoading: boolean;
+  error: string | null;
   
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   register: (data: SignUpData) => Promise<void>;
   setUser: (user: User) => void;
+  clearError: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,69 +26,105 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       role: null,
       isLoading: false,
+      error: null,
 
       login: async (credentials: LoginCredentials) => {
-        set({ isLoading: true });
+        set({ isLoading: true, error: null });
         try {
-          // Mock login - in production, this would call your backend API
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          const mockUser: User = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: credentials.email.split('@')[0],
+          const response = await apiClient.post<any>('/auth/login', {
             email: credentials.email,
-            phone: '+1234567890',
-            role: credentials.role,
+            password: credentials.password,
+          });
+
+          // Store tokens
+          await apiClient.setTokens({
+            access_token: response.access_token,
+            refresh_token: response.refresh_token,
+          });
+
+          // Set user state
+          const user: User = {
+            id: response.user.id,
+            name: `${response.user.firstName} ${response.user.lastName}`,
+            email: response.user.email,
+            phone: response.user.phone || '',
+            role: response.user.role === 'PARENT' ? 'parent' : 'driver',
           };
 
           set({
-            user: mockUser,
+            user,
             isAuthenticated: true,
-            role: credentials.role,
+            role: user.role,
             isLoading: false,
+            error: null,
           });
-        } catch (error) {
-          set({ isLoading: false });
+        } catch (error: any) {
+          console.log('Login error:', error);
+          console.log('Error response:', error.response);
+          const errorMessage =
+            error.response?.data?.message || error.message || 'Login failed. Please try again.';
+          set({ isLoading: false, error: errorMessage });
           throw error;
         }
       },
 
-      logout: () => {
+      logout: async () => {
+        await apiClient.clearTokens();
         set({
           user: null,
           isAuthenticated: false,
           role: null,
+          error: null,
         });
       },
 
       register: async (data: SignUpData) => {
-        set({ isLoading: true });
+        set({ isLoading: true, error: null });
         try {
-          // Mock registration - in production, this would call your backend API
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          const newUser: User = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: data.name,
+          const response = await apiClient.post<any>('/auth/signup', {
             email: data.email,
+            password: data.password,
+            firstName: data.name.split(' ')[0],
+            lastName: data.name.split(' ')[1] || '',
             phone: data.phone,
+          });
+
+          // Store tokens
+          await apiClient.setTokens({
+            access_token: response.access_token,
+            refresh_token: response.refresh_token,
+          });
+
+          // Set user state
+          const user: User = {
+            id: response.user.id,
+            name: `${response.user.firstName} ${response.user.lastName}`,
+            email: response.user.email,
+            phone: response.user.phone || '',
             role: 'parent',
           };
 
           set({
-            user: newUser,
+            user,
             isAuthenticated: true,
             role: 'parent',
             isLoading: false,
+            error: null,
           });
-        } catch (error) {
-          set({ isLoading: false });
+        } catch (error: any) {
+          const errorMessage =
+            error.response?.data?.message || 'Registration failed. Please try again.';
+          set({ isLoading: false, error: errorMessage });
           throw error;
         }
       },
 
       setUser: (user: User) => {
         set({ user, isAuthenticated: true, role: user.role });
+      },
+
+      clearError: () => {
+        set({ error: null });
       },
     }),
     {

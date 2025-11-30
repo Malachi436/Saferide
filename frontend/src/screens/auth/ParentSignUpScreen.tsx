@@ -23,7 +23,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
-
+import { useAuthStore } from "../../stores/authStore";
 type RootStackParamList = {
   Login: undefined;
   ParentSignUp: undefined;
@@ -42,6 +42,7 @@ interface SignUpFormData {
 }
 
 export default function ParentSignUpScreen({ navigation }: Props) {
+  const register = useAuthStore((s) => s.register);
   const [formData, setFormData] = useState<SignUpFormData>({
     fullName: "",
     email: "",
@@ -103,20 +104,27 @@ export default function ParentSignUpScreen({ navigation }: Props) {
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await register({
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      });
 
       Alert.alert(
         "Account Created!",
-        "Your parent account has been created successfully. Please login to continue.",
+        "Your parent account has been created successfully. You are now logged in.",
         [
           {
-            text: "OK",
-            onPress: () => navigation.navigate("Login"),
+            text: "Continue",
+            onPress: () => navigation.navigate("ParentApp"),
           },
         ]
       );
-    } catch (error) {
-      Alert.alert("Error", "Failed to create account. Please try again.");
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to create account. Please try again.";
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsSubmitting(false);
     }

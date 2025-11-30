@@ -2,7 +2,7 @@
 export type UserRole = 'parent' | 'driver';
 export type ChildStatus = 'waiting' | 'picked_up' | 'on_board' | 'dropped_off' | 'absent';
 export type PickupType = 'home' | 'roadside';
-export type NotificationType = 'payment' | 'alert' | 'info' | 'delay';
+export type NotificationType = 'PICKUP' | 'DROPOFF' | 'DELAY' | 'PAYMENT' | 'INFO';
 
 // User & Auth
 export interface User {
@@ -77,12 +77,13 @@ export interface Trip {
 // Notifications
 export interface Notification {
   id: string;
-  type: NotificationType;
+  userId: string;
   title: string;
   message: string;
-  timestamp: string;
-  read: boolean;
-  icon?: string;
+  type: NotificationType;
+  isRead: boolean;
+  createdAt: string;
+  readAt?: string;
 }
 
 // Broadcast Message Templates

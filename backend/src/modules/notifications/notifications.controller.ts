@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Param, Patch, UseGuards } from '@nestjs/co
 import { NotificationsService } from './notifications.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { NotificationType } from '@prisma/client';
 
 class CreateNotificationDto {
@@ -12,7 +13,7 @@ class CreateNotificationDto {
 }
 
 @Controller('notifications')
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 

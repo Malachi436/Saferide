@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const notifications_service_1 = require("./notifications.service");
 const roles_decorator_1 = require("../roles/roles.decorator");
 const roles_guard_1 = require("../roles/roles.guard");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 class CreateNotificationDto {
 }
 let NotificationsController = class NotificationsController {
@@ -71,7 +72,7 @@ __decorate([
 ], NotificationsController.prototype, "markAsRead", null);
 exports.NotificationsController = NotificationsController = __decorate([
     (0, common_1.Controller)('notifications'),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [notifications_service_1.NotificationsService])
 ], NotificationsController);
 //# sourceMappingURL=notifications.controller.js.map

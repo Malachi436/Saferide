@@ -3,7 +3,7 @@
  * View and manage notifications with filters
  */
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,107 +11,94 @@ import {
   ScrollView,
   Pressable,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
+import { apiClient } from "../../utils/api";
+import { useAuthStore } from "../../stores/authStore";
+import { Notification as NotificationModel } from "../../types";
 
-type NotificationType = "pickup" | "dropoff" | "delay" | "payment" | "general";
+type NotificationType = "PICKUP" | "DROPOFF" | "DELAY" | "PAYMENT" | "INFO";
+type DisplayNotificationType = "pickup" | "dropoff" | "delay" | "payment" | "general";
 
-interface Notification {
-  id: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  childName?: string;
+interface NotificationDisplay extends NotificationModel {
+  displayType: DisplayNotificationType;
 }
-
-// Mock notifications data
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: "1",
-    type: "pickup",
-    title: "Child Picked Up",
-    message: "Kwame has been picked up by the driver at 7:15 AM",
-    timestamp: "2025-01-15T07:15:00",
-    read: false,
-    childName: "Kwame",
-  },
-  {
-    id: "2",
-    type: "delay",
-    title: "Delay Alert",
-    message: "Bus is running 5 minutes late due to traffic",
-    timestamp: "2025-01-15T07:10:00",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "dropoff",
-    title: "Child Dropped Off",
-    message: "Kwame has been safely dropped off at school at 7:45 AM",
-    timestamp: "2025-01-15T07:45:00",
-    read: true,
-    childName: "Kwame",
-  },
-  {
-    id: "4",
-    type: "payment",
-    title: "Payment Received",
-    message: "Your payment of GHS 200.00 has been received for January 2025",
-    timestamp: "2025-01-14T16:30:00",
-    read: true,
-  },
-  {
-    id: "5",
-    type: "general",
-    title: "Route Update",
-    message: "Your child's pickup time has been updated to 7:00 AM starting Monday",
-    timestamp: "2025-01-13T12:00:00",
-    read: true,
-  },
-  {
-    id: "6",
-    type: "pickup",
-    title: "Child Picked Up",
-    message: "Kwame has been picked up by the driver at 7:12 AM",
-    timestamp: "2025-01-12T07:12:00",
-    read: true,
-    childName: "Kwame",
-  },
-  {
-    id: "7",
-    type: "dropoff",
-    title: "Child Dropped Off",
-    message: "Kwame has been safely dropped off at school at 7:42 AM",
-    timestamp: "2025-01-12T07:42:00",
-    read: true,
-    childName: "Kwame",
-  },
-];
 
 type FilterType = "all" | "pickup" | "dropoff" | "delay" | "payment";
 
 export default function NotificationsScreen() {
+  const { user } = useAuthStore();
+  const [notifications, setNotifications] = useState<NotificationDisplay[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch notifications from API
+  const fetchNotifications = useCallback(async () => {
+    if (!user?.id) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.get<NotificationModel[]>(
+        `/notifications/user/${user.id}`
+      );
+      console.log('[NotificationsScreen] Fetched notifications:', response);
+
+      // Map backend notifications to display format
+      const displayNotifications: NotificationDisplay[] = (Array.isArray(response) ? response : []).map((notif) => ({
+        ...notif,
+        displayType: mapNotificationType(notif.type),
+      }));
+
+      setNotifications(displayNotifications);
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || 'Failed to load notifications';
+      setError(errorMsg);
+      console.error('[NotificationsScreen] Error fetching notifications:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+
+  // Fetch when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchNotifications();
+    }, [fetchNotifications])
+  );
+
+  // Map backend notification types to display types
+  const mapNotificationType = (type: NotificationType): NotificationDisplay['displayType'] => {
+    const typeMap: Record<NotificationType, NotificationDisplay['displayType']> = {
+      'PICKUP': 'pickup',
+      'DROPOFF': 'dropoff',
+      'DELAY': 'delay',
+      'PAYMENT': 'payment',
+      'INFO': 'general',
+    };
+    return typeMap[type] || 'general';
+  };
 
   // Filter notifications
   const filteredNotifications = useMemo(() => {
     if (selectedFilter === "all") {
       return notifications;
     }
-    return notifications.filter((n) => n.type === selectedFilter);
+    return notifications.filter((n) => n.displayType === selectedFilter);
   }, [notifications, selectedFilter]);
 
   // Count unread notifications
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -122,16 +109,16 @@ export default function NotificationsScreen() {
 
   const handleMarkAsRead = (id: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
     );
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
-  const getNotificationIcon = (type: NotificationType) => {
-    switch (type) {
+  const getNotificationIcon = (displayType: DisplayNotificationType) => {
+    switch (displayType) {
       case "pickup":
         return { name: "log-in" as const, color: colors.accent.sunsetOrange };
       case "dropoff":
@@ -267,7 +254,7 @@ export default function NotificationsScreen() {
           </Animated.View>
         ) : (
           filteredNotifications.map((notification, index) => {
-            const iconConfig = getNotificationIcon(notification.type);
+            const iconConfig = getNotificationIcon(notification.displayType);
 
             return (
               <Animated.View
@@ -276,18 +263,18 @@ export default function NotificationsScreen() {
               >
                 <Pressable
                   onPress={() => {
-                    if (!notification.read) {
+                    if (!notification.isRead) {
                       handleMarkAsRead(notification.id);
                     }
                   }}
                   style={styles.notificationWrapper}
                 >
                   <LiquidGlassCard
-                    intensity={notification.read ? "light" : "medium"}
+                    intensity={notification.isRead ? "light" : "medium"}
                     className="mb-3"
                   >
                     <View style={styles.notificationCard}>
-                      {!notification.read && <View style={styles.unreadBadge} />}
+                      {!notification.isRead && <View style={styles.unreadBadge} />}
                       <View
                         style={[
                           styles.notificationIcon,
@@ -304,7 +291,7 @@ export default function NotificationsScreen() {
                         <Text
                           style={[
                             styles.notificationTitle,
-                            !notification.read && styles.notificationTitleUnread,
+                            !notification.isRead && styles.notificationTitleUnread,
                           ]}
                         >
                           {notification.title}
@@ -313,7 +300,7 @@ export default function NotificationsScreen() {
                           {notification.message}
                         </Text>
                         <Text style={styles.notificationTime}>
-                          {formatTimestamp(notification.timestamp)}
+                          {formatTimestamp(notification.createdAt)}
                         </Text>
                       </View>
                     </View>

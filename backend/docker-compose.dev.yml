@@ -38,14 +38,18 @@ services:
     environment:
       DATABASE_URL: postgresql://rosago:rosago_password@postgres:5432/rosago_dev
       REDIS_URL: redis://redis:6379
+      NODE_ENV: production
     depends_on:
       - postgres
       - redis
     networks:
       - rosago-network
-    volumes:
-      - .:/app
-      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/auth/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   worker:
     build:
@@ -62,9 +66,6 @@ services:
       - redis
     networks:
       - rosago-network
-    volumes:
-      - .:/app
-      - /app/node_modules
 
 volumes:
   postgres_data:

@@ -8,7 +8,7 @@ RUN npm ci
 
 COPY . .
 
-RUN npm run build
+RUN npm run build && echo "Build complete" && ls -la dist/
 
 EXPOSE 3000
 

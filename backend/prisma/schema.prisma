@@ -38,6 +38,12 @@ enum NotificationType {
   ALERT
 }
 
+enum PickupType {
+  HOME
+  ROADSIDE
+  SCHOOL
+}
+
 // Models
 model Company {
   id        String   @id @default(uuid())
@@ -102,17 +108,21 @@ model Driver {
 }
 
 model Child {
-  id          String            @id @default(uuid())
-  firstName   String
-  lastName    String
-  dateOfBirth DateTime
-  parentId    String
-  parent      User              @relation("ParentChild", fields: [parentId], references: [id])
-  schoolId    String
-  school      School            @relation(fields: [schoolId], references: [id])
-  attendance  ChildAttendance[]
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id                String            @id @default(uuid())
+  firstName         String
+  lastName          String
+  dateOfBirth       DateTime
+  parentId          String
+  parent            User              @relation("ParentChild", fields: [parentId], references: [id])
+  schoolId          String
+  school            School            @relation(fields: [schoolId], references: [id])
+  pickupType        PickupType        @default(SCHOOL)
+  pickupLatitude    Float?
+  pickupLongitude   Float?
+  pickupDescription String? // For roadside: description of landmark/location
+  attendance        ChildAttendance[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([parentId])
   @@index([schoolId])

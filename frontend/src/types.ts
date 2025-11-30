@@ -1,7 +1,7 @@
 // Core Types
 export type UserRole = 'parent' | 'driver';
 export type ChildStatus = 'waiting' | 'picked_up' | 'on_board' | 'dropped_off' | 'absent';
-export type PickupType = 'home' | 'roadside';
+export type PickupType = 'HOME' | 'ROADSIDE' | 'SCHOOL';
 export type NotificationType = 'PICKUP' | 'DROPOFF' | 'DELAY' | 'PAYMENT' | 'INFO';
 
 // User & Auth
@@ -35,13 +35,10 @@ export interface Child {
   school?: { id: string; name: string };
   parentId: string;
   status?: ChildStatus;
-  pickupType?: PickupType;
-  pickupLocation?: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-    roadName?: string;
-  };
+  pickupType: PickupType;
+  pickupLatitude?: number;
+  pickupLongitude?: number;
+  pickupDescription?: string;
   image?: string;
 }
 

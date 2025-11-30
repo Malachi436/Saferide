@@ -162,15 +162,15 @@ export default function LiveTrackingScreen() {
           </Marker>
         )}
 
-        {/* Child Pickup Location */}
-        {selectedChild?.pickupLocation && (
+        {/* Child Pickup Location - Default Accra location */}
+        {selectedChild && (
           <Marker
             coordinate={{
-              latitude: selectedChild.pickupLocation.latitude,
-              longitude: selectedChild.pickupLocation.longitude,
+              latitude: 5.6037,
+              longitude: -0.187,
             }}
             title={`${selectedChild.firstName} ${selectedChild.lastName}`}
-            description="Pickup Location"
+            description="School pickup area (Accra)"
           >
             <View style={styles.childMarker}>
               <Ionicons name="location" size={24} color={colors.neutral.pureWhite} />
@@ -267,7 +267,7 @@ export default function LiveTrackingScreen() {
               <View style={styles.locationInfo}>
                 <Ionicons name="location" size={16} color={colors.neutral.textSecondary} />
                 <Text style={styles.addressText} numberOfLines={2}>
-                  {selectedChild?.pickupLocation?.address || 'No address'}
+                  Accra, Ghana (School pickup area)
                 </Text>
               </View>
             </View>

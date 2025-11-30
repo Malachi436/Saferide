@@ -10,6 +10,10 @@ export declare class ChildrenController {
         lastName: string;
         schoolId: string;
         dateOfBirth: Date;
+        pickupType: import(".prisma/client").$Enums.PickupType;
+        pickupLatitude: number | null;
+        pickupLongitude: number | null;
+        pickupDescription: string | null;
         parentId: string;
     }>;
     findAll(): Promise<{
@@ -20,6 +24,10 @@ export declare class ChildrenController {
         lastName: string;
         schoolId: string;
         dateOfBirth: Date;
+        pickupType: import(".prisma/client").$Enums.PickupType;
+        pickupLatitude: number | null;
+        pickupLongitude: number | null;
+        pickupDescription: string | null;
         parentId: string;
     }[]>;
     findOne(id: string): Promise<{
@@ -30,6 +38,10 @@ export declare class ChildrenController {
         lastName: string;
         schoolId: string;
         dateOfBirth: Date;
+        pickupType: import(".prisma/client").$Enums.PickupType;
+        pickupLatitude: number | null;
+        pickupLongitude: number | null;
+        pickupDescription: string | null;
         parentId: string;
     }>;
     findByParent(parentId: string): Promise<{
@@ -40,6 +52,10 @@ export declare class ChildrenController {
         lastName: string;
         schoolId: string;
         dateOfBirth: Date;
+        pickupType: import(".prisma/client").$Enums.PickupType;
+        pickupLatitude: number | null;
+        pickupLongitude: number | null;
+        pickupDescription: string | null;
         parentId: string;
     }[]>;
     update(id: string, updateChildDto: any): Promise<{
@@ -50,6 +66,10 @@ export declare class ChildrenController {
         lastName: string;
         schoolId: string;
         dateOfBirth: Date;
+        pickupType: import(".prisma/client").$Enums.PickupType;
+        pickupLatitude: number | null;
+        pickupLongitude: number | null;
+        pickupDescription: string | null;
         parentId: string;
     }>;
     remove(id: string): Promise<{
@@ -60,6 +80,10 @@ export declare class ChildrenController {
         lastName: string;
         schoolId: string;
         dateOfBirth: Date;
+        pickupType: import(".prisma/client").$Enums.PickupType;
+        pickupLatitude: number | null;
+        pickupLongitude: number | null;
+        pickupDescription: string | null;
         parentId: string;
     }>;
 }

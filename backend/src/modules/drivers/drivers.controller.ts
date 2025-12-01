@@ -2,9 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { DriversService } from './drivers.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('drivers')
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class DriversController {
   constructor(private readonly driversService: DriversService) {}
 
@@ -29,12 +30,17 @@ export class DriversController {
   @Get(':id/today-trip')
   @Roles('DRIVER')
   async getTodayTrip(@Param('id') userId: string) {
+    console.log('[DriversController] getTodayTrip called with userId:', userId);
     // Find the driver record by user ID
     const driver = await this.driversService.findByUserId(userId);
+    console.log('[DriversController] Found driver:', driver);
     if (!driver) {
+      console.log('[DriversController] No driver found for userId:', userId);
       return null;
     }
-    return this.driversService.getTodayTrip(driver.id);
+    const trip = await this.driversService.getTodayTrip(driver.id);
+    console.log('[DriversController] Found trip:', trip);
+    return trip;
   }
 
   @Patch(':id')

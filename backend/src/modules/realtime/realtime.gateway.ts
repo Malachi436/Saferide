@@ -152,4 +152,55 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   async emitNewNotification(userId: string, notification: any) {
     this.server.to(`user:${userId}`).emit('new_notification', notification);
   }
+
+  // Method to emit attendance status changes
+  async emitAttendanceStatusChange(tripId: string, childId: string, status: string) {
+    // Emit to relevant parents and admins
+    this.server.to(`trip:${tripId}`).emit('attendance_status_change', {
+      tripId,
+      childId,
+      status,
+      timestamp: new Date(),
+    });
+  }
+
+  // Method to emit bus offline event
+  async emitBusOffline(busId: string) {
+    this.server.to(`bus:${busId}`).emit('bus_offline', {
+      busId,
+      timestamp: new Date(),
+      message: 'Bus GPS signal lost',
+    });
+  }
+
+  // Method to emit bus online event (GPS signal restored)
+  async emitBusOnline(busId: string) {
+    this.server.to(`bus:${busId}`).emit('bus_online', {
+      busId,
+      timestamp: new Date(),
+      message: 'Bus GPS signal restored',
+    });
+  }
+
+  @SubscribeMessage('subscribe_trip_tracking')
+  async handleSubscribeTripTracking(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { tripId: string; childIds: string[] },
+  ) {
+    client.join(`trip:${data.tripId}`);
+    // Also join child-specific rooms for individual tracking
+    data.childIds?.forEach(childId => {
+      client.join(`child:${childId}`);
+    });
+    return { success: true, message: 'Subscribed to trip tracking' };
+  }
+
+  @SubscribeMessage('unsubscribe_trip_tracking')
+  async handleUnsubscribeTripTracking(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { tripId: string },
+  ) {
+    client.leave(`trip:${data.tripId}`);
+    return { success: true, message: 'Unsubscribed from trip tracking' };
+  }
 }

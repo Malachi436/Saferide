@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RequestStatus } from '@prisma/client';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
@@ -7,7 +7,7 @@ import { RealtimeGateway } from '../realtime/realtime.gateway';
 export class EarlyPickupRequestsService {
   constructor(
     private prisma: PrismaService,
-    private realtimeGateway?: RealtimeGateway,
+    @Optional() private realtimeGateway?: RealtimeGateway,
   ) {}
 
   // Parent requests early pickup

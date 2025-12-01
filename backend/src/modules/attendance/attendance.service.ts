@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChildAttendance, AttendanceStatus } from '@prisma/client';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
@@ -7,7 +7,7 @@ import { RealtimeGateway } from '../realtime/realtime.gateway';
 export class AttendanceService {
   constructor(
     private prisma: PrismaService,
-    private realtimeGateway?: RealtimeGateway,
+    @Optional() private realtimeGateway?: RealtimeGateway,
   ) {}
 
   async recordAttendance(childId: string, tripId: string, status: AttendanceStatus, recordedBy: string): Promise<ChildAttendance> {

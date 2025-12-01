@@ -18,6 +18,8 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
+import { TripExceptionsModule } from './modules/trip-exceptions/trip-exceptions.module';
+import { EarlyPickupModule } from './modules/early-pickup/early-pickup.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     AnalyticsModule,
     AdminModule,
     RealtimeModule,
+    TripExceptionsModule,
+    EarlyPickupModule,
   ],
   controllers: [],
   providers: [],

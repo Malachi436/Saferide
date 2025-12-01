@@ -108,6 +108,39 @@ let RealtimeGateway = class RealtimeGateway {
     async emitNewNotification(userId, notification) {
         this.server.to(`user:${userId}`).emit('new_notification', notification);
     }
+    async emitAttendanceStatusChange(tripId, childId, status) {
+        this.server.to(`trip:${tripId}`).emit('attendance_status_change', {
+            tripId,
+            childId,
+            status,
+            timestamp: new Date(),
+        });
+    }
+    async emitBusOffline(busId) {
+        this.server.to(`bus:${busId}`).emit('bus_offline', {
+            busId,
+            timestamp: new Date(),
+            message: 'Bus GPS signal lost',
+        });
+    }
+    async emitBusOnline(busId) {
+        this.server.to(`bus:${busId}`).emit('bus_online', {
+            busId,
+            timestamp: new Date(),
+            message: 'Bus GPS signal restored',
+        });
+    }
+    async handleSubscribeTripTracking(client, data) {
+        client.join(`trip:${data.tripId}`);
+        data.childIds?.forEach(childId => {
+            client.join(`child:${childId}`);
+        });
+        return { success: true, message: 'Subscribed to trip tracking' };
+    }
+    async handleUnsubscribeTripTracking(client, data) {
+        client.leave(`trip:${data.tripId}`);
+        return { success: true, message: 'Unsubscribed from trip tracking' };
+    }
 };
 exports.RealtimeGateway = RealtimeGateway;
 __decorate([
@@ -130,6 +163,22 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", Promise)
 ], RealtimeGateway.prototype, "handleLeaveBusRoom", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('subscribe_trip_tracking'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], RealtimeGateway.prototype, "handleSubscribeTripTracking", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('unsubscribe_trip_tracking'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], RealtimeGateway.prototype, "handleUnsubscribeTripTracking", null);
 exports.RealtimeGateway = RealtimeGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {

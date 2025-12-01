@@ -50,6 +50,112 @@ let ChildrenService = class ChildrenService {
             where: { id },
         });
     }
+    async getTrackingData(childId, tripId) {
+        const child = await this.prisma.child.findUnique({
+            where: { id: childId },
+            include: {
+                school: {
+                    select: {
+                        id: true,
+                        name: true,
+                        latitude: true,
+                        longitude: true,
+                        address: true,
+                    },
+                },
+            },
+        });
+        if (!child) {
+            throw new Error('Child not found');
+        }
+        let currentTrip = null;
+        if (tripId) {
+            currentTrip = await this.prisma.trip.findUnique({
+                where: { id: tripId },
+                include: {
+                    bus: {
+                        select: {
+                            id: true,
+                            plateNumber: true,
+                        },
+                    },
+                    route: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            });
+        }
+        else {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            currentTrip = await this.prisma.trip.findFirst({
+                where: {
+                    attendances: {
+                        some: { childId },
+                    },
+                    startTime: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                },
+                include: {
+                    bus: {
+                        select: {
+                            id: true,
+                            plateNumber: true,
+                        },
+                    },
+                    route: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            });
+        }
+        let attendanceStatus = 'PENDING';
+        if (currentTrip) {
+            const attendance = await this.prisma.childAttendance.findUnique({
+                where: { childId_tripId: { childId, tripId: currentTrip.id } },
+            });
+            if (attendance) {
+                attendanceStatus = attendance.status;
+            }
+        }
+        return {
+            child: {
+                id: child.id,
+                name: `${child.firstName} ${child.lastName}`,
+                colorCode: child.colorCode,
+            },
+            home: {
+                latitude: child.homeLatitude,
+                longitude: child.homeLongitude,
+                address: child.homeAddress,
+            },
+            school: {
+                id: child.school.id,
+                name: child.school.name,
+                latitude: child.school.latitude,
+                longitude: child.school.longitude,
+                address: child.school.address,
+            },
+            currentTrip: currentTrip ? {
+                id: currentTrip.id,
+                status: currentTrip.status,
+                busId: currentTrip.bus.id,
+                busPlateNumber: currentTrip.bus.plateNumber,
+                routeName: currentTrip.route.name,
+            } : null,
+            attendanceStatus,
+        };
+    }
 };
 exports.ChildrenService = ChildrenService;
 exports.ChildrenService = ChildrenService = __decorate([

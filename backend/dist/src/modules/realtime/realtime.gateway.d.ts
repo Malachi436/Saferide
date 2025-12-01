@@ -25,4 +25,20 @@ export declare class RealtimeGateway implements OnGatewayConnection, OnGatewayDi
     }>;
     emitLocationUpdate(busId: string, locationData: any): Promise<void>;
     emitNewNotification(userId: string, notification: any): Promise<void>;
+    emitAttendanceStatusChange(tripId: string, childId: string, status: string): Promise<void>;
+    emitBusOffline(busId: string): Promise<void>;
+    emitBusOnline(busId: string): Promise<void>;
+    handleSubscribeTripTracking(client: Socket, data: {
+        tripId: string;
+        childIds: string[];
+    }): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    handleUnsubscribeTripTracking(client: Socket, data: {
+        tripId: string;
+    }): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }

@@ -22,6 +22,9 @@ async function main() {
   const school = await prisma.school.create({
     data: {
       name: 'Greenfield Academy',
+      latitude: 5.6037,  // School main entrance - Osu area, Accra
+      longitude: -0.187,
+      address: 'Osu, Accra, Ghana',
       companyId: company.id,
     },
   });
@@ -125,7 +128,7 @@ async function main() {
 
   console.log(`Created parent user: ${parentUser.email}`);
 
-  // Create children for the parent
+  // Create children for the parent with home locations in Accra
   const child1 = await prisma.child.create({
     data: {
       firstName: 'Akosua',
@@ -133,6 +136,10 @@ async function main() {
       dateOfBirth: new Date('2010-05-15'),
       parentId: parentUser.id,
       schoolId: school.id,
+      homeLatitude: 5.5820,  // Parent's home - Cantonments, Accra
+      homeLongitude: -0.1850,
+      homeAddress: 'Cantonments, Accra',
+      colorCode: '#3B82F6',  // Blue
     },
   });
 
@@ -143,30 +150,46 @@ async function main() {
       dateOfBirth: new Date('2012-08-20'),
       parentId: parentUser.id,
       schoolId: school.id,
+      homeLatitude: 5.5820,  // Same home
+      homeLongitude: -0.1850,
+      homeAddress: 'Cantonments, Accra',
+      colorCode: '#EF4444',  // Red
     },
   });
 
   console.log(`Created children: ${child1.firstName}, ${child2.firstName}`);
 
-  // Create a trip
+  // Create a trip for today
+  const today = new Date();
+  today.setHours(7, 30, 0, 0);  // 7:30 AM pickup
+  
   const trip = await prisma.trip.create({
     data: {
       busId: bus.id,
       routeId: route.id,
       driverId: driver.id,
       status: 'SCHEDULED',
-      startTime: new Date(Date.now() + 3600000), // 1 hour from now
+      startTime: today,
     },
   });
 
   console.log(`Created trip: ${trip.id}`);
 
-  // Create attendance records
+  // Create attendance records - both children PENDING (not picked up yet)
   await prisma.childAttendance.create({
     data: {
       childId: child1.id,
       tripId: trip.id,
-      status: 'PICKED_UP',
+      status: 'PENDING',
+      recordedBy: driverUser.id,
+    },
+  });
+
+  await prisma.childAttendance.create({
+    data: {
+      childId: child2.id,
+      tripId: trip.id,
+      status: 'PENDING',
       recordedBy: driverUser.id,
     },
   });

@@ -60,6 +60,8 @@ const payments_module_1 = require("./modules/payments/payments.module");
 const analytics_module_1 = require("./modules/analytics/analytics.module");
 const admin_module_1 = require("./modules/admin/admin.module");
 const realtime_module_1 = require("./modules/realtime/realtime.module");
+const trip_exceptions_module_1 = require("./modules/trip-exceptions/trip-exceptions.module");
+const early_pickup_module_1 = require("./modules/early-pickup/early-pickup.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -92,6 +94,8 @@ exports.AppModule = AppModule = __decorate([
             analytics_module_1.AnalyticsModule,
             admin_module_1.AdminModule,
             realtime_module_1.RealtimeModule,
+            trip_exceptions_module_1.TripExceptionsModule,
+            early_pickup_module_1.EarlyPickupModule,
         ],
         controllers: [],
         providers: [],

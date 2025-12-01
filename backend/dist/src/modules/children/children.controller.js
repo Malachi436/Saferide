@@ -40,6 +40,9 @@ let ChildrenController = class ChildrenController {
     remove(id) {
         return this.childrenService.remove(id);
     }
+    async getTrackingData(childId) {
+        return this.childrenService.getTrackingData(childId);
+    }
 };
 exports.ChildrenController = ChildrenController;
 __decorate([
@@ -90,6 +93,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ChildrenController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)(':childId/tracking'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    __param(0, (0, common_1.Param)('childId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ChildrenController.prototype, "getTrackingData", null);
 exports.ChildrenController = ChildrenController = __decorate([
     (0, common_1.Controller)('children'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

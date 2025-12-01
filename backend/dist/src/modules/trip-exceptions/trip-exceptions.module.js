@@ -1,0 +1,25 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TripExceptionsModule = void 0;
+const common_1 = require("@nestjs/common");
+const trip_exceptions_service_1 = require("./trip-exceptions.service");
+const trip_exceptions_controller_1 = require("./trip-exceptions.controller");
+const prisma_module_1 = require("../../prisma/prisma.module");
+let TripExceptionsModule = class TripExceptionsModule {
+};
+exports.TripExceptionsModule = TripExceptionsModule;
+exports.TripExceptionsModule = TripExceptionsModule = __decorate([
+    (0, common_1.Module)({
+        imports: [prisma_module_1.PrismaModule],
+        controllers: [trip_exceptions_controller_1.TripExceptionsController],
+        providers: [trip_exceptions_service_1.TripExceptionsService],
+        exports: [trip_exceptions_service_1.TripExceptionsService],
+    })
+], TripExceptionsModule);
+//# sourceMappingURL=trip-exceptions.module.js.map

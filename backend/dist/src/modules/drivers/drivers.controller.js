@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const drivers_service_1 = require("./drivers.service");
 const roles_decorator_1 = require("../roles/roles.decorator");
 const roles_guard_1 = require("../roles/roles.guard");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let DriversController = class DriversController {
     constructor(driversService) {
         this.driversService = driversService;
@@ -30,8 +31,17 @@ let DriversController = class DriversController {
     findOne(id) {
         return this.driversService.findOne(id);
     }
-    async getTodayTrip(driverId) {
-        return this.driversService.getTodayTrip(driverId);
+    async getTodayTrip(userId) {
+        console.log('[DriversController] getTodayTrip called with userId:', userId);
+        const driver = await this.driversService.findByUserId(userId);
+        console.log('[DriversController] Found driver:', driver);
+        if (!driver) {
+            console.log('[DriversController] No driver found for userId:', userId);
+            return null;
+        }
+        const trip = await this.driversService.getTodayTrip(driver.id);
+        console.log('[DriversController] Found trip:', trip);
+        return trip;
     }
     update(id, updateDriverDto) {
         return this.driversService.update(id, updateDriverDto);
@@ -91,7 +101,7 @@ __decorate([
 ], DriversController.prototype, "remove", null);
 exports.DriversController = DriversController = __decorate([
     (0, common_1.Controller)('drivers'),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [drivers_service_1.DriversService])
 ], DriversController);
 //# sourceMappingURL=drivers.controller.js.map

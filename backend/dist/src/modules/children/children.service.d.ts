@@ -10,4 +10,5 @@ export declare class ChildrenService {
     update(id: string, data: any): Promise<Child>;
     findAll(): Promise<Child[]>;
     remove(id: string): Promise<Child>;
+    getTrackingData(childId: string, tripId?: string): Promise<any>;
 }

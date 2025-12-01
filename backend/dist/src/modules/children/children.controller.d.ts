@@ -14,6 +14,10 @@ export declare class ChildrenController {
         pickupLatitude: number | null;
         pickupLongitude: number | null;
         pickupDescription: string | null;
+        homeLatitude: number | null;
+        homeLongitude: number | null;
+        homeAddress: string | null;
+        colorCode: string;
         parentId: string;
     }>;
     findAll(): Promise<{
@@ -28,6 +32,10 @@ export declare class ChildrenController {
         pickupLatitude: number | null;
         pickupLongitude: number | null;
         pickupDescription: string | null;
+        homeLatitude: number | null;
+        homeLongitude: number | null;
+        homeAddress: string | null;
+        colorCode: string;
         parentId: string;
     }[]>;
     findOne(id: string): Promise<{
@@ -42,6 +50,10 @@ export declare class ChildrenController {
         pickupLatitude: number | null;
         pickupLongitude: number | null;
         pickupDescription: string | null;
+        homeLatitude: number | null;
+        homeLongitude: number | null;
+        homeAddress: string | null;
+        colorCode: string;
         parentId: string;
     }>;
     findByParent(parentId: string): Promise<{
@@ -56,6 +68,10 @@ export declare class ChildrenController {
         pickupLatitude: number | null;
         pickupLongitude: number | null;
         pickupDescription: string | null;
+        homeLatitude: number | null;
+        homeLongitude: number | null;
+        homeAddress: string | null;
+        colorCode: string;
         parentId: string;
     }[]>;
     update(id: string, updateChildDto: any): Promise<{
@@ -70,6 +86,10 @@ export declare class ChildrenController {
         pickupLatitude: number | null;
         pickupLongitude: number | null;
         pickupDescription: string | null;
+        homeLatitude: number | null;
+        homeLongitude: number | null;
+        homeAddress: string | null;
+        colorCode: string;
         parentId: string;
     }>;
     remove(id: string): Promise<{
@@ -84,6 +104,11 @@ export declare class ChildrenController {
         pickupLatitude: number | null;
         pickupLongitude: number | null;
         pickupDescription: string | null;
+        homeLatitude: number | null;
+        homeLongitude: number | null;
+        homeAddress: string | null;
+        colorCode: string;
         parentId: string;
     }>;
+    getTrackingData(childId: string): Promise<any>;
 }

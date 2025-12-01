@@ -3,19 +3,20 @@
  * Main dashboard for drivers showing today's trip
  */
 
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { useAuthStore } from "../../state/authStore";
-import { mockTrip, mockChildren } from "../../mock/data";
+import { apiClient } from "../../utils/api";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
@@ -24,13 +25,37 @@ export default function DriverHomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const [trip, setTrip] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // TODO: Replace with actual API call to fetch today's trip
-  const trip = mockTrip;
-  const childrenOnTrip = mockChildren.filter((c) => trip.childIds.includes(c.id));
+  const fetchTodayTrip = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (!user?.id) return;
+
+      // Note: We need to get the driver ID from the driver record
+      const response = await apiClient.get<any>(`/drivers/${user.id}/today-trip`);
+      setTrip(response);
+    } catch (err: any) {
+      console.log('[DriverHomeScreen] Error fetching trip:', err);
+      setError(err.message || 'Failed to load trip');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTodayTrip();
+    }, [user?.id])
+  );
+
+  const childrenOnTrip = trip?.attendances || [];
 
   const handleStartTrip = () => {
-    // Navigate to child list for attendance
     navigation.navigate("ChildList");
   };
 
@@ -65,47 +90,79 @@ export default function DriverHomeScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Trip Info Card */}
-          <LiquidGlassCard className="mb-4" intensity="heavy">
-            <View style={styles.tripCard}>
-              <View style={styles.tripHeader}>
-                <Ionicons name="calendar" size={24} color={colors.primary.blue} />
-                <Text style={styles.tripTitle}>Today&apos;s Trip</Text>
-              </View>
-              <Text style={styles.routeName}>Osu - Greenfield Route</Text>
-              <View style={styles.tripStats}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{childrenOnTrip.length}</Text>
-                  <Text style={styles.statLabel}>Children</Text>
-                </View>
-                <View style={styles.statDivider} />
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>
-                    {trip.status === "in_progress" ? "In Progress" : "Pending"}
-                  </Text>
-                  <Text style={styles.statLabel}>Status</Text>
-                </View>
-              </View>
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.primary.blue} />
+              <Text style={styles.loadingText}>Loading trip information...</Text>
             </View>
-          </LiquidGlassCard>
-
-          {/* Start Trip Button */}
-          {trip.status === "pending" && (
-            <LargeCTAButton
-              title="Start Trip"
-              onPress={handleStartTrip}
-              variant="success"
-              style={styles.startButton}
-            />
           )}
 
-          {trip.status === "in_progress" && (
-            <LargeCTAButton
-              title="View Attendance"
-              onPress={handleStartTrip}
-              variant="primary"
-              style={styles.startButton}
-            />
+          {error && !loading && (
+            <LiquidGlassCard className="mb-4" intensity="medium">
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={24} color={colors.status.dangerRed} />
+                <Text style={styles.errorText}>{error}</Text>
+                <Pressable onPress={fetchTodayTrip} style={styles.retryButton}>
+                  <Text style={styles.retryText}>Retry</Text>
+                </Pressable>
+              </View>
+            </LiquidGlassCard>
+          )}
+
+          {!loading && !error && trip && (
+            <>
+              {/* Trip Info Card */}
+              <LiquidGlassCard className="mb-4" intensity="heavy">
+                <View style={styles.tripCard}>
+                  <View style={styles.tripHeader}>
+                    <Ionicons name="calendar" size={24} color={colors.primary.blue} />
+                    <Text style={styles.tripTitle}>Today&apos;s Trip</Text>
+                  </View>
+                  <Text style={styles.routeName}>{trip.route?.name || 'No Route Assigned'}</Text>
+                  <View style={styles.tripStats}>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statValue}>{childrenOnTrip.length}</Text>
+                      <Text style={styles.statLabel}>Children</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={styles.statValue}>
+                        {trip.status === "IN_PROGRESS" ? "In Progress" : trip.status === "SCHEDULED" ? "Scheduled" : trip.status}
+                      </Text>
+                      <Text style={styles.statLabel}>Status</Text>
+                    </View>
+                  </View>
+                </View>
+              </LiquidGlassCard>
+
+              {/* Start Trip Button */}
+              {trip.status === "SCHEDULED" && (
+                <LargeCTAButton
+                  title="Start Trip"
+                  onPress={handleStartTrip}
+                  variant="success"
+                  style={styles.startButton}
+                />
+              )}
+
+              {trip.status === "IN_PROGRESS" && (
+                <LargeCTAButton
+                  title="View Attendance"
+                  onPress={handleStartTrip}
+                  variant="primary"
+                  style={styles.startButton}
+                />
+              )}
+            </>
+          )}
+
+          {!loading && !error && !trip && (
+            <LiquidGlassCard className="mb-4" intensity="medium">
+              <View style={styles.emptyContainer}>
+                <Ionicons name="information-circle" size={48} color={colors.neutral.textSecondary} />
+                <Text style={styles.emptyText}>No trips scheduled for today</Text>
+              </View>
+            </LiquidGlassCard>
           )}
 
           {/* Quick Actions */}
@@ -283,5 +340,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: colors.neutral.textPrimary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: colors.neutral.textSecondary,
+  },
+  errorContainer: {
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: colors.status.dangerRed,
+    textAlign: "center",
+  },
+  retryButton: {
+    marginTop: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    backgroundColor: colors.primary.blue,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: colors.neutral.pureWhite,
+    fontWeight: "600",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    padding: 40,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: colors.neutral.textSecondary,
+    textAlign: "center",
   },
 });

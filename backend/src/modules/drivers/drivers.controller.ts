@@ -26,6 +26,12 @@ export class DriversController {
     return this.driversService.findOne(id);
   }
 
+  @Get(':id/today-trip')
+  @Roles('DRIVER')
+  async getTodayTrip(@Param('id') driverId: string) {
+    return this.driversService.getTodayTrip(driverId);
+  }
+
   @Patch(':id')
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
   update(@Param('id') id: string, @Body() updateDriverDto: any) {

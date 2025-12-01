@@ -56,7 +56,7 @@ export class DriversService {
     return this.prisma.trip.findFirst({
       where: {
         driverId,
-        createdAt: {
+        startTime: {
           gte: today,
           lt: tomorrow,
         },

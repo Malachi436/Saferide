@@ -30,6 +30,9 @@ let DriversController = class DriversController {
     findOne(id) {
         return this.driversService.findOne(id);
     }
+    async getTodayTrip(driverId) {
+        return this.driversService.getTodayTrip(driverId);
+    }
     update(id, updateDriverDto) {
         return this.driversService.update(id, updateDriverDto);
     }
@@ -61,6 +64,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], DriversController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)(':id/today-trip'),
+    (0, roles_decorator_1.Roles)('DRIVER'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DriversController.prototype, "getTodayTrip", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),

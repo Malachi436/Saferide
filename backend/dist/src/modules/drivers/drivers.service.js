@@ -50,6 +50,38 @@ let DriversService = class DriversService {
             where: { id },
         });
     }
+    async getTodayTrip(driverId) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return this.prisma.trip.findFirst({
+            where: {
+                driverId,
+                createdAt: {
+                    gte: today,
+                    lt: tomorrow,
+                },
+            },
+            include: {
+                bus: {
+                    include: {
+                        locations: true,
+                    },
+                },
+                route: {
+                    include: {
+                        stops: true,
+                    },
+                },
+                attendances: {
+                    include: {
+                        child: true,
+                    },
+                },
+            },
+        });
+    }
 };
 exports.DriversService = DriversService;
 exports.DriversService = DriversService = __decorate([

@@ -3,38 +3,67 @@
  * Shows attendance summary with total children, picked up, and dropped off
  */
 
-import React, { useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import React, { useState, useEffect, useMemo } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
-import { useAttendanceStore } from "../../state/attendanceStore";
-import { mockTrip, mockChildren } from "../../mock/data";
+import { useAuthStore } from "../../state/authStore";
+import { apiClient } from "../../utils/api";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
 
 export default function AttendanceScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const getTripStats = useAttendanceStore((s) => s.getTripStats);
-  const getAttendanceForTrip = useAttendanceStore((s) => s.getAttendanceForTrip);
+  const user = useAuthStore((s) => s.user);
+  const [trip, setTrip] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // TODO: Replace with actual API call to fetch today's trip
-  const trip = mockTrip;
-  const childrenOnTrip = mockChildren.filter((c) => trip.childIds.includes(c.id));
+  const fetchTodayTrip = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (!user?.id) return;
 
-  // Get attendance stats
+      const response = await apiClient.get<any>(`/drivers/${user.id}/today-trip`);
+      setTrip(response);
+    } catch (err: any) {
+      console.log('[AttendanceScreen] Error fetching trip:', err);
+      setError(err.message || 'Failed to load trip');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTodayTrip();
+    }, [user?.id])
+  );
+
+  const childrenOnTrip = trip?.attendances || [];
+
+  // Calculate stats from attendance records
   const stats = useMemo(() => {
-    return getTripStats(trip.id, trip.childIds);
-  }, [trip.id, trip.childIds, getTripStats]);
+    const total = childrenOnTrip.length;
+    const pickedUp = childrenOnTrip.filter(
+      (a: any) => a.status === 'PICKED_UP'
+    ).length;
+    const droppedOff = childrenOnTrip.filter(
+      (a: any) => a.status === 'DROPPED'
+    ).length;
 
-  const attendance = getAttendanceForTrip(trip.id);
+    return { total, pickedUp, droppedOff };
+  }, [childrenOnTrip]);
 
   // Calculate percentages for visual progress
   const pickedUpPercentage = stats.total > 0 ? (stats.pickedUp / stats.total) * 100 : 0;
@@ -65,206 +94,211 @@ export default function AttendanceScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Trip Info */}
-          <Animated.View entering={FadeInDown.delay(100).springify()}>
-            <Text style={styles.routeName}>Osu - Greenfield Route</Text>
-            <Text style={styles.dateText}>
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </Text>
-          </Animated.View>
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.primary.blue} />
+              <Text style={styles.loadingText}>Loading attendance...</Text>
+            </View>
+          )}
 
-          {/* Summary Stats Cards */}
-          <View style={styles.statsContainer}>
-            {/* Total Children Card */}
-            <Animated.View
-              entering={FadeInDown.delay(200).springify()}
-              style={styles.statCard}
-            >
-              <Pressable onPress={() => navigation.navigate("ChildList", { filter: "all" })}>
-                <LiquidGlassCard intensity="heavy">
-                  <View style={styles.statContent}>
-                    <View
-                      style={[
-                        styles.iconCircle,
-                        { backgroundColor: colors.primary.blue + "20" },
-                      ]}
-                    >
-                      <Ionicons name="people" size={32} color={colors.primary.blue} />
-                    </View>
-                    <Text style={styles.statValue}>{stats.total}</Text>
-                    <Text style={styles.statLabel}>Total Children</Text>
-                  </View>
-                </LiquidGlassCard>
+          {error && !loading && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="information-circle" size={48} color={colors.accent.sunsetOrange} />
+              <Text style={styles.errorText}>{error}</Text>
+              <Pressable style={styles.retryButton} onPress={fetchTodayTrip}>
+                <Text style={styles.retryButtonText}>Retry</Text>
               </Pressable>
-            </Animated.View>
+            </View>
+          )}
 
-            {/* Picked Up Card */}
-            <Animated.View
-              entering={FadeInDown.delay(300).springify()}
-              style={styles.statCard}
-            >
-              <Pressable onPress={() => navigation.navigate("ChildList", { filter: "picked_up" })}>
-                <LiquidGlassCard intensity="heavy">
-                  <View style={styles.statContent}>
-                    <View
-                      style={[
-                        styles.iconCircle,
-                        { backgroundColor: colors.accent.sunsetOrange + "20" },
-                      ]}
-                    >
-                      <Ionicons
-                        name="arrow-up-circle"
-                        size={32}
-                        color={colors.accent.sunsetOrange}
-                      />
-                    </View>
-                    <Text style={styles.statValue}>{stats.pickedUp}</Text>
-                    <Text style={styles.statLabel}>Picked Up</Text>
-                    <View style={styles.progressBar}>
-                      <View
-                        style={[
-                          styles.progressFill,
-                          {
-                            width: `${pickedUpPercentage}%`,
-                            backgroundColor: colors.accent.sunsetOrange,
-                          },
-                        ]}
-                      />
-                    </View>
-                  </View>
-                </LiquidGlassCard>
-              </Pressable>
-            </Animated.View>
+          {!loading && !error && !trip && (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="calendar-outline" size={48} color={colors.neutral.textSecondary} />
+              <Text style={styles.emptyText}>No trip scheduled for today</Text>
+            </View>
+          )}
 
-            {/* Dropped Off Card */}
-            <Animated.View
-              entering={FadeInDown.delay(400).springify()}
-              style={styles.statCard}
-            >
-              <Pressable onPress={() => navigation.navigate("ChildList", { filter: "dropped_off" })}>
-                <LiquidGlassCard intensity="heavy">
-                  <View style={styles.statContent}>
-                    <View
-                      style={[
-                        styles.iconCircle,
-                        { backgroundColor: colors.accent.successGreen + "20" },
-                      ]}
-                    >
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={32}
-                        color={colors.accent.successGreen}
-                      />
-                    </View>
-                    <Text style={styles.statValue}>{stats.droppedOff}</Text>
-                    <Text style={styles.statLabel}>Dropped Off</Text>
-                    <View style={styles.progressBar}>
-                      <View
-                        style={[
-                          styles.progressFill,
-                          {
-                            width: `${droppedOffPercentage}%`,
-                            backgroundColor: colors.accent.successGreen,
-                          },
-                        ]}
-                      />
-                    </View>
-                  </View>
-                </LiquidGlassCard>
-              </Pressable>
-            </Animated.View>
-          </View>
+          {!loading && !error && trip && (
+            <>
+              {/* Trip Info */}
+              <Animated.View entering={FadeInDown.delay(100).springify()}>
+                <Text style={styles.routeName}>{trip.route?.name || 'Route'}</Text>
+                <Text style={styles.dateText}>
+                  {new Date().toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </Text>
+              </Animated.View>
 
-          {/* Children List */}
-          <Animated.View entering={FadeInDown.delay(500).springify()}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Children List</Text>
-              {childrenOnTrip.map((child, index) => {
-                const attendanceRecord = attendance.find((a) => a.childId === child.id);
-                const status = attendanceRecord?.status || child.status;
-
-                let statusColor: string = colors.neutral.textSecondary;
-                let statusIcon: keyof typeof Ionicons.glyphMap = "time-outline";
-                let statusText = "Waiting";
-
-                if (status === "picked_up" || status === "on_way") {
-                  statusColor = colors.accent.sunsetOrange;
-                  statusIcon = "arrow-up-circle";
-                  statusText = "Picked Up";
-                } else if (status === "dropped_off") {
-                  statusColor = colors.accent.successGreen;
-                  statusIcon = "checkmark-circle";
-                  statusText = "Dropped Off";
-                }
-
-                return (
-                  <Animated.View
-                    key={child.id}
-                    entering={FadeInDown.delay(600 + index * 50).springify()}
-                    style={styles.childItem}
-                  >
-                    <LiquidGlassCard intensity="medium">
-                      <Pressable
-                        onPress={() => navigation.navigate("ChildList")}
-                        style={styles.childContent}
-                      >
-                        <View style={styles.childInfo}>
-                          <View style={styles.avatarCircle}>
-                            <Text style={styles.avatarText}>
-                              {child.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </Text>
-                          </View>
-                          <View style={styles.childDetails}>
-                            <Text style={styles.childName}>{child.name}</Text>
-                            <Text style={styles.childAddress}>
-                              {child.pickupLocation.address}
-                            </Text>
-                          </View>
+              {/* Summary Stats Cards */}
+              <View style={styles.statsContainer}>
+                {/* Total Children Card */}
+                <Animated.View
+                  entering={FadeInDown.delay(200).springify()}
+                  style={styles.statCard}
+                >
+                  <Pressable onPress={() => navigation.navigate("ChildList", { filter: "all" })}>
+                    <LiquidGlassCard intensity="heavy">
+                      <View style={styles.statContent}>
+                        <View
+                          style={[
+                            styles.iconCircle,
+                            { backgroundColor: colors.primary.blue + "20" },
+                          ]}
+                        >
+                          <Ionicons name="people" size={32} color={colors.primary.blue} />
                         </View>
-                        <View style={styles.statusBadge}>
-                          <Ionicons name={statusIcon} size={16} color={statusColor} />
-                          <Text style={[styles.statusText, { color: statusColor }]}>
-                            {statusText}
-                          </Text>
-                        </View>
-                      </Pressable>
+                        <Text style={styles.statValue}>{stats.total}</Text>
+                        <Text style={styles.statLabel}>Total Children</Text>
+                      </View>
                     </LiquidGlassCard>
-                  </Animated.View>
-                );
-              })}
-            </View>
-          </Animated.View>
+                  </Pressable>
+                </Animated.View>
 
-          {/* Quick Actions */}
-          <Animated.View entering={FadeInDown.delay(700).springify()}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Quick Actions</Text>
-              <Pressable
-                onPress={() => navigation.navigate("ChildList")}
-                style={styles.actionButton}
-              >
-                <LiquidGlassCard intensity="medium">
-                  <View style={styles.actionContent}>
-                    <Ionicons name="list" size={24} color={colors.primary.blue} />
-                    <Text style={styles.actionText}>Manage Attendance</Text>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={20}
-                      color={colors.neutral.textSecondary}
-                    />
-                  </View>
-                </LiquidGlassCard>
-              </Pressable>
-            </View>
-          </Animated.View>
+                {/* Picked Up Card */}
+                <Animated.View
+                  entering={FadeInDown.delay(300).springify()}
+                  style={styles.statCard}
+                >
+                  <Pressable onPress={() => navigation.navigate("ChildList", { filter: "picked_up" })}>
+                    <LiquidGlassCard intensity="heavy">
+                      <View style={styles.statContent}>
+                        <View
+                          style={[
+                            styles.iconCircle,
+                            { backgroundColor: colors.accent.sunsetOrange + "20" },
+                          ]}
+                        >
+                          <Ionicons
+                            name="arrow-up-circle"
+                            size={32}
+                            color={colors.accent.sunsetOrange}
+                          />
+                        </View>
+                        <Text style={styles.statValue}>{stats.pickedUp}</Text>
+                        <Text style={styles.statLabel}>Picked Up</Text>
+                        <View style={styles.progressBar}>
+                          <View
+                            style={[
+                              styles.progressFill,
+                              {
+                                width: `${pickedUpPercentage}%`,
+                                backgroundColor: colors.accent.sunsetOrange,
+                              },
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    </LiquidGlassCard>
+                  </Pressable>
+                </Animated.View>
+
+                {/* Dropped Off Card */}
+                <Animated.View
+                  entering={FadeInDown.delay(400).springify()}
+                  style={styles.statCard}
+                >
+                  <Pressable onPress={() => navigation.navigate("ChildList", { filter: "dropped_off" })}>
+                    <LiquidGlassCard intensity="heavy">
+                      <View style={styles.statContent}>
+                        <View
+                          style={[
+                            styles.iconCircle,
+                            { backgroundColor: colors.accent.successGreen + "20" },
+                          ]}
+                        >
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={32}
+                            color={colors.accent.successGreen}
+                          />
+                        </View>
+                        <Text style={styles.statValue}>{stats.droppedOff}</Text>
+                        <Text style={styles.statLabel}>Dropped Off</Text>
+                        <View style={styles.progressBar}>
+                          <View
+                            style={[
+                              styles.progressFill,
+                              {
+                                width: `${droppedOffPercentage}%`,
+                                backgroundColor: colors.accent.successGreen,
+                              },
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    </LiquidGlassCard>
+                  </Pressable>
+                </Animated.View>
+              </View>
+
+              {/* Children List */}
+              <Animated.View entering={FadeInDown.delay(500).springify()}>
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Children List</Text>
+                  {childrenOnTrip.map((attendance: any, index: number) => {
+                    const child = attendance.child;
+                    const status = attendance.status;
+
+                    let statusColor: string = colors.neutral.textSecondary;
+                    let statusIcon: keyof typeof Ionicons.glyphMap = "time-outline";
+                    let statusText = "Waiting";
+
+                    if (status === "PICKED_UP" || status === "ON_WAY") {
+                      statusColor = colors.accent.sunsetOrange;
+                      statusIcon = "arrow-up-circle";
+                      statusText = "Picked Up";
+                    } else if (status === "DROPPED") {
+                      statusColor = colors.accent.successGreen;
+                      statusIcon = "checkmark-circle";
+                      statusText = "Dropped Off";
+                    }
+
+                    return (
+                      <Animated.View
+                        key={child.id}
+                        entering={FadeInDown.delay(600 + index * 50).springify()}
+                        style={styles.childItem}
+                      >
+                        <LiquidGlassCard intensity="medium">
+                          <Pressable
+                            onPress={() => navigation.navigate("ChildList")}
+                            style={styles.childContent}
+                          >
+                            <View style={styles.childInfo}>
+                              <View style={styles.avatarCircle}>
+                                <Text style={styles.avatarText}>
+                                  {child.name
+                                    .split(" ")
+                                    .map((n: string) => n[0])
+                                    .join("")}
+                                </Text>
+                              </View>
+                              <View style={styles.childDetails}>
+                                <Text style={styles.childName}>{child.name}</Text>
+                                <Text style={styles.childAddress}>
+                                  {child.pickupLocation?.address || 'N/A'}
+                                </Text>
+                              </View>
+                            </View>
+                            <View style={styles.statusBadge}>
+                              <Ionicons name={statusIcon} size={16} color={statusColor} />
+                              <Text style={[styles.statusText, { color: statusColor }]}>
+                                {statusText}
+                              </Text>
+                            </View>
+                          </Pressable>
+                        </LiquidGlassCard>
+                      </Animated.View>
+                    );
+                  })}
+                </View>
+              </Animated.View>
+            </>
+          )}
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -447,5 +481,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: colors.neutral.textPrimary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: colors.neutral.textSecondary,
+  },
+  errorContainer: {
+    alignItems: "center",
+    padding: 20,
+    marginVertical: 20,
+  },
+  errorText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: colors.accent.sunsetOrange,
+    textAlign: "center",
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    backgroundColor: colors.primary.blue,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: colors.neutral.pureWhite,
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    padding: 20,
+    marginVertical: 40,
+  },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: colors.neutral.textSecondary,
+    textAlign: "center",
   },
 });

@@ -10,4 +10,5 @@ export declare class DriversService {
     update(id: string, data: any): Promise<Driver>;
     findAll(): Promise<Driver[]>;
     remove(id: string): Promise<Driver>;
+    getTodayTrip(driverId: string): Promise<any>;
 }

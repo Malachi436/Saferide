@@ -27,9 +27,10 @@ enum TripStatus {
 }
 
 enum AttendanceStatus {
-  PICKED_UP
-  DROPPED
-  MISSED
+  PENDING   // Waiting to be picked up
+  PICKED_UP // Child is on the bus
+  DROPPED   // Child has been dropped off
+  MISSED    // Child was not picked up
 }
 
 enum NotificationType {
@@ -42,6 +43,13 @@ enum PickupType {
   HOME
   ROADSIDE
   SCHOOL
+}
+
+enum RequestStatus {
+  PENDING   // Awaiting driver/admin approval
+  APPROVED  // Approved, child can be picked up early
+  REJECTED  // Request rejected
+  CANCELLED // Parent cancelled the request
 }
 
 // Models
@@ -60,6 +68,9 @@ model Company {
 model School {
   id        String   @id @default(uuid())
   name      String
+  latitude  Float    // School main entrance latitude
+  longitude Float    // School main entrance longitude
+  address   String?  // School physical address
   companyId String
   company   Company  @relation(fields: [companyId], references: [id])
   users     User[]
@@ -89,6 +100,8 @@ model User {
   paymentIntents PaymentIntent[]
   notifications  Notification[]
   auditLogs      AuditLog[]
+  earlyPickupRequests EarlyPickupRequest[]
+  approvedEarlyPickups EarlyPickupRequest[] @relation("EarlyPickupApprover")
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -120,7 +133,13 @@ model Child {
   pickupLatitude    Float?
   pickupLongitude   Float?
   pickupDescription String? // For roadside: description of landmark/location
+  homeLatitude      Float?  // Parent's home/pickup location latitude
+  homeLongitude     Float?  // Parent's home/pickup location longitude
+  homeAddress       String? // Parent's home address description
+  colorCode         String  @default("#3B82F6") // Color for map marker (hex code)
   attendance        ChildAttendance[]
+  tripExceptions    TripException[]
+  earlyPickupRequests EarlyPickupRequest[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -182,6 +201,8 @@ model Trip {
   endTime     DateTime?
   histories   TripHistory[]
   attendances ChildAttendance[]
+  exceptions  TripException[]
+  earlyPickupRequests EarlyPickupRequest[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
@@ -276,4 +297,49 @@ model AuditLog {
 
   @@index([userId])
   @@index([timestamp])
+}
+
+model TripException {
+  id                String   @id @default(uuid())
+  childId           String
+  child             Child    @relation(fields: [childId], references: [id])
+  tripId            String?
+  trip              Trip?    @relation(fields: [tripId], references: [id])
+  date              DateTime // Date of exception
+  type              String   // "SKIP_TRIP" or "EARLY_PICKUP"
+  reason            String? // Why the child won't use the bus
+  status            String  // "ACTIVE", "COMPLETED", "CANCELLED"
+  requestedAt       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([childId, tripId])
+  @@index([childId])
+  @@index([tripId])
+  @@index([date])
+}
+
+model EarlyPickupRequest {
+  id                String        @id @default(uuid())
+  childId           String
+  child             Child         @relation(fields: [childId], references: [id])
+  tripId            String
+  trip              Trip          @relation(fields: [tripId], references: [id])
+  requestedBy       String // userId of parent
+  requestedByUser   User          @relation(fields: [requestedBy], references: [id])
+  status            RequestStatus @default(PENDING)
+  reason            String? // Why early pickup is needed
+  requestedTime     DateTime @default(now())
+  approvedBy        String? // userId of driver/admin who approved
+  approvedByUser    User?         @relation("EarlyPickupApprover", fields: [approvedBy], references: [id])
+  approvedAt        DateTime?
+  rejectionReason   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([childId, tripId])
+  @@index([childId])
+  @@index([tripId])
+  @@index([status])
+  @@index([requestedTime])
 }

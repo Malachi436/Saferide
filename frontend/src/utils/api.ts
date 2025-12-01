@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// API configuration - Use hardcoded IP for physical device testing
+// API configuration
 const API_BASE_URL = 'http://192.168.100.15:3000';
 
 interface ApiRequestConfig {
@@ -23,7 +23,7 @@ class ApiClient {
     console.log('[API Client] Initializing with base URL:', API_BASE_URL);
     this.axiosInstance = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 5000,  // Reduced from 10000
+      timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },

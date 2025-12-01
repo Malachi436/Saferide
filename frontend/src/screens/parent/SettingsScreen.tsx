@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -13,6 +13,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { useAuthStore } from "../../stores/authStore";
+import { apiClient } from "../../utils/api";
 import { ParentTabParamList } from "../../navigation/ParentNavigator";
 import { CompositeScreenProps } from "@react-navigation/native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
@@ -31,6 +32,32 @@ export default function SettingsScreen({ navigation }: Props) {
   const [pickupAlerts, setPickupAlerts] = useState(true);
   const [dropoffAlerts, setDropoffAlerts] = useState(true);
   const [delayAlerts, setDelayAlerts] = useState(true);
+
+  const handleClearCache = async () => {
+    Alert.alert(
+      "Clear Cache & Re-login",
+      "This will clear all stored tokens and session data. You'll need to log in again.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear & Re-login",
+          style: "destructive",
+          onPress: async () => {
+            console.log('[SettingsScreen] Clearing cache and tokens');
+            try {
+              await apiClient.clearTokens();
+              await logout();
+              console.log('[SettingsScreen] Cache cleared, redirecting to login');
+              Alert.alert("Success", "Cache cleared. Please log in again.");
+            } catch (error) {
+              console.log('[SettingsScreen] Clear cache error:', error);
+              Alert.alert("Error", "Failed to clear cache. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleLogout = async () => {
     console.log('[SettingsScreen] Logout pressed');
@@ -355,8 +382,20 @@ export default function SettingsScreen({ navigation }: Props) {
           </LiquidGlassCard>
         </Animated.View>
 
-        {/* Logout Button */}
+        {/* Clear Cache Button */}
         <Animated.View entering={FadeInDown.delay(450).springify()}>
+          <Pressable onPress={handleClearCache} style={styles.clearCacheButton}>
+            <LiquidGlassCard intensity="medium">
+              <View style={styles.clearCacheContent}>
+                <Ionicons name="refresh" size={20} color={colors.status.warningYellow} />
+                <Text style={styles.clearCacheText}>Clear Cache & Re-login</Text>
+              </View>
+            </LiquidGlassCard>
+          </Pressable>
+        </Animated.View>
+
+        {/* Logout Button */}
+        <Animated.View entering={FadeInDown.delay(500).springify()}>
           <Pressable onPress={handleLogout} style={styles.logoutButton}>
             <LiquidGlassCard intensity="medium">
               <View style={styles.logoutContent}>
@@ -494,6 +533,21 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 14,
     color: colors.neutral.textSecondary,
+  },
+  clearCacheButton: {
+    marginBottom: 12,
+  },
+  clearCacheContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    gap: 12,
+  },
+  clearCacheText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.status.warningYellow,
   },
   logoutButton: {
     marginBottom: 20,

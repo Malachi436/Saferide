@@ -173,9 +173,9 @@ export default function RouteMapScreen() {
           showsVerticalScrollIndicator={false}
         >
           {route.stops.map((stop: any, index: number) => {
-            const childrenAtStop = childrenOnTrip.filter((c: any) =>
-              stop.childIds.includes(c.id)
-            );
+            // For now, show total children on trip
+            // In future, this could be enhanced to show children per stop
+            const childrenAtStop = childrenOnTrip.length > 0 ? childrenOnTrip : [];
 
             return (
               <Animated.View
@@ -215,7 +215,7 @@ export default function RouteMapScreen() {
                           size={14}
                           color={colors.neutral.textSecondary}
                         />
-                        <Text style={styles.stopTime}>{stop.estimatedArrivalTime}</Text>
+                        <Text style={styles.stopTime}>Stop {index + 1}</Text>
                         <View style={styles.childrenCount}>
                           <Ionicons
                             name="people"

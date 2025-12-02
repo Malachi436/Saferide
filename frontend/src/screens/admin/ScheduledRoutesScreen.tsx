@@ -10,7 +10,7 @@ import {
   Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { apiClient } from '../../services/api';
+import { apiClient } from '../../utils/api';
 import { colors } from '../../theme/colors';
 
 interface ScheduledRoute {
@@ -43,7 +43,7 @@ export default function ScheduledRoutesScreen() {
     try {
       setIsLoading(true);
       const response = await apiClient.get('/scheduled-routes');
-      setRoutes(response);
+      setRoutes(Array.isArray(response) ? response : []);
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Failed to load scheduled routes');
     } finally {
@@ -111,19 +111,19 @@ export default function ScheduledRoutesScreen() {
 
       <View style={styles.routeDetails}>
         <View style={styles.detailRow}>
-          <Ionicons name="time-outline" size={16} color={colors.text.secondary} />
+          <Ionicons name="time-outline" size={16} color={colors.neutral.textSecondary} />
           <Text style={styles.detailText}>Departs: {item.scheduledTime}</Text>
         </View>
 
         <View style={styles.detailRow}>
-          <Ionicons name="person-outline" size={16} color={colors.text.secondary} />
+          <Ionicons name="person-outline" size={16} color={colors.neutral.textSecondary} />
           <Text style={styles.detailText}>
             {item.driver.user.firstName} {item.driver.user.lastName}
           </Text>
         </View>
 
         <View style={styles.detailRow}>
-          <Ionicons name="bus-outline" size={16} color={colors.text.secondary} />
+          <Ionicons name="bus-outline" size={16} color={colors.neutral.textSecondary} />
           <Text style={styles.detailText}>{item.bus.plateNumber}</Text>
         </View>
 
@@ -136,7 +136,7 @@ export default function ScheduledRoutesScreen() {
           <Ionicons
             name={item.autoAssignChildren ? 'checkmark-circle' : 'close-circle'}
             size={16}
-            color={item.autoAssignChildren ? colors.status.success : colors.text.secondary}
+            color={item.autoAssignChildren ? colors.accent.successGreen : colors.neutral.textSecondary}
           />
           <Text style={styles.detailText}>
             {item.autoAssignChildren ? 'Auto-assign enabled' : 'Manual assignment'}
@@ -162,13 +162,13 @@ export default function ScheduledRoutesScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Scheduled Routes</Text>
         <Pressable style={styles.generateButton} onPress={handleGenerateToday}>
-          <Ionicons name="add-circle" size={20} color={colors.white} />
+          <Ionicons name="add-circle" size={20} color={colors.neutral.pureWhite} />
           <Text style={styles.generateButtonText}>Generate Today</Text>
         </Pressable>
       </View>
 
       <View style={styles.infoCard}>
-        <Ionicons name="information-circle" size={20} color={colors.primary} />
+        <Ionicons name="information-circle" size={20} color={colors.primary.blue} />
         <Text style={styles.infoText}>
           Trips are auto-generated daily at midnight. Use "Generate Today" to manually create trips.
         </Text>
@@ -180,7 +180,7 @@ export default function ScheduledRoutesScreen() {
         </View>
       ) : routes.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="calendar-outline" size={48} color={colors.text.secondary} />
+          <Ionicons name="calendar-outline" size={48} color={colors.neutral.textSecondary} />
           <Text style={styles.emptyText}>No scheduled routes yet</Text>
           <Text style={styles.emptySubtext}>Create recurring routes to automate trip generation</Text>
         </View>
@@ -199,40 +199,40 @@ export default function ScheduledRoutesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.neutral.creamWhite,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: colors.white,
+    backgroundColor: colors.neutral.pureWhite,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: '#E5E5E5',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text.primary,
+    color: colors.neutral.textPrimary,
   },
   generateButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primary.blue,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     gap: 4,
   },
   generateButtonText: {
-    color: colors.white,
+    color: colors.neutral.pureWhite,
     fontSize: 14,
     fontWeight: '600',
   },
   infoCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background.secondary,
+    backgroundColor: '#F5F5F5',
     margin: 16,
     padding: 12,
     borderRadius: 8,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 12,
-    color: colors.text.secondary,
+    color: colors.neutral.textSecondary,
   },
   loadingContainer: {
     flex: 1,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: colors.text.secondary,
+    color: colors.neutral.textSecondary,
   },
   emptyContainer: {
     flex: 1,
@@ -261,12 +261,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.neutral.textPrimary,
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.neutral.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -274,12 +274,12 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   routeCard: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.neutral.pureWhite,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#E5E5E5',
   },
   routeHeader: {
     flexDirection: 'row',
@@ -293,11 +293,11 @@ const styles = StyleSheet.create({
   routeName: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.neutral.textPrimary,
   },
   schoolName: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.neutral.textSecondary,
     marginTop: 2,
   },
   statusBadge: {
@@ -306,15 +306,15 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   statusActive: {
-    backgroundColor: colors.status.successLight,
+    backgroundColor: '#E8F5E9',
   },
   statusInactive: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: '#F5F5F5',
   },
   statusText: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.neutral.textPrimary,
   },
   routeDetails: {
     gap: 8,
@@ -326,14 +326,14 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.neutral.textSecondary,
   },
   daysContainer: {
     marginTop: 4,
   },
   daysLabel: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: colors.neutral.textSecondary,
     marginBottom: 4,
   },
   daysRow: {
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   dayBadge: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primary.blue,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
@@ -350,16 +350,16 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 10,
     fontWeight: '600',
-    color: colors.white,
+    color: colors.neutral.pureWhite,
   },
   routeActions: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: '#E5E5E5',
   },
   actionButton: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: '#F5F5F5',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
@@ -368,6 +368,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.neutral.textPrimary,
   },
 });

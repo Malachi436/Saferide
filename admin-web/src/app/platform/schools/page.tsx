@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { apiClient } from '@/lib/api-client';
 
-interface School {
-  id: string;
+interface School {  id: string;
   name: string;
   address?: string;
   latitude?: number;
@@ -17,13 +16,26 @@ interface School {
   createdAt: string;
 }
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 export default function SchoolsPage() {
   const [schools, setSchools] = useState<School[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    address: '',
+    companyId: '',
+  });
 
   useEffect(() => {
     fetchSchools();
+    fetchCompanies();
   }, []);
 
   const fetchSchools = async () => {
@@ -38,6 +50,30 @@ export default function SchoolsPage() {
     }
   };
 
+  const fetchCompanies = async () => {
+    try {
+      const data = await apiClient.get<Company[]>('/admin/companies');
+      setCompanies(data || []);
+    } catch (err: any) {
+      console.error('Failed to load companies:', err);
+    }
+  };
+
+  const handleCreateSchool = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await apiClient.post(`/admin/school/${formData.companyId}`, {
+        name: formData.name,
+        address: formData.address,
+      });
+      setFormData({ name: '', address: '', companyId: '' });
+      setShowForm(false);
+      await fetchSchools();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to create school');
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-6xl">
@@ -46,12 +82,78 @@ export default function SchoolsPage() {
             <h1 className="text-3xl font-bold text-slate-900">Schools</h1>
             <p className="text-slate-500 mt-1">View all schools across all companies</p>
           </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded-lg transition"
+          >
+            {showForm ? '✕ Cancel' : '+ Add School'}
+          </button>
         </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
             {error}
           </div>
+        )}
+
+        {showForm && (
+          <form onSubmit={handleCreateSchool} className="bg-white rounded-lg border border-slate-200 p-6 mb-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Add New School</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">School Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  placeholder="e.g., Greenfield Academy"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Company *</label>
+                <select
+                  required
+                  value={formData.companyId}
+                  onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="">Select Company</option>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Address</label>
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  placeholder="School address"
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="submit"
+                className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded-lg transition"
+              >
+                Create School
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold px-6 py-2 rounded-lg transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         )}
 
         {loading ? (

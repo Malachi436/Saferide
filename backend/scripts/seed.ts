@@ -6,6 +6,21 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Starting database seed...');
 
+  // Clear existing data (in reverse order of dependencies)
+  console.log('Clearing existing data...');
+  await prisma.childAttendance.deleteMany();
+  await prisma.trip.deleteMany();
+  await prisma.scheduledRoute.deleteMany();
+  await prisma.child.deleteMany();
+  await prisma.stop.deleteMany();
+  await prisma.route.deleteMany();
+  await prisma.bus.deleteMany();
+  await prisma.driver.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.school.deleteMany();
+  await prisma.company.deleteMany();
+  console.log('Database cleared!');
+
   // Create a company
   const company = await prisma.company.create({
     data: {
@@ -30,6 +45,21 @@ async function main() {
 
   // Create a company admin
   const passwordHash = await bcrypt.hash('Test@1234', 10);
+  
+  // Create a platform admin (global access)
+  const platformAdmin = await prisma.user.create({
+    data: {
+      email: 'platform@saferide.com',
+      passwordHash,
+      firstName: 'Platform',
+      lastName: 'Admin',
+      phone: '+233 20 000 0000',
+      role: 'PLATFORM_ADMIN',
+    },
+  });
+
+  console.log(`Created platform admin: ${platformAdmin.email}`);
+  
   const adminUser = await prisma.user.create({
     data: {
       email: 'admin@saferide.com',

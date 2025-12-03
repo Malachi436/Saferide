@@ -3,40 +3,42 @@
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import { use } from 'react';
 
 export default function CompanyOverviewPage({
   params,
 }: {
-  params: { companyId: string };
+  params: Promise<{ companyId: string }>;
 }) {
   const { user } = useAuth();
+  const { companyId } = use(params);
 
   const quickActions = [
     {
       title: 'Scheduled Routes',
       description: 'Manage recurring routes and generate daily trips',
-      href: `/company/${params.companyId}/scheduled-routes`,
+      href: `/company/${companyId}/scheduled-routes`,
       color: 'bg-blue-50 border-blue-200',
       icon: '📅',
     },
     {
       title: 'Auto Generate Routes',
       description: 'Create routes based on child density and bus capacity',
-      href: `/company/${params.companyId}/auto-generate-routes`,
+      href: `/company/${companyId}/auto-generate-routes`,
       color: 'bg-teal-50 border-teal-200',
       icon: '🗺️',
     },
     {
       title: 'Buses',
       description: 'Manage buses and capacity',
-      href: `/company/${params.companyId}/buses`,
+      href: `/company/${companyId}/buses`,
       color: 'bg-green-50 border-green-200',
       icon: '🚌',
     },
     {
       title: 'Drivers',
       description: 'Manage drivers and assignments',
-      href: `/company/${params.companyId}/drivers`,
+      href: `/company/${companyId}/drivers`,
       color: 'bg-orange-50 border-orange-200',
       icon: '👤',
     },

@@ -11,8 +11,8 @@ export function Sidebar() {
 
   if (!user) return null;
 
-  const isPlatformAdmin = user.role === 'platform_admin';
-  const isCompanyAdmin = user.role === 'company_admin';
+  const isPlatformAdmin = user.role?.toUpperCase() === 'PLATFORM_ADMIN';
+  const isCompanyAdmin = user.role?.toUpperCase() === 'COMPANY_ADMIN';
 
   const navItems = isPlatformAdmin
     ? [

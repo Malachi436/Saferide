@@ -18,6 +18,7 @@ export declare class AuthController {
             lastName: string;
             phone: string;
             role: import(".prisma/client").$Enums.Role;
+            companyId: string;
         };
     }>;
     signup(signupDto: SignupDto): Promise<any>;

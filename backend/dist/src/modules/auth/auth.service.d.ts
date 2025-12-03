@@ -21,6 +21,7 @@ export declare class AuthService {
             lastName: string;
             phone: string;
             role: import(".prisma/client").$Enums.Role;
+            companyId: string;
         };
     }>;
     hashPassword(password: string): Promise<string>;

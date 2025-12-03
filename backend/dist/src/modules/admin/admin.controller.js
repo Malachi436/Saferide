@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const admin_service_1 = require("./admin.service");
 const roles_decorator_1 = require("../roles/roles.decorator");
 const roles_guard_1 = require("../roles/roles.guard");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let AdminController = class AdminController {
     constructor(adminService) {
         this.adminService = adminService;
@@ -90,7 +91,7 @@ __decorate([
 ], AdminController.prototype, "getCompanyById", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [admin_service_1.AdminService])
 ], AdminController);
 //# sourceMappingURL=admin.controller.js.map

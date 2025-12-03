@@ -10,8 +10,8 @@ async function main() {
   console.log('Clearing existing data...');
   await prisma.childAttendance.deleteMany();
   await prisma.trip.deleteMany();
-  // Note: Can't delete ScheduledRoute directly - will be deleted with cascade
   await prisma.child.deleteMany();
+  await prisma.scheduledRoute.deleteMany();
   await prisma.stop.deleteMany();
   await prisma.route.deleteMany();
   await prisma.bus.deleteMany();

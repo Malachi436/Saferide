@@ -42,6 +42,7 @@ async function main() {
     await prisma.childAttendance.deleteMany();
     await prisma.trip.deleteMany();
     await prisma.child.deleteMany();
+    await prisma.scheduledRoute.deleteMany();
     await prisma.stop.deleteMany();
     await prisma.route.deleteMany();
     await prisma.bus.deleteMany();

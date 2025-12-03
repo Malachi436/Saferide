@@ -14,11 +14,19 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
+    console.log('[AuthService] Validating user:', email);
     const user = await this.usersService.findByEmail(email);
-    if (user && await this.comparePasswords(password, user.passwordHash)) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { passwordHash, ...result } = user;
-      return result;
+    console.log('[AuthService] User found:', user ? 'yes' : 'no');
+    if (user) {
+      console.log('[AuthService] User role:', user.role);
+      console.log('[AuthService] Comparing passwords...');
+      const passwordMatch = await this.comparePasswords(password, user.passwordHash);
+      console.log('[AuthService] Password match:', passwordMatch);
+      if (passwordMatch) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { passwordHash, ...result } = user;
+        return result;
+      }
     }
     return null;
   }

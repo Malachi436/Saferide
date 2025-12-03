@@ -14,10 +14,22 @@ export default function Home() {
         router.push('/login');
       } else if (user) {
         const role = user.role?.toUpperCase();
+        console.log('[Home Page] User:', user);
+        console.log('[Home Page] Role:', role);
+        
         if (role === 'PLATFORM_ADMIN') {
+          console.log('[Home Page] Redirecting to /platform/overview');
           router.push('/platform/overview');
         } else if (role === 'COMPANY_ADMIN') {
-          router.push(`/company/${user.companyId}/overview`);
+          if (user.companyId) {
+            console.log('[Home Page] Redirecting to /company/' + user.companyId + '/overview');
+            router.push(`/company/${user.companyId}/overview`);
+          } else {
+            console.error('[Home Page] Company admin has no companyId!');
+            alert('Error: Company admin account is missing company ID');
+          }
+        } else {
+          console.error('[Home Page] Unknown role:', role);
         }
       }
     }

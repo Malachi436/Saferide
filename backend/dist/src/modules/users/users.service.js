@@ -47,7 +47,21 @@ let UsersService = class UsersService {
         });
     }
     async findAll() {
-        return this.prisma.user.findMany();
+        const users = await this.prisma.user.findMany({
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                phone: true,
+                role: true,
+                companyId: true,
+                schoolId: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+        return users;
     }
     async remove(id) {
         return this.prisma.user.delete({

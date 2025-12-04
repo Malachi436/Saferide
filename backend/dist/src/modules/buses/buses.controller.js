@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const buses_service_1 = require("./buses.service");
 const roles_decorator_1 = require("../roles/roles.decorator");
 const roles_guard_1 = require("../roles/roles.guard");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let BusesController = class BusesController {
     constructor(busesService) {
         this.busesService = busesService;
@@ -26,6 +27,9 @@ let BusesController = class BusesController {
     }
     findAll() {
         return this.busesService.findAll();
+    }
+    findByCompany(companyId) {
+        return this.busesService.findByCompanyId(companyId);
     }
     findOne(id) {
         return this.busesService.findOne(id);
@@ -54,6 +58,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BusesController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('company/:companyId'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BusesController.prototype, "findByCompany", null);
+__decorate([
     (0, common_1.Get)(':id'),
     (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('id')),
@@ -80,7 +92,7 @@ __decorate([
 ], BusesController.prototype, "remove", null);
 exports.BusesController = BusesController = __decorate([
     (0, common_1.Controller)('buses'),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [buses_service_1.BusesService])
 ], BusesController);
 //# sourceMappingURL=buses.controller.js.map

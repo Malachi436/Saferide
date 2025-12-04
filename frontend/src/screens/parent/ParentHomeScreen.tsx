@@ -22,7 +22,6 @@ import { DriverInfoBanner } from "../../components/shared/DriverInfoBanner";
 import { ETAChip } from "../../components/shared/ETAChip";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
-import { mockDriver, mockBuses, mockNotifications } from "../../mock/data";
 import { ParentStackParamList, ParentTabParamList } from "../../navigation/ParentNavigator";
 import { Child } from "../../types";
 
@@ -82,10 +81,10 @@ export default function ParentHomeScreen() {
     }
   };
 
-  const driver = mockDriver;
-  const bus = mockBuses[0];
-  const unreadCount = mockNotifications.filter((n) => !n.read).length;
-  const estimatedArrival = 12;
+  const driver = todayTrip?.bus?.driver?.user || null;
+  const bus = todayTrip?.bus || null;
+  const unreadCount = 0; // TODO: Fetch from notifications API
+  const estimatedArrival = todayTrip?.estimatedArrival || null; // Will be null if no trip
 
   const handleLogout = async () => {
     await logout();
@@ -137,8 +136,14 @@ export default function ParentHomeScreen() {
                   <Text style={styles.statusTitle}>Pickup Status</Text>
                 </View>
                 <View style={styles.statusContent}>
-                  <Text style={styles.statusText}>Bus is on the way</Text>
-                  <ETAChip minutes={estimatedArrival} variant="default" />
+                  {todayTrip ? (
+                    <>
+                      <Text style={styles.statusText}>Bus is on the way</Text>
+                      {estimatedArrival && <ETAChip minutes={estimatedArrival} variant="default" />}
+                    </>
+                  ) : (
+                    <Text style={styles.statusText}>No trip scheduled for today</Text>
+                  )}
                 </View>
               </View>
             </LiquidGlassCard>
@@ -147,7 +152,13 @@ export default function ParentHomeScreen() {
           <Animated.View entering={FadeInDown.delay(200).duration(500)}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Your Driver</Text>
-              <DriverInfoBanner driver={driver} busPlateNumber={bus.plateNumber} />
+              {driver && bus ? (
+                <DriverInfoBanner driver={driver} busPlateNumber={bus.plateNumber} />
+              ) : (
+                <LiquidGlassCard>
+                  <Text style={styles.emptyText}>No trip scheduled for today</Text>
+                </LiquidGlassCard>
+              )}
             </View>
           </Animated.View>
 

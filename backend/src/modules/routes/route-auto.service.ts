@@ -123,9 +123,28 @@ export class RouteAutoService {
         },
       });
 
+      // Fetch full child details for this route
+      const routeChildren = await this.prisma.child.findMany({
+        where: {
+          id: { in: cluster.children.map((c) => c.childId) },
+        },
+        include: {
+          parent: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+            },
+          },
+        },
+      });
+
       createdRoutes.push({
         route,
         childrenCount: cluster.children.length,
+        children: routeChildren,
         childrenIds: cluster.children.map((c) => c.childId),
       });
 

@@ -84,6 +84,8 @@ export default function ParentSignUpScreen({ navigation }: Props) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = "Password must have uppercase, lowercase, and number";
     }
 
     if (!formData.confirmPassword) {
@@ -214,7 +216,7 @@ export default function ParentSignUpScreen({ navigation }: Props) {
                     icon: "call",
                     keyboardType: "phone-pad",
                   })}
-                  {renderInput("password", "Password", "Create a password", {
+                  {renderInput("password", "Password", "e.g., Password123", {
                     icon: "lock-closed",
                     secureTextEntry: true,
                   })}

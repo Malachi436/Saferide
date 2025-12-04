@@ -84,11 +84,12 @@ export const useAuthStore = create<AuthState>()(
       register: async (data: SignUpData) => {
         set({ isLoading: true, error: null });
         try {
+          const nameParts = (data.name || '').split(' ');
           const response = await apiClient.post<any>('/auth/signup', {
             email: data.email,
             password: data.password,
-            firstName: data.name.split(' ')[0],
-            lastName: data.name.split(' ')[1] || '',
+            firstName: nameParts[0] || 'User',
+            lastName: nameParts[1] || '',
             phone: data.phone,
           });
 

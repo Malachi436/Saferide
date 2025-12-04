@@ -3,11 +3,12 @@ import { ChildrenService } from './children.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Controller('children')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ChildrenController {
-  constructor(private readonly childrenService: ChildrenService) {}
+  constructor(private readonly childrenService: ChildrenService, private prisma: PrismaService) {}
 
   @Post()
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
@@ -43,5 +44,19 @@ export class ChildrenController {
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
   remove(@Param('id') id: string) {
     return this.childrenService.remove(id);
+  }
+
+  @Get('public/schools')
+  @Roles('PARENT', 'PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getSchools() {
+    return this.prisma.school.findMany({
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        latitude: true,
+        longitude: true,
+      },
+    });
   }
 }

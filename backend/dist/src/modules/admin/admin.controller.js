@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const admin_service_1 = require("./admin.service");
 const roles_decorator_1 = require("../roles/roles.decorator");
 const roles_guard_1 = require("../roles/roles.guard");
@@ -37,8 +38,29 @@ let AdminController = class AdminController {
     async getAllCompanies() {
         return this.adminService.getAllCompanies();
     }
+    async getAllSchools() {
+        return this.adminService.getAllSchools();
+    }
+    async getCompanySchools(companyId) {
+        return this.adminService.getCompanySchools(companyId);
+    }
+    async getCompanyChildren(companyId) {
+        return this.adminService.getCompanyChildren(companyId);
+    }
+    async getChildrenPayments(companyId) {
+        return this.adminService.getChildrenPaymentStatus(companyId);
+    }
+    async getCompanyDrivers(companyId) {
+        return this.adminService.getCompanyDrivers(companyId);
+    }
+    async uploadDriverPhoto(driverId, file) {
+        return this.adminService.saveDriverPhoto(driverId, file);
+    }
     async getCompanyById(companyId) {
         return this.adminService.getCompanyById(companyId);
+    }
+    async deleteCompany(companyId) {
+        return this.adminService.deleteCompany(companyId);
     }
 };
 exports.AdminController = AdminController;
@@ -82,6 +104,55 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getAllCompanies", null);
 __decorate([
+    (0, common_1.Get)('schools'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getAllSchools", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/schools'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCompanySchools", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/children'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCompanyChildren", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/children/payments'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getChildrenPayments", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/drivers'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCompanyDrivers", null);
+__decorate([
+    (0, common_1.Post)('driver/:driverId/photo'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('photo')),
+    __param(0, (0, common_1.Param)('driverId')),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "uploadDriverPhoto", null);
+__decorate([
     (0, common_1.Get)('companies/:companyId'),
     (0, roles_decorator_1.Roles)('PLATFORM_ADMIN'),
     __param(0, (0, common_1.Param)('companyId')),
@@ -89,6 +160,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getCompanyById", null);
+__decorate([
+    (0, common_1.Delete)('company/:companyId'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "deleteCompany", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

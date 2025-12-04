@@ -25,8 +25,11 @@ export function Sidebar() {
         { label: 'Overview', href: `/company/${companyId}/overview` },
         { label: 'Scheduled Routes', href: `/company/${companyId}/scheduled-routes` },
         { label: 'Auto Generate Routes', href: `/company/${companyId}/auto-generate-routes` },
+        { label: 'Children', href: `/company/${companyId}/children` },
         { label: 'Buses', href: `/company/${companyId}/buses` },
         { label: 'Drivers', href: `/company/${companyId}/drivers` },
+        { label: 'Onboard Driver', href: `/company/${companyId}/onboard-driver` },
+        { label: 'Bus Fares', href: `/company/${companyId}/bus-fares` },
         { label: 'Analytics', href: `/company/${companyId}/analytics` },
       ];
 

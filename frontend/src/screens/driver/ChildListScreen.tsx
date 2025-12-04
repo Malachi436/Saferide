@@ -250,6 +250,8 @@ export default function ChildListScreen() {
               filteredChildren.map((attendance: any, index: number) => {
                 const child = attendance.child;
                 const status = attendance.status;
+                const childName = child ? `${child.firstName || ''} ${child.lastName || ''}`.trim() : 'Unknown';
+                const initials = childName.split(' ').map((n: string) => n[0] || '').join('').toUpperCase() || 'U';
 
                 let statusColor: string = colors.neutral.textSecondary;
                 let statusIcon: keyof typeof Ionicons.glyphMap = "time-outline";
@@ -277,14 +279,11 @@ export default function ChildListScreen() {
                         <View style={styles.childInfo}>
                           <View style={styles.avatarCircle}>
                             <Text style={styles.avatarText}>
-                              {child.name
-                                .split(" ")
-                                .map((n: string) => n[0])
-                                .join("")}
+                              {initials}
                             </Text>
                           </View>
                           <View style={styles.childDetails}>
-                            <Text style={styles.childName}>{child.name}</Text>
+                            <Text style={styles.childName}>{childName}</Text>
                             <View style={styles.locationRow}>
                               <Ionicons
                                 name="location"

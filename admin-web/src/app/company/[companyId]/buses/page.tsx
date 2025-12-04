@@ -26,12 +26,12 @@ export default function BusesPage({
 
   useEffect(() => {
     fetchBuses();
-  }, []);
+  }, [companyId]);
 
   const fetchBuses = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get<Bus[]>('/buses');
+      const data = await apiClient.get<Bus[]>(`/buses/company/${companyId}`);
       setBuses(data || []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load buses');
@@ -46,6 +46,7 @@ export default function BusesPage({
       await apiClient.post('/buses', {
         plateNumber: formData.plateNumber,
         capacity: parseInt(formData.capacity.toString()),
+        driverId: null,
       });
       setFormData({ plateNumber: '', capacity: 50 });
       setShowForm(false);

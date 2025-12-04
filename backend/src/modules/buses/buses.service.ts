@@ -54,6 +54,30 @@ export class BusesService {
     });
   }
 
+  async findByCompanyId(companyId: string): Promise<any[]> {
+    return this.prisma.bus.findMany({
+      where: {
+        driver: {
+          user: { companyId },
+        },
+      },
+      include: {
+        driver: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async remove(id: string): Promise<Bus> {
     return this.prisma.bus.delete({
       where: { id },

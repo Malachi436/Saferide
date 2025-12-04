@@ -2,9 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { BusesService } from './buses.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('buses')
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class BusesController {
   constructor(private readonly busesService: BusesService) {}
 
@@ -18,6 +19,12 @@ export class BusesController {
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
   findAll() {
     return this.busesService.findAll();
+  }
+
+  @Get('company/:companyId')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  findByCompany(@Param('companyId') companyId: string) {
+    return this.busesService.findByCompanyId(companyId);
   }
 
   @Get(':id')

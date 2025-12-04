@@ -9,5 +9,6 @@ export declare class BusesService {
     create(data: any): Promise<Bus>;
     update(id: string, data: any): Promise<Bus>;
     findAll(): Promise<any[]>;
+    findByCompanyId(companyId: string): Promise<any[]>;
     remove(id: string): Promise<Bus>;
 }

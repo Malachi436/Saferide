@@ -18,7 +18,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { PaymentsModule } from './modules/payments/payments.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AdminModule } from './modules/admin/admin.module';
-import { RealtimeModule } from './modules/realtime/realtime.module';
+// import { RealtimeModule } from './modules/realtime/realtime.module';
 import { TripExceptionsModule } from './modules/trip-exceptions/trip-exceptions.module';
 import { EarlyPickupModule } from './modules/early-pickup/early-pickup.module';
 import { ScheduledRoutesModule } from './modules/scheduled-routes/scheduled-routes.module';
@@ -62,7 +62,7 @@ import { ScheduledRoutesModule } from './modules/scheduled-routes/scheduled-rout
     PaymentsModule,
     AnalyticsModule,
     AdminModule,
-    RealtimeModule,
+    // RealtimeModule,
     TripExceptionsModule,
     EarlyPickupModule,
     ScheduledRoutesModule,

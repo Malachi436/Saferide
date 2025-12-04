@@ -1,15 +1,16 @@
 import { ChildrenService } from './children.service';
+import { PrismaService } from '../../prisma/prisma.service';
 export declare class ChildrenController {
     private readonly childrenService;
-    constructor(childrenService: ChildrenService);
+    private prisma;
+    constructor(childrenService: ChildrenService, prisma: PrismaService);
     create(createChildDto: any): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string;
         lastName: string;
-        schoolId: string;
         dateOfBirth: Date;
+        parentId: string;
+        schoolId: string;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
         pickupLongitude: number | null;
@@ -18,16 +19,16 @@ export declare class ChildrenController {
         homeLongitude: number | null;
         homeAddress: string | null;
         colorCode: string;
-        parentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     findAll(): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string;
         lastName: string;
-        schoolId: string;
         dateOfBirth: Date;
+        parentId: string;
+        schoolId: string;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
         pickupLongitude: number | null;
@@ -36,16 +37,16 @@ export declare class ChildrenController {
         homeLongitude: number | null;
         homeAddress: string | null;
         colorCode: string;
-        parentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string;
         lastName: string;
-        schoolId: string;
         dateOfBirth: Date;
+        parentId: string;
+        schoolId: string;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
         pickupLongitude: number | null;
@@ -54,16 +55,16 @@ export declare class ChildrenController {
         homeLongitude: number | null;
         homeAddress: string | null;
         colorCode: string;
-        parentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     findByParent(parentId: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string;
         lastName: string;
-        schoolId: string;
         dateOfBirth: Date;
+        parentId: string;
+        schoolId: string;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
         pickupLongitude: number | null;
@@ -72,16 +73,16 @@ export declare class ChildrenController {
         homeLongitude: number | null;
         homeAddress: string | null;
         colorCode: string;
-        parentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     update(id: string, updateChildDto: any): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string;
         lastName: string;
-        schoolId: string;
         dateOfBirth: Date;
+        parentId: string;
+        schoolId: string;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
         pickupLongitude: number | null;
@@ -90,16 +91,16 @@ export declare class ChildrenController {
         homeLongitude: number | null;
         homeAddress: string | null;
         colorCode: string;
-        parentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string;
         lastName: string;
-        schoolId: string;
         dateOfBirth: Date;
+        parentId: string;
+        schoolId: string;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
         pickupLongitude: number | null;
@@ -108,6 +109,14 @@ export declare class ChildrenController {
         homeLongitude: number | null;
         homeAddress: string | null;
         colorCode: string;
-        parentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
+    getSchools(): Promise<{
+        name: string;
+        id: string;
+        latitude: number;
+        longitude: number;
+        address: string;
+    }[]>;
 }

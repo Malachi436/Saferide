@@ -3,24 +3,57 @@
  * View and manage children
  */
 
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import React, { useState, useCallback } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { ParentStackParamList } from "../../navigation/ParentNavigator";
-import { mockChildren } from "../../mock/data";
 import { useAuthStore } from "../../state/authStore";
+import { apiClient } from "../../utils/api";
+import { Child } from "../../types";
 
 type Props = NativeStackScreenProps<ParentStackParamList, "ManageChildren">;
 
 export default function ManageChildrenScreen({ navigation }: Props) {
   const user = useAuthStore((s) => s.user);
-  const children = mockChildren.filter((c) => c.parentId === user?.id);
+  const [children, setChildren] = useState<Child[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchChildren = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await apiClient.get<Child[]>(`/children/parent/${user.id}`);
+      console.log('[ManageChildren] Fetched children:', response);
+      setChildren(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error('[ManageChildren] Error fetching children:', error);
+      setChildren([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchChildren();
+    setRefreshing(false);
+  }, [user?.id]);
+
+  // Fetch children when screen focuses
+  useFocusEffect(
+    useCallback(() => {
+      fetchChildren();
+    }, [user?.id])
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
@@ -28,6 +61,9 @@ export default function ManageChildrenScreen({ navigation }: Props) {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         {/* Add Child Button */}
         <Animated.View entering={FadeInDown.delay(100).springify()}>
@@ -52,36 +88,52 @@ export default function ManageChildrenScreen({ navigation }: Props) {
         {/* Children List */}
         <Text style={styles.sectionTitle}>Your Children ({children.length})</Text>
 
-        {children.map((child, index) => {
-          const initials = child.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("");
+        {isLoading && children.length === 0 ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary.blue} />
+            <Text style={styles.loadingText}>Loading children...</Text>
+          </View>
+        ) : children.length === 0 ? (
+          <LiquidGlassCard intensity="medium" className="mb-3">
+            <View style={styles.emptyContainer}>
+              <Ionicons name="people-outline" size={48} color={colors.neutral.textSecondary} />
+              <Text style={styles.emptyText}>No children added yet</Text>
+              <Text style={styles.emptySubtext}>Tap "Add New Child" above to get started</Text>
+            </View>
+          </LiquidGlassCard>
+        ) : (
+          children.map((child, index) => {
+            const fullName = `${child.firstName} ${child.lastName}`;
+            const initials = fullName
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("");
 
-          return (
-            <Animated.View
-              key={child.id}
-              entering={FadeInDown.delay(150 + index * 50).springify()}
-            >
-              <LiquidGlassCard intensity="medium" className="mb-3">
-                <View style={styles.childCard}>
-                  <View style={styles.childAvatar}>
-                    <Text style={styles.childAvatarText}>{initials}</Text>
+            return (
+              <Animated.View
+                key={child.id}
+                entering={FadeInDown.delay(150 + index * 50).springify()}
+              >
+                <LiquidGlassCard intensity="medium" className="mb-3">
+                  <View style={styles.childCard}>
+                    <View style={styles.childAvatar}>
+                      <Text style={styles.childAvatarText}>{initials}</Text>
+                    </View>
+                    <View style={styles.childInfo}>
+                      <Text style={styles.childName}>{fullName}</Text>
+                      <Text style={styles.childDetails}>
+                        School: {child.school?.name || 'Not assigned'}
+                      </Text>
+                    </View>
+                    <Pressable style={styles.editButton}>
+                      <Ionicons name="create-outline" size={20} color={colors.primary.blue} />
+                    </Pressable>
                   </View>
-                  <View style={styles.childInfo}>
-                    <Text style={styles.childName}>{child.name}</Text>
-                    <Text style={styles.childDetails}>
-                      Status: {child.status}
-                    </Text>
-                  </View>
-                  <Pressable style={styles.editButton}>
-                    <Ionicons name="create-outline" size={20} color={colors.primary.blue} />
-                  </Pressable>
-                </View>
-              </LiquidGlassCard>
-            </Animated.View>
-          );
-        })}
+                </LiquidGlassCard>
+              </Animated.View>
+            );
+          })
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -171,5 +223,32 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary.blue + "20",
     alignItems: "center",
     justifyContent: "center",
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: colors.neutral.textSecondary,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.neutral.textPrimary,
+  },
+  emptySubtext: {
+    marginTop: 4,
+    fontSize: 14,
+    color: colors.neutral.textSecondary,
+    textAlign: "center",
   },
 });

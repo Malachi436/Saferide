@@ -12,14 +12,37 @@ interface School {
 }
 
 interface GenerationResult {
-  routesCreated: number;
-  totalChildren: number;
-  avgChildrenPerRoute: number;
-  busCapacity: number;
+  message: string;
+  summary: {
+    totalChildren: number;
+    routesCreated: number;
+    avgChildrenPerRoute: number;
+    busCapacityUsed: number;
+  };
   routes: Array<{
-    name: string;
+    route: {
+      id: string;
+      name: string;
+      schoolId: string;
+      stops: Array<{ id: string; name: string; latitude: number; longitude: number; order: number }>;
+    };
     childrenCount: number;
-    stopsCount: number;
+    children: Array<{
+      id: string;
+      firstName: string;
+      lastName: string;
+      pickupType: string;
+      pickupLatitude: number;
+      pickupLongitude: number;
+      pickupDescription: string;
+      parent: {
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        phone: string;
+      };
+    }>;  
   }>;
 }
 
@@ -42,7 +65,7 @@ export default function AutoGenerateRoutesPage({
   const fetchSchools = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get<School[]>('/schools');
+      const data = await apiClient.get<School[]>(`/admin/company/${companyId}/schools`);
       setSchools(data || []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load schools');
@@ -116,19 +139,19 @@ export default function AutoGenerateRoutesPage({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded p-4 border border-teal-100">
                   <p className="text-xs text-slate-600 font-semibold">Routes Created</p>
-                  <p className="text-2xl font-bold text-teal-700 mt-1">{result.routesCreated}</p>
+                  <p className="text-2xl font-bold text-teal-700 mt-1">{result.summary.routesCreated}</p>
                 </div>
                 <div className="bg-white rounded p-4 border border-teal-100">
                   <p className="text-xs text-slate-600 font-semibold">Total Children</p>
-                  <p className="text-2xl font-bold text-teal-700 mt-1">{result.totalChildren}</p>
+                  <p className="text-2xl font-bold text-teal-700 mt-1">{result.summary.totalChildren}</p>
                 </div>
                 <div className="bg-white rounded p-4 border border-teal-100">
                   <p className="text-xs text-slate-600 font-semibold">Avg per Route</p>
-                  <p className="text-2xl font-bold text-teal-700 mt-1">{result.avgChildrenPerRoute.toFixed(1)}</p>
+                  <p className="text-2xl font-bold text-teal-700 mt-1">{result.summary.avgChildrenPerRoute.toFixed(1)}</p>
                 </div>
                 <div className="bg-white rounded p-4 border border-teal-100">
                   <p className="text-xs text-slate-600 font-semibold">Bus Capacity</p>
-                  <p className="text-2xl font-bold text-teal-700 mt-1">{result.busCapacity}</p>
+                  <p className="text-2xl font-bold text-teal-700 mt-1">{result.summary.busCapacityUsed}</p>
                 </div>
               </div>
             </div>
@@ -137,13 +160,47 @@ export default function AutoGenerateRoutesPage({
               <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
                 <h3 className="font-semibold text-slate-900">Generated Routes</h3>
               </div>
-              <div className="space-y-3 p-6">
-                {result.routes.map((route, idx) => (
-                  <div key={idx} className="border border-slate-200 rounded p-4 hover:bg-slate-50 transition">
-                    <h4 className="font-semibold text-slate-900">{route.name}</h4>
-                    <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
-                      <p className="text-slate-600">👶 Children: <span className="font-semibold">{route.childrenCount}</span></p>
-                      <p className="text-slate-600">📍 Stops: <span className="font-semibold">{route.stopsCount}</span></p>
+              <div className="divide-y divide-slate-200">
+                {result.routes.map((routeData, idx) => (
+                  <div key={routeData.route.id} className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="font-semibold text-slate-900 text-lg">{routeData.route.name}</h4>
+                        <p className="text-sm text-slate-600 mt-1">👶 {routeData.childrenCount} children assigned</p>
+                      </div>
+                      <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
+                        {routeData.route.stops.length} stops
+                      </span>
+                    </div>
+
+                    <div className="space-y-3 mt-4">
+                      <div className="text-sm font-semibold text-slate-700 mb-2">Assigned Children:</div>
+                      {routeData.children.map((child) => (
+                        <div key={child.id} className="bg-slate-50 rounded p-3 border border-slate-200">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-semibold text-slate-900">
+                                {child.firstName} {child.lastName}
+                              </p>
+                              <p className="text-xs text-slate-600 mt-1">
+                                👨‍👩‍👧 Parent: {child.parent.firstName} {child.parent.lastName}
+                              </p>
+                              <p className="text-xs text-slate-600">
+                                📧 {child.parent.email}
+                              </p>
+                              <p className="text-xs text-slate-600">
+                                📱 {child.parent.phone || 'N/A'}
+                              </p>
+                            </div>
+                            <div className="text-xs text-slate-600 text-right">
+                              <p className="font-semibold">Pickup: {child.pickupType}</p>
+                              {child.pickupDescription && (
+                                <p className="mt-1">{child.pickupDescription}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}

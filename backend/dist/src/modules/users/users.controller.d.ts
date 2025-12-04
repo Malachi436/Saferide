@@ -6,43 +6,43 @@ export declare class UsersController {
     findOne(id: string): Promise<{
         id: string;
         email: string;
+        phone: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        companyId: string | null;
         passwordHash: string;
         firstName: string;
         lastName: string;
-        phone: string | null;
         role: import(".prisma/client").$Enums.Role;
         refreshToken: string | null;
-        companyId: string | null;
         schoolId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     update(id: string, updateUserDto: any): Promise<{
         id: string;
         email: string;
+        phone: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        companyId: string | null;
         passwordHash: string;
         firstName: string;
         lastName: string;
-        phone: string | null;
         role: import(".prisma/client").$Enums.Role;
         refreshToken: string | null;
-        companyId: string | null;
         schoolId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         id: string;
         email: string;
+        phone: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        companyId: string | null;
         passwordHash: string;
         firstName: string;
         lastName: string;
-        phone: string | null;
         role: import(".prisma/client").$Enums.Role;
         refreshToken: string | null;
-        companyId: string | null;
         schoolId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }

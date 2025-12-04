@@ -7,16 +7,19 @@ import { useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    console.log('[DashboardLayout] Auth state:', { isLoading, isAuthenticated, user });
     if (!isLoading && !isAuthenticated) {
+      console.log('[DashboardLayout] Not authenticated, redirecting to login');
       router.push('/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, user]);
 
   if (isLoading) {
+    console.log('[DashboardLayout] Still loading...');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -28,8 +31,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   }
 
   if (!isAuthenticated) {
+    console.log('[DashboardLayout] Not authenticated');
     return null;
   }
+
+  console.log('[DashboardLayout] Rendering dashboard for user:', user?.email);
 
   return (
     <div className="flex">

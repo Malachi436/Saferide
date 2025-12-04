@@ -3,7 +3,7 @@
  * Add a new child to parent account
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -25,11 +25,21 @@ import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { ParentStackParamList } from "../../navigation/ParentNavigator";
-import { mockSchools } from "../../mock/data";
+import { apiClient } from "../../utils/api";
+import { useAuthStore } from "../../stores/authStore";
 
 type Props = NativeStackScreenProps<ParentStackParamList, "AddChild">;
 
 type PickupType = "home" | "roadside";
+
+interface School {
+  id: string;
+  name: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  companyId?: string;
+}
 
 interface FormData {
   firstName: string;
@@ -45,10 +55,10 @@ interface FormData {
   pickupType: PickupType;
   pickupAddress: string;
   roadsideName: string;
-  dropoffAddress: string;
 }
 
 export default function AddChildScreen({ navigation }: Props) {
+  const user = useAuthStore((s) => s.user);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -63,18 +73,55 @@ export default function AddChildScreen({ navigation }: Props) {
     pickupType: "home",
     pickupAddress: "",
     roadsideName: "",
-    dropoffAddress: "",
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSchoolPicker, setShowSchoolPicker] = useState(false);
 
-  // TODO: Replace with actual API call to fetch all schools in the system
-  const schools = mockSchools;
+  const [schools, setSchools] = useState<School[]>([]);
+  const [loadingSchools, setLoadingSchools] = useState(false);
+
+  useEffect(() => {
+    fetchSchools();
+  }, []);
+
+  const fetchSchools = async () => {
+    try {
+      setLoadingSchools(true);
+      const response = await apiClient.get('/children/public/schools');
+      setSchools(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error('Error fetching schools:', error);
+      setSchools([]);
+    } finally {
+      setLoadingSchools(false);
+    }
+  };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Special handling for date of birth to auto-insert slashes
+    if (field === "dateOfBirth") {
+      // Remove all non-digits
+      const digitsOnly = value.replace(/\D/g, "");
+      
+      // Format as DD/MM/YYYY
+      let formatted = "";
+      if (digitsOnly.length > 0) {
+        formatted = digitsOnly.substring(0, 2);
+        if (digitsOnly.length >= 3) {
+          formatted += "/" + digitsOnly.substring(2, 4);
+        }
+        if (digitsOnly.length >= 5) {
+          formatted += "/" + digitsOnly.substring(4, 8);
+        }
+      }
+      
+      setFormData((prev) => ({ ...prev, [field]: formatted }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
+    
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -92,6 +139,17 @@ export default function AddChildScreen({ navigation }: Props) {
     }
     if (!formData.dateOfBirth.trim()) {
       newErrors.dateOfBirth = "Date of birth is required";
+    } else if (!/^\d{2}\/\d{2}\/\d{4}$/.test(formData.dateOfBirth)) {
+      newErrors.dateOfBirth = "Date must be in DD/MM/YYYY format";
+    } else {
+      // Validate the date is valid
+      const [day, month, year] = formData.dateOfBirth.split("/").map(Number);
+      const date = new Date(year, month - 1, day);
+      if (date.getDate() !== day || date.getMonth() !== month - 1 || date.getFullYear() !== year) {
+        newErrors.dateOfBirth = "Invalid date";
+      } else if (date > new Date()) {
+        newErrors.dateOfBirth = "Date cannot be in the future";
+      }
     }
     if (!formData.grade.trim()) {
       newErrors.grade = "Grade is required";
@@ -117,10 +175,6 @@ export default function AddChildScreen({ navigation }: Props) {
       }
     }
 
-    if (!formData.dropoffAddress.trim()) {
-      newErrors.dropoffAddress = "Dropoff address is required";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -131,11 +185,37 @@ export default function AddChildScreen({ navigation }: Props) {
       return;
     }
 
+    if (!user?.id) {
+      Alert.alert("Error", "User ID not found. Please log in again.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Parse DD/MM/YYYY to ISO date
+      const [day, month, year] = formData.dateOfBirth.split("/").map(Number);
+      const dateOfBirth = new Date(year, month - 1, day);
+      
+      // Create child with parent ID
+      const childData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dateOfBirth: dateOfBirth.toISOString(),
+        parentId: user.id,
+        schoolId: formData.schoolId,
+        pickupType: formData.pickupType.toUpperCase(),
+        pickupLatitude: formData.pickupType === "home" ? null : undefined,
+        pickupLongitude: formData.pickupType === "home" ? null : undefined,
+        pickupDescription: formData.pickupType === "roadside" ? formData.roadsideName : null,
+        homeLatitude: null,
+        homeLongitude: null,
+        homeAddress: formData.pickupAddress || null,
+      };
+
+      console.log('[AddChild] Submitting child data:', childData);
+      const response = await apiClient.post('/children', childData);
+      console.log('[AddChild] Child created:', response);
 
       Alert.alert(
         "Success",
@@ -147,8 +227,10 @@ export default function AddChildScreen({ navigation }: Props) {
           },
         ]
       );
-    } catch (error) {
-      Alert.alert("Error", "Failed to add child. Please try again.");
+    } catch (error: any) {
+      console.error('[AddChild] Error creating child:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to add child. Please try again.';
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -279,6 +361,7 @@ export default function AddChildScreen({ navigation }: Props) {
                 })}
                 {renderInput("dateOfBirth", "Date of Birth", "DD/MM/YYYY", {
                   icon: "calendar",
+                  keyboardType: "number-pad",
                 })}
                 {renderInput("grade", "Grade/Class", "e.g., Grade 5", {
                   icon: "school",
@@ -514,17 +597,6 @@ export default function AddChildScreen({ navigation }: Props) {
                     </View>
                   </>
                 )}
-
-                {/* Dropoff is same as pickup location */}
-                {renderInput(
-                  "dropoffAddress",
-                  "School/Dropoff Address",
-                  "Enter school or dropoff address",
-                  {
-                    multiline: true,
-                    icon: "school",
-                  }
-                )}
               </View>
             </LiquidGlassCard>
           </Animated.View>
@@ -570,61 +642,71 @@ export default function AddChildScreen({ navigation }: Props) {
               style={styles.schoolList}
               showsVerticalScrollIndicator={false}
             >
-              {schools.map((school) => (
-                <Pressable
-                  key={school.id}
-                  style={[
-                    styles.schoolItem,
-                    formData.schoolId === school.id && styles.schoolItemSelected,
-                  ]}
-                  onPress={() => {
-                    handleInputChange("schoolId", school.id);
-                    handleInputChange("schoolName", school.name);
-                    setShowSchoolPicker(false);
-                  }}
-                >
-                  <View style={styles.schoolItemContent}>
-                    <View
-                      style={[
-                        styles.schoolItemIcon,
-                        formData.schoolId === school.id &&
-                          styles.schoolItemIconSelected,
-                      ]}
-                    >
-                      <Ionicons
-                        name="school"
-                        size={20}
-                        color={
-                          formData.schoolId === school.id
-                            ? colors.primary.blue
-                            : colors.neutral.textSecondary
-                        }
-                      />
-                    </View>
-                    <View style={styles.schoolItemInfo}>
-                      <Text
+              {loadingSchools ? (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>Loading schools...</Text>
+                </View>
+              ) : schools.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>No schools available</Text>
+                </View>
+              ) : (
+                schools.map((school) => (
+                  <Pressable
+                    key={school.id}
+                    style={[
+                      styles.schoolItem,
+                      formData.schoolId === school.id && styles.schoolItemSelected,
+                    ]}
+                    onPress={() => {
+                      handleInputChange("schoolId", school.id);
+                      handleInputChange("schoolName", school.name);
+                      setShowSchoolPicker(false);
+                    }}
+                  >
+                    <View style={styles.schoolItemContent}>
+                      <View
                         style={[
-                          styles.schoolItemName,
+                          styles.schoolItemIcon,
                           formData.schoolId === school.id &&
-                            styles.schoolItemNameSelected,
+                            styles.schoolItemIconSelected,
                         ]}
                       >
-                        {school.name}
-                      </Text>
-                      <Text style={styles.schoolItemAddress}>
-                        {school.location.address}
-                      </Text>
+                        <Ionicons
+                          name="school"
+                          size={20}
+                          color={
+                            formData.schoolId === school.id
+                              ? colors.primary.blue
+                              : colors.neutral.textSecondary
+                          }
+                        />
+                      </View>
+                      <View style={styles.schoolItemInfo}>
+                        <Text
+                          style={[
+                            styles.schoolItemName,
+                            formData.schoolId === school.id &&
+                              styles.schoolItemNameSelected,
+                          ]}
+                        >
+                          {school.name}
+                        </Text>
+                        <Text style={styles.schoolItemAddress}>
+                          {school.address || "No address provided"}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                  {formData.schoolId === school.id && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={24}
-                      color={colors.primary.blue}
-                    />
-                  )}
-                </Pressable>
-              ))}
+                    {formData.schoolId === school.id && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={24}
+                        color={colors.primary.blue}
+                      />
+                    )}
+                  </Pressable>
+                ))
+              )}
             </ScrollView>
           </View>
         </Pressable>
@@ -810,6 +892,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: "70%",
+    minHeight: 200,
     paddingBottom: 40,
   },
   modalHeader: {
@@ -880,5 +963,25 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.neutral.textSecondary,
     lineHeight: 18,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: colors.neutral.textSecondary,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: colors.neutral.textSecondary,
   },
 });

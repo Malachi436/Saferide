@@ -18,9 +18,11 @@ const children_service_1 = require("./children.service");
 const roles_decorator_1 = require("../roles/roles.decorator");
 const roles_guard_1 = require("../roles/roles.guard");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const prisma_service_1 = require("../../prisma/prisma.service");
 let ChildrenController = class ChildrenController {
-    constructor(childrenService) {
+    constructor(childrenService, prisma) {
         this.childrenService = childrenService;
+        this.prisma = prisma;
     }
     create(createChildDto) {
         return this.childrenService.create(createChildDto);
@@ -39,6 +41,17 @@ let ChildrenController = class ChildrenController {
     }
     remove(id) {
         return this.childrenService.remove(id);
+    }
+    async getSchools() {
+        return this.prisma.school.findMany({
+            select: {
+                id: true,
+                name: true,
+                address: true,
+                latitude: true,
+                longitude: true,
+            },
+        });
     }
 };
 exports.ChildrenController = ChildrenController;
@@ -90,9 +103,16 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ChildrenController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)('public/schools'),
+    (0, roles_decorator_1.Roles)('PARENT', 'PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ChildrenController.prototype, "getSchools", null);
 exports.ChildrenController = ChildrenController = __decorate([
     (0, common_1.Controller)('children'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [children_service_1.ChildrenService])
+    __metadata("design:paramtypes", [children_service_1.ChildrenService, prisma_service_1.PrismaService])
 ], ChildrenController);
 //# sourceMappingURL=children.controller.js.map

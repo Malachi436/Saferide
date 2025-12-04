@@ -59,8 +59,10 @@ export const AutoGenerateRoutesScreen = () => {
   const fetchSchools = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/schools');
-      const schoolsData = Array.isArray((response as any).data) ? (response as any).data : [];
+      // Note: This screen is for admin use - if you need company-specific schools,
+      // pass companyId as a prop and use: `/admin/company/${companyId}/schools`
+      const response = await apiClient.get('/admin/schools');
+      const schoolsData = Array.isArray((response as any).data) ? (response as any).data : Array.isArray(response) ? response : [];
       setSchools(schoolsData);
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Failed to load schools');

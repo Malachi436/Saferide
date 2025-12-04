@@ -58,6 +58,29 @@ let BusesService = class BusesService {
             },
         });
     }
+    async findByCompanyId(companyId) {
+        return this.prisma.bus.findMany({
+            where: {
+                driver: {
+                    user: { companyId },
+                },
+            },
+            include: {
+                driver: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
     async remove(id) {
         return this.prisma.bus.delete({
             where: { id },

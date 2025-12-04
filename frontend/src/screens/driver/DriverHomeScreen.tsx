@@ -89,7 +89,7 @@ export default function DriverHomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Welcome,</Text>
-            <Text style={styles.userName}>{user?.name}</Text>
+            <Text style={styles.userName}>{user?.name || 'Driver'}</Text>
           </View>
           <Pressable onPress={handleLogout} style={styles.logoutButton}>
             <Ionicons name="log-out-outline" size={24} color={colors.neutral.pureWhite} />

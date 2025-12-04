@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
@@ -39,9 +40,55 @@ export class AdminController {
     return this.adminService.getAllCompanies();
   }
 
+  @Get('schools')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getAllSchools() {
+    return this.adminService.getAllSchools();
+  }
+
+  @Get('company/:companyId/schools')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getCompanySchools(@Param('companyId') companyId: string) {
+    return this.adminService.getCompanySchools(companyId);
+  }
+
+  @Get('company/:companyId/children')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getCompanyChildren(@Param('companyId') companyId: string) {
+    return this.adminService.getCompanyChildren(companyId);
+  }
+
+  @Get('company/:companyId/children/payments')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getChildrenPayments(@Param('companyId') companyId: string) {
+    return this.adminService.getChildrenPaymentStatus(companyId);
+  }
+
+  @Get('company/:companyId/drivers')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getCompanyDrivers(@Param('companyId') companyId: string) {
+    return this.adminService.getCompanyDrivers(companyId);
+  }
+
+  @Post('driver/:driverId/photo')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @UseInterceptors(FileInterceptor('photo'))
+  async uploadDriverPhoto(
+    @Param('driverId') driverId: string,
+    @UploadedFile() file: any,
+  ) {
+    return this.adminService.saveDriverPhoto(driverId, file);
+  }
+
   @Get('companies/:companyId')
   @Roles('PLATFORM_ADMIN')
   async getCompanyById(@Param('companyId') companyId: string) {
     return this.adminService.getCompanyById(companyId);
+  }
+
+  @Delete('company/:companyId')
+  @Roles('PLATFORM_ADMIN')
+  async deleteCompany(@Param('companyId') companyId: string) {
+    return this.adminService.deleteCompany(companyId);
   }
 }

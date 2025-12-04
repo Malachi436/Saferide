@@ -242,6 +242,8 @@ export default function AttendanceScreen() {
                   {childrenOnTrip.map((attendance: any, index: number) => {
                     const child = attendance.child;
                     const status = attendance.status;
+                    const childName = child ? `${child.firstName || ''} ${child.lastName || ''}`.trim() : 'Unknown';
+                    const initials = childName.split(' ').map((n: string) => n[0] || '').join('').toUpperCase() || 'U';
 
                     let statusColor: string = colors.neutral.textSecondary;
                     let statusIcon: keyof typeof Ionicons.glyphMap = "time-outline";
@@ -257,6 +259,8 @@ export default function AttendanceScreen() {
                       statusText = "Dropped Off";
                     }
 
+                    if (!child) return null;
+
                     return (
                       <Animated.View
                         key={child.id}
@@ -271,16 +275,13 @@ export default function AttendanceScreen() {
                             <View style={styles.childInfo}>
                               <View style={styles.avatarCircle}>
                                 <Text style={styles.avatarText}>
-                                  {child.name
-                                    .split(" ")
-                                    .map((n: string) => n[0])
-                                    .join("")}
+                                  {initials}
                                 </Text>
                               </View>
                               <View style={styles.childDetails}>
-                                <Text style={styles.childName}>{child.name}</Text>
+                                <Text style={styles.childName}>{childName}</Text>
                                 <Text style={styles.childAddress}>
-                                  {child.pickupLocation?.address || 'N/A'}
+                                  {child.pickupLocation?.address || child.homeAddress || 'N/A'}
                                 </Text>
                               </View>
                             </View>

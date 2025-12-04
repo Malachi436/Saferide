@@ -10,7 +10,6 @@ import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { useAuthStore } from "../../stores/authStore";
-import { mockParent, mockDriver } from "../../mock/data";
 import { colors } from "../../theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";

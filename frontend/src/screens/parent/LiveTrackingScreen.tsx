@@ -11,25 +11,18 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
-import { mockTrip, mockChildren, mockDriver } from "../../mock/data";
 import { useAuthStore } from "../../state/authStore";
 
 export default function LiveTrackingScreen() {
   const user = useAuthStore((s) => s.user);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
-  // TODO: Replace with actual API call
-  const trip = mockTrip;
-  const driver = mockDriver;
+  // TODO: Implement real GPS tracking with API
+  const trip = null;
+  const driver = null;
+  const userChildren = [];
 
-  // Get only user's children
-  const userChildren = mockChildren.filter(
-    (c) => c.parentId === user?.id && trip.childIds.includes(c.id)
-  );
-
-  const selectedChild = selectedChildId
-    ? userChildren.find((c) => c.id === selectedChildId)
-    : userChildren[0];
+  const selectedChild = null;
 
   // Calculate ETA (mock)
   const eta = "8 mins";

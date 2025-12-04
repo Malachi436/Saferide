@@ -24,7 +24,8 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
-import { mockTrip, mockChildren } from "../../mock/data";
+import { useAuthStore } from "../../stores/authStore";
+import { apiClient } from "../../utils/api";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
@@ -54,20 +55,39 @@ const QUICK_MESSAGES = [
 
 export default function BroadcastMessageScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const user = useAuthStore((s) => s.user);
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedParentIds, setSelectedParentIds] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(true);
+  const [trip, setTrip] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Replace with actual API call
-  const trip = mockTrip;
-  const childrenOnTrip = mockChildren.filter((c) => trip.childIds.includes(c.id));
+  const fetchTodayTrip = async () => {
+    try {
+      setLoading(true);
+      if (!user?.id) return;
+      const response = await apiClient.get<any>(`/drivers/${user.id}/today-trip`);
+      setTrip(response);
+    } catch (err) {
+      console.error('[BroadcastMessage] Error fetching trip:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchTodayTrip();
+  }, [user?.id]);
+
+  // Get children from attendance records
+  const childrenOnTrip = trip?.attendances?.map((a: any) => a.child) || [];
 
   // Group children by parent
   const parentGroups = useMemo(() => {
     const groups: { [key: string]: typeof childrenOnTrip } = {};
-    childrenOnTrip.forEach((child) => {
+    childrenOnTrip.forEach((child: any) => {
       if (!groups[child.parentId]) {
         groups[child.parentId] = [];
       }
@@ -283,7 +303,7 @@ export default function BroadcastMessageScreen() {
                               {children.length > 1 && ` (+${children.length - 1})`}
                             </Text>
                             <Text style={styles.childrenNames}>
-                              {children.map((c) => c.name).join(", ")}
+                              {children.map((c: any) => c.firstName && c.lastName ? `${c.firstName} ${c.lastName}` : 'Unknown').join(", ")}
                             </Text>
                           </View>
                         </View>

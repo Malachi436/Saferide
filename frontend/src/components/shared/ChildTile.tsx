@@ -37,24 +37,48 @@ export function ChildTile({ child, onPress, showStatus = true, tripId, showActio
   // Get initials from child name
   const initials = `${child.firstName[0]}${child.lastName[0]}`.toUpperCase();
 
-  const handleRequestEarlyPickup = async () => {
+  const handleRequestParentPickup = async () => {
     if (!tripId) {
       Alert.alert('No Active Trip', 'There is no active trip for your child today.');
       return;
     }
 
+    // Show time selection dialog
+    Alert.alert(
+      'Parent Pickup',
+      'When will you be picking up your child?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Morning',
+          onPress: () => submitParentPickup('MORNING'),
+        },
+        {
+          text: 'Evening',
+          onPress: () => submitParentPickup('EVENING'),
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const submitParentPickup = async (timeOfDay: 'MORNING' | 'EVENING') => {
     try {
       setIsLoading(true);
       await apiClient.post('/early-pickup/request', {
         childId: child.id,
         tripId,
-        reason: 'Parent requested early pickup',
+        timeOfDay,
+        reason: `Parent will pick up child in the ${timeOfDay.toLowerCase()}`,
       });
       setEarlyPickupPending(true);
-      Alert.alert('Success', 'Early pickup request sent to driver');
+      Alert.alert('Success', `Child exempted from ${timeOfDay.toLowerCase()} pickup. Driver has been notified.`);
       onActionComplete?.();
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to request early pickup';
+      const message = error.response?.data?.message || 'Failed to request parent pickup';
       Alert.alert('Error', message);
     } finally {
       setIsLoading(false);
@@ -67,21 +91,38 @@ export function ChildTile({ child, onPress, showStatus = true, tripId, showActio
       return;
     }
 
-    try {
-      setIsLoading(true);
-      await apiClient.post('/trip-exceptions/skip', {
-        childId: child.id,
-        tripId,
-      });
-      setTripSkipped(true);
-      Alert.alert('Success', 'Your child will not join the bus today');
-      onActionComplete?.();
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to skip trip';
-      Alert.alert('Error', message);
-    } finally {
-      setIsLoading(false);
-    }
+    Alert.alert(
+      'Skip Today',
+      'Are you sure your child will not join the bus today?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Confirm',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsLoading(true);
+              await apiClient.post('/trip-exceptions/skip', {
+                childId: child.id,
+                tripId,
+              });
+              setTripSkipped(true);
+              Alert.alert('Success', 'Child removed from today\'s attendance. Driver has been notified.');
+              onActionComplete?.();
+            } catch (error: any) {
+              const message = error.response?.data?.message || 'Failed to skip trip';
+              Alert.alert('Error', message);
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
@@ -110,7 +151,7 @@ export function ChildTile({ child, onPress, showStatus = true, tripId, showActio
                 </Text>
               )}
               {tripSkipped && <Text style={styles.skippedBadge}>Skipped for today</Text>}
-              {earlyPickupPending && <Text style={styles.earlyPickupBadge}>Early pickup requested</Text>}
+              {earlyPickupPending && <Text style={styles.earlyPickupBadge}>Parent pickup requested</Text>}
             </View>
 
             {/* Status */}
@@ -129,15 +170,15 @@ export function ChildTile({ child, onPress, showStatus = true, tripId, showActio
         <View style={styles.actionsContainer}>
           <Pressable
             style={[styles.actionButton, styles.earlyPickupButton, (earlyPickupPending || !tripId) && styles.actionButtonDisabled]}
-            onPress={handleRequestEarlyPickup}
+            onPress={handleRequestParentPickup}
             disabled={isLoading || earlyPickupPending}
           >
             {isLoading && earlyPickupPending ? (
               <ActivityIndicator size="small" color={colors.neutral.pureWhite} />
             ) : (
               <>
-                <Ionicons name="arrow-up-circle" size={18} color={colors.neutral.pureWhite} />
-                <Text style={styles.actionButtonText}>Early Pickup</Text>
+                <Ionicons name="person-outline" size={18} color={colors.neutral.pureWhite} />
+                <Text style={styles.actionButtonText}>Parent Pickup</Text>
               </>
             )}
           </Pressable>

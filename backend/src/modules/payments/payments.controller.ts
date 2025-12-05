@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Param, Headers, UseGuards } from '@nestjs/
 import { PaymentsService } from './payments.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 class CreatePaymentIntentDto {
   parentId: string;
@@ -10,7 +11,7 @@ class CreatePaymentIntentDto {
 }
 
 @Controller('payments')
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 

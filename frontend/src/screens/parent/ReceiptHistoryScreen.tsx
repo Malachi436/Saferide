@@ -1,15 +1,16 @@
 /**
  * Receipt History Screen
- * View historical payment receipts
+ * View historical payment receipts from backend
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,45 +18,44 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
+import { useAuthStore } from "../../stores/authStore";
+import { apiClient } from "../../utils/api";
 
-type TimeFilter = "all" | "week" | "month" | "year";
-
-interface Receipt {
+interface Payment {
   id: string;
-  number: string;
   amount: number;
-  date: string;
-  method: "Mobile Money" | "Cash Payment";
+  status: 'pending' | 'completed' | 'failed';
+  createdAt: string;
+  hubtleRef?: string;
 }
 
-const MOCK_RECEIPTS: Receipt[] = [
-  {
-    id: "1",
-    number: "eceipt-1",
-    amount: 150,
-    date: "29 Nov 2025",
-    method: "Mobile Money",
-  },
-  {
-    id: "2",
-    number: "eceipt-2",
-    amount: 150,
-    date: "22 Nov 2025",
-    method: "Cash Payment",
-  },
-];
-
-const TIME_FILTERS: { key: TimeFilter; label: string }[] = [
-  { key: "all", label: "All Time" },
-  { key: "week", label: "This Week" },
-  { key: "month", label: "This Month" },
-  { key: "year", label: "This Year" },
-];
-
 export default function ReceiptHistoryScreen() {
-  const [activeFilter, setActiveFilter] = useState<TimeFilter>("all");
+  const user = useAuthStore((s) => s.user);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const totalSpent = MOCK_RECEIPTS.reduce((sum, r) => sum + r.amount, 0);
+  useEffect(() => {
+    fetchPayments();
+  }, [user?.id]);
+
+  const fetchPayments = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await apiClient.get<Payment[]>(
+        `/payments/history/${user.id}`
+      );
+      setPayments(Array.isArray(response) ? response : []);
+    } catch (err: any) {
+      console.log('[ReceiptHistory] Error fetching payments:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const completedPayments = payments.filter((p) => p.status === 'completed');
+  const totalSpent = completedPayments.reduce((sum, p) => sum + p.amount, 0);
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
@@ -79,100 +79,70 @@ export default function ReceiptHistoryScreen() {
                 <Text style={styles.summaryPeriod}>All time</Text>
               </View>
               <View style={styles.receiptCount}>
-                <Text style={styles.receiptCountNumber}>{MOCK_RECEIPTS.length}</Text>
-                <Text style={styles.receiptCountLabel}>Receipts</Text>
+                <Text style={styles.receiptCountNumber}>
+                  {completedPayments.length}
+                </Text>
+                <Text style={styles.receiptCountLabel}>Payments</Text>
               </View>
             </View>
           </View>
         </Animated.View>
 
-        {/* Time Filters */}
+        {/* Filter Note */}
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.filtersContainer}
-            contentContainerStyle={styles.filtersContent}
-          >
-            {TIME_FILTERS.map((filter) => (
-              <Pressable
-                key={filter.key}
-                onPress={() => setActiveFilter(filter.key)}
-                style={[
-                  styles.filterChip,
-                  activeFilter === filter.key && styles.filterChipActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterChipText,
-                    activeFilter === filter.key && styles.filterChipTextActive,
-                  ]}
-                >
-                  {filter.label}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+          <View style={styles.filterNote}>
+            <Text style={styles.filterNoteText}>
+              Showing all completed payments
+            </Text>
+          </View>
         </Animated.View>
 
-        {/* Receipts List */}
+        {/* Payments List */}
         <View style={styles.receiptsList}>
-          {MOCK_RECEIPTS.map((receipt, index) => (
-            <Animated.View
-              key={receipt.id}
-              entering={FadeInDown.delay(300 + index * 50).springify()}
-            >
-              <LiquidGlassCard intensity="medium" className="mb-4">
-                <Pressable style={styles.receiptCard}>
-                  <View
-                    style={[
-                      styles.receiptIcon,
-                      {
-                        backgroundColor:
-                          receipt.method === "Mobile Money"
-                            ? colors.primary.blue + "20"
-                            : colors.accent.successGreen + "20",
-                      },
-                    ]}
-                  >
-                    <Ionicons
-                      name={
-                        receipt.method === "Mobile Money"
-                          ? "phone-portrait"
-                          : "cash"
-                      }
-                      size={24}
-                      color={
-                        receipt.method === "Mobile Money"
-                          ? colors.primary.blue
-                          : colors.accent.successGreen
-                      }
-                    />
-                  </View>
-
-                  <View style={styles.receiptInfo}>
-                    <Text style={styles.receiptNumber}>Receipt #{receipt.number}</Text>
-                    <Text style={styles.receiptDate}>{receipt.date}</Text>
-                    <Text style={styles.receiptMethod}>{receipt.method}</Text>
-                  </View>
-
-                  <View style={styles.receiptRight}>
-                    <Text style={styles.receiptAmount}>
-                      GHS {receipt.amount.toFixed(2)}
-                    </Text>
-                    <Pressable style={styles.shareButton}>
+          {isLoading ? (
+            <View style={styles.centerContent}>
+              <ActivityIndicator color={colors.primary.blue} size="large" />
+            </View>
+          ) : completedPayments.length === 0 ? (
+            <LiquidGlassCard>
+              <Text style={styles.emptyText}>No completed payments yet</Text>
+            </LiquidGlassCard>
+          ) : (
+            completedPayments.map((payment, index) => (
+              <Animated.View
+                key={payment.id}
+                entering={FadeInDown.delay(300 + index * 50).springify()}
+              >
+                <LiquidGlassCard intensity="medium" className="mb-4">
+                  <Pressable style={styles.receiptCard}>
+                    <View style={[styles.receiptIcon, { backgroundColor: colors.primary.blue + "20" }]}>
                       <Ionicons
-                        name="share-outline"
-                        size={20}
+                        name="card"
+                        size={24}
                         color={colors.primary.blue}
                       />
-                    </Pressable>
-                  </View>
-                </Pressable>
-              </LiquidGlassCard>
-            </Animated.View>
-          ))}
+                    </View>
+
+                    <View style={styles.receiptInfo}>
+                      <Text style={styles.receiptNumber}>
+                        Payment ID: {payment.id.slice(0, 8)}
+                      </Text>
+                      <Text style={styles.receiptDate}>
+                        {new Date(payment.createdAt).toLocaleDateString()}
+                      </Text>
+                      <Text style={styles.receiptMethod}>Via Payment Gateway</Text>
+                    </View>
+
+                    <View style={styles.receiptRight}>
+                      <Text style={styles.receiptAmount}>
+                        GHS {payment.amount.toFixed(2)}
+                      </Text>
+                    </View>
+                  </Pressable>
+                </LiquidGlassCard>
+              </Animated.View>
+            ))
+          )}
         </View>
 
         <View style={{ height: 40 }} />
@@ -191,6 +161,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+  },
+  centerContent: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   summaryContainer: {
     marginBottom: 24,
@@ -252,32 +227,17 @@ const styles = StyleSheet.create({
     color: colors.primary.blue,
     fontWeight: "600",
   },
-  filtersContainer: {
+  filterNote: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.primary.blue + "10",
+    borderRadius: 12,
     marginBottom: 20,
   },
-  filtersContent: {
-    gap: 8,
-    paddingRight: 20,
-  },
-  filterChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.neutral.pureWhite,
-    borderWidth: 1.5,
-    borderColor: colors.neutral.textSecondary + "30",
-  },
-  filterChipActive: {
-    backgroundColor: colors.primary.blue,
-    borderColor: colors.primary.blue,
-  },
-  filterChipText: {
+  filterNoteText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: colors.neutral.textPrimary,
-  },
-  filterChipTextActive: {
-    color: colors.neutral.pureWhite,
+    color: colors.primary.blue,
+    fontWeight: "500",
   },
   receiptsList: {
     gap: 0,
@@ -322,12 +282,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: colors.primary.blue,
   },
-  shareButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.primary.blue + "15",
-    alignItems: "center",
-    justifyContent: "center",
+  emptyText: {
+    fontSize: 14,
+    color: colors.neutral.textSecondary,
+    textAlign: "center",
+    paddingVertical: 20,
   },
 });

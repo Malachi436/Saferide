@@ -152,4 +152,9 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   async emitNewNotification(userId: string, notification: any) {
     this.server.to(`user:${userId}`).emit('new_notification', notification);
   }
+
+  // Method to emit attendance status updates (called by AttendanceService)
+  async emitAttendanceUpdate(parentId: string, attendanceData: any) {
+    this.server.to(`user:${parentId}`).emit('attendance_status_update', attendanceData);
+  }
 }

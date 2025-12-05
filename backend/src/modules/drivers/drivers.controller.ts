@@ -12,6 +12,7 @@ export class DriversController {
   @Post()
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
   create(@Body() createDriverDto: any) {
+    console.log('[DriversController] POST /drivers called with data:', createDriverDto);
     return this.driversService.create(createDriverDto);
   }
 

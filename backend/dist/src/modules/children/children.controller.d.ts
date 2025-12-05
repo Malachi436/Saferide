@@ -11,6 +11,7 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
+        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -29,6 +30,7 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
+        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -47,6 +49,7 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
+        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -65,6 +68,7 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
+        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -83,6 +87,7 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
+        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -101,6 +106,7 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
+        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -119,4 +125,57 @@ export declare class ChildrenController {
         latitude: number;
         longitude: number;
     }[]>;
+    getAvailableChildrenBySchool(schoolId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        firstName: string;
+        lastName: string;
+        schoolId: string;
+        driverId: string | null;
+        dateOfBirth: Date;
+        pickupType: import(".prisma/client").$Enums.PickupType;
+        pickupLatitude: number | null;
+        pickupLongitude: number | null;
+        pickupDescription: string | null;
+        homeLatitude: number | null;
+        homeLongitude: number | null;
+        homeAddress: string | null;
+        colorCode: string;
+        parentId: string;
+    }[]>;
+    assignChildToParent(childId: string, data: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        firstName: string;
+        lastName: string;
+        schoolId: string;
+        driverId: string | null;
+        dateOfBirth: Date;
+        pickupType: import(".prisma/client").$Enums.PickupType;
+        pickupLatitude: number | null;
+        pickupLongitude: number | null;
+        pickupDescription: string | null;
+        homeLatitude: number | null;
+        homeLongitude: number | null;
+        homeAddress: string | null;
+        colorCode: string;
+        parentId: string;
+    }>;
+    subscribeToPaymentPlan(childId: string, data: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        parentId: string;
+        status: string;
+        childId: string;
+        planId: string;
+        startDate: Date;
+        nextDueDate: Date;
+    }>;
+    getDaysUntilPaymentDue(childId: string): Promise<{
+        childId: string;
+        daysRemaining: number;
+    }>;
 }

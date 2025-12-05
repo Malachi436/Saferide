@@ -66,39 +66,68 @@ let DriversService = class DriversService {
         });
     }
     async create(data) {
-        const { firstName, lastName, email, phone, password, license, companyId, schoolId } = data;
-        const existingDriver = await this.findByLicense(license);
-        if (existingDriver) {
-            throw new common_1.BadRequestException('Driver with this license already exists');
-        }
-        const existingUser = await this.prisma.user.findUnique({
-            where: { email },
-        });
-        if (existingUser) {
-            throw new common_1.BadRequestException('User with this email already exists');
-        }
-        const passwordHash = await bcrypt.hash(password, 10);
-        return this.prisma.$transaction(async (tx) => {
-            const user = await tx.user.create({
-                data: {
-                    email,
-                    firstName,
-                    lastName,
-                    phone,
-                    passwordHash,
-                    role: 'DRIVER',
-                    companyId,
-                    schoolId,
-                },
+        try {
+            const { userId, firstName, lastName, email, phone, password, license, companyId, schoolId } = data;
+            console.log('[DriversService] Creating driver with data:', { userId, license, companyId, email });
+            const existingDriver = await this.findByLicense(license);
+            if (existingDriver) {
+                throw new common_1.BadRequestException('Driver with this license already exists');
+            }
+            if (userId) {
+                console.log('[DriversService] Updating existing user with DRIVER role');
+                await this.prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                        role: 'DRIVER',
+                        companyId,
+                    },
+                });
+                console.log('[DriversService] Creating driver record');
+                const driver = await this.prisma.driver.create({
+                    data: {
+                        license,
+                        userId,
+                    },
+                });
+                console.log('[DriversService] Driver created successfully:', driver.id);
+                return driver;
+            }
+            if (!email) {
+                throw new common_1.BadRequestException('Email is required when userId is not provided');
+            }
+            const existingUser = await this.prisma.user.findUnique({
+                where: { email },
             });
-            const driver = await tx.driver.create({
-                data: {
-                    license,
-                    userId: user.id,
-                },
+            if (existingUser) {
+                throw new common_1.BadRequestException('User with this email already exists');
+            }
+            const passwordHash = await bcrypt.hash(password, 10);
+            return this.prisma.$transaction(async (tx) => {
+                const user = await tx.user.create({
+                    data: {
+                        email,
+                        firstName,
+                        lastName,
+                        phone,
+                        passwordHash,
+                        role: 'DRIVER',
+                        companyId,
+                        schoolId,
+                    },
+                });
+                const driver = await tx.driver.create({
+                    data: {
+                        license,
+                        userId: user.id,
+                    },
+                });
+                return driver;
             });
-            return driver;
-        });
+        }
+        catch (error) {
+            console.error('[DriversService] Error creating driver:', error);
+            throw error;
+        }
     }
     async update(id, data) {
         return this.prisma.driver.update({
@@ -141,7 +170,7 @@ let DriversService = class DriversService {
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        return this.prisma.trip.findFirst({
+        const trip = await this.prisma.trip.findFirst({
             where: {
                 driverId,
                 startTime: {
@@ -167,6 +196,36 @@ let DriversService = class DriversService {
                 },
             },
         });
+        if (!trip)
+            return null;
+        if (trip.attendances && trip.attendances.length > 0) {
+            const childIds = trip.attendances.map((a) => a.childId);
+            const pickupRequests = await this.prisma.earlyPickupRequest.findMany({
+                where: {
+                    tripId: trip.id,
+                    status: 'PENDING',
+                    childId: { in: childIds },
+                },
+                select: { childId: true },
+            });
+            const tripExceptions = await this.prisma.tripException.findMany({
+                where: {
+                    tripId: trip.id,
+                    status: 'ACTIVE',
+                    childId: { in: childIds },
+                },
+                select: { childId: true },
+            });
+            const exemptedChildIds = new Set();
+            pickupRequests.forEach((req) => {
+                exemptedChildIds.add(req.childId);
+            });
+            tripExceptions.forEach((exc) => {
+                exemptedChildIds.add(exc.childId);
+            });
+            trip.attendances = trip.attendances.filter((attendance) => !exemptedChildIds.has(attendance.childId));
+        }
+        return trip;
     }
 };
 exports.DriversService = DriversService;

@@ -23,6 +23,7 @@ let DriversController = class DriversController {
         this.driversService = driversService;
     }
     create(createDriverDto) {
+        console.log('[DriversController] POST /drivers called with data:', createDriverDto);
         return this.driversService.create(createDriverDto);
     }
     findAll() {

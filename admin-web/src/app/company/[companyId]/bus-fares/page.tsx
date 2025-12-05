@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 
 export default function BusFaresPage({ params }: { params: Promise<{ companyId: string }> }) {
-  const { companyId } = use(params);
+  use(params);
   const [dailyFare, setDailyFare] = useState('25.00');
   const [weeklyFare, setWeeklyFare] = useState('125.00');
   const [monthlyFare, setMonthlyFare] = useState('450.00');

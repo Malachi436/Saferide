@@ -37,6 +37,12 @@ export class TripsController {
     return this.tripsService.findActiveByChildId(childId);
   }
 
+  @Get('company/:companyId/active')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  findActiveByCompany(@Param('companyId') companyId: string) {
+    return this.tripsService.findActiveByCompany(companyId);
+  }
+
   @Patch(':id')
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
   update(@Param('id') id: string, @Body() updateTripDto: any) {

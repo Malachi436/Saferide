@@ -22,6 +22,7 @@ import { DriverInfoBanner } from "../../components/shared/DriverInfoBanner";
 import { ETAChip } from "../../components/shared/ETAChip";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
+import { socketService } from "../../utils/socket";
 import { ParentStackParamList, ParentTabParamList } from "../../navigation/ParentNavigator";
 import { Child } from "../../types";
 
@@ -40,12 +41,30 @@ export default function ParentHomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [todayTrip, setTodayTrip] = useState<any>(null);
 
-  // Fetch children when screen focuses
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchChildren();
-    }, [user?.id])
-  );
+  // Connect to WebSocket for real-time updates
+  useEffect(() => {
+    const setupWebSocket = async () => {
+      try {
+        await socketService.connect();
+        
+        // Listen for attendance status updates
+        socketService.on('attendance_status_update', (data: any) => {
+          console.log('[ParentHome] Attendance update received:', data);
+          // Refresh trip data to get updated attendance status
+          fetchChildren();
+        });
+      } catch (err) {
+        console.log('[ParentHome] WebSocket setup error:', err);
+      }
+    };
+    
+    setupWebSocket();
+    
+    return () => {
+      // Clean up listener when component unmounts
+      socketService.off('attendance_status_update');
+    };
+  }, [user?.id]);
 
 
 

@@ -16,10 +16,13 @@ export default function LoginPage() {
     setError('');
 
     try {
+      console.log('[LoginPage] Logging in with email:', email);
       await login(email, password);
+      console.log('[LoginPage] Login successful, redirecting to home');
       // Redirect handled by home page based on role
       router.push('/');
     } catch (err: any) {
+      console.error('[LoginPage] Login error:', err);
       setError(err.response?.data?.message || err.message || 'Login failed. Please try again.');
     }
   };

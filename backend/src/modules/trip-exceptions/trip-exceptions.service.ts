@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class TripExceptionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private realtimeGateway?: RealtimeGateway,
+  ) {}
 
   // Skip a trip (create or update exception)
   async skipTrip(childId: string, tripId: string, reason?: string): Promise<any> {
-    return this.prisma.tripException.upsert({
+    const exception = await this.prisma.tripException.upsert({
       where: { childId_tripId: { childId, tripId } },
       update: {
         reason,
@@ -22,7 +26,22 @@ export class TripExceptionsService {
         reason,
         status: 'ACTIVE',
       },
+      include: {
+        child: true,
+      },
     });
+
+    // Notify driver via WebSocket
+    if (this.realtimeGateway) {
+      await this.realtimeGateway.server.to(`trip:${tripId}`).emit('trip_skip_requested', {
+        childId: exception.child.id,
+        childName: `${exception.child.firstName} ${exception.child.lastName}`,
+        reason,
+        timestamp: new Date(),
+      });
+    }
+
+    return exception;
   }
 
   // Cancel a skip

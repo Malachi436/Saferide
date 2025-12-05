@@ -1,8 +1,10 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChildAttendance, AttendanceStatus } from '@prisma/client';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 export declare class AttendanceService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private realtimeGateway;
+    constructor(prisma: PrismaService, realtimeGateway: RealtimeGateway);
     recordAttendance(childId: string, tripId: string, status: AttendanceStatus, recordedBy: string): Promise<ChildAttendance>;
     updateAttendance(id: string, status: AttendanceStatus, recordedBy: string): Promise<ChildAttendance>;
     getAttendanceByChild(childId: string): Promise<ChildAttendance[]>;

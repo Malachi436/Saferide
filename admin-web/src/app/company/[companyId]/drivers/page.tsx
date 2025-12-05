@@ -28,6 +28,14 @@ interface Driver {
   photoUrl?: string;
 }
 
+interface Child {
+  id: string;
+  firstName: string;
+  lastName: string;
+  driverId?: string;
+  school: { id: string; name: string };
+}
+
 export default function DriversPage({
   params,
 }: {
@@ -35,24 +43,30 @@ export default function DriversPage({
 }) {
   const { companyId } = use(params);
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [uploadingDriverId, setUploadingDriverId] = useState<string | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showAssignChildren, setShowAssignChildren] = useState(false);
+  const [selectedChildrenIds, setSelectedChildrenIds] = useState<string[]>([]);
+  const [assigningChildren, setAssigningChildren] = useState(false);
 
   useEffect(() => {
-    fetchDrivers();
+    fetchData();
   }, [companyId]);
 
-  const fetchDrivers = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get(`/admin/company/${companyId}/drivers`);
-      setDrivers(data || []);
+      const driversData = (await apiClient.get(`/admin/company/${companyId}/drivers`)) as Driver[];
+      const childrenData = (await apiClient.get(`/admin/company/${companyId}/children`)) as Child[];
+      setDrivers(driversData || []);
+      setChildren(childrenData || []);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load drivers');
-      console.error('Error loading drivers:', err);
+      setError(err.response?.data?.message || 'Failed to load data');
+      console.error('Error loading data:', err);
     } finally {
       setLoading(false);
     }
@@ -95,6 +109,45 @@ export default function DriversPage({
   const closeDetails = () => {
     setShowDetails(false);
     setSelectedDriver(null);
+  };
+
+  const openAssignChildren = () => {
+    setSelectedChildrenIds((selectedDriver?.children || []).map((c) => c.id));
+    setShowAssignChildren(true);
+  };
+
+  const closeAssignChildren = () => {
+    setShowAssignChildren(false);
+    setSelectedChildrenIds([]);
+  };
+
+  const handleAssignChildren = async () => {
+    if (!selectedDriver) return;
+    try {
+      setAssigningChildren(true);
+      await Promise.all(
+        selectedChildrenIds.map((childId) =>
+          apiClient.patch(`/children/${childId}`, { driverId: selectedDriver.id })
+        )
+      );
+      // Mark unassigned children as unassigned
+      const currentlyAssigned = (selectedDriver.children || []).map((c) => c.id);
+      const childrenToUnassign = currentlyAssigned.filter(
+        (id) => !selectedChildrenIds.includes(id)
+      );
+      await Promise.all(
+        childrenToUnassign.map((childId) =>
+          apiClient.patch(`/children/${childId}`, { driverId: null })
+        )
+      );
+      await fetchData();
+      closeAssignChildren();
+      alert('Children assigned successfully!');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to assign children');
+    } finally {
+      setAssigningChildren(false);
+    }
   };
 
   if (loading) {
@@ -276,6 +329,83 @@ export default function DriversPage({
                     </div>
                   </div>
                 )}
+
+                <div className="border-t border-slate-200 pt-6">
+                  <button
+                    onClick={openAssignChildren}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition"
+                  >
+                    Assign Children to Route
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Assign Children Modal */}
+        {showAssignChildren && selectedDriver && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Assign Children to {selectedDriver.user.firstName}
+                </h2>
+                <button
+                  onClick={closeAssignChildren}
+                  className="text-slate-500 hover:text-slate-700 text-2xl font-light"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                {children.length === 0 ? (
+                  <p className="text-slate-600">No available children</p>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {children.map((child) => (
+                      <label key={child.id} className="flex items-center p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedChildrenIds.includes(child.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedChildrenIds([...selectedChildrenIds, child.id]);
+                            } else {
+                              setSelectedChildrenIds(
+                                selectedChildrenIds.filter((id) => id !== child.id)
+                              );
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                        />
+                        <div className="ml-3">
+                          <p className="font-semibold text-slate-900">
+                            {child.firstName} {child.lastName}
+                          </p>
+                          <p className="text-sm text-slate-600">{child.school.name}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4 border-t border-slate-200">
+                  <button
+                    onClick={closeAssignChildren}
+                    className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold px-4 py-2 rounded-lg transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAssignChildren}
+                    disabled={assigningChildren}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-semibold px-4 py-2 rounded-lg transition"
+                  >
+                    {assigningChildren ? 'Assigning...' : 'Assign'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

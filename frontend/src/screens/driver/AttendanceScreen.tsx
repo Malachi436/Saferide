@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,6 +16,7 @@ import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
+import { socketService } from "../../utils/socket";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
@@ -43,6 +44,61 @@ export default function AttendanceScreen() {
       setLoading(false);
     }
   };
+
+  // Connect to WebSocket and subscribe to notifications
+  useEffect(() => {
+    const setupWebSocket = async () => {
+      await socketService.connect();
+
+      // Listen for parent pickup requests
+      const handleParentPickup = (data: any) => {
+        console.log('[AttendanceScreen] Parent pickup requested:', data);
+        Alert.alert(
+          'Parent Pickup Request',
+          `${data.parentName} will pick up ${data.childName} in the ${data.timeOfDay.toLowerCase()}.\n\n${data.reason || ''}`,
+          [
+            {
+              text: 'OK',
+              onPress: () => fetchTodayTrip(), // Refresh data
+            },
+          ]
+        );
+      };
+
+      // Listen for trip skip requests
+      const handleTripSkip = (data: any) => {
+        console.log('[AttendanceScreen] Trip skip requested:', data);
+        Alert.alert(
+          'Child Skipping Trip',
+          `${data.childName} will not join the bus today.\n\n${data.reason || ''}`,
+          [
+            {
+              text: 'OK',
+              onPress: () => fetchTodayTrip(), // Refresh data
+            },
+          ]
+        );
+      };
+
+      socketService.on('parent_pickup_requested', handleParentPickup);
+      socketService.on('trip_skip_requested', handleTripSkip);
+
+      // Subscribe to trip tracking room if we have a trip
+      if (trip?.id) {
+        socketService.subscribeToTrip(trip.id);
+      }
+
+      return () => {
+        socketService.off('parent_pickup_requested', handleParentPickup);
+        socketService.off('trip_skip_requested', handleTripSkip);
+        if (trip?.id) {
+          socketService.unsubscribeFromTrip(trip.id);
+        }
+      };
+    };
+
+    setupWebSocket();
+  }, [trip?.id]);
 
   useFocusEffect(
     React.useCallback(() => {

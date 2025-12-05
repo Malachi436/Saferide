@@ -6,6 +6,7 @@ export declare class EarlyPickupController {
         childId: string;
         tripId: string;
         reason?: string;
+        timeOfDay?: string;
     }, req: any): Promise<any>;
     approveRequest(requestId: string, req: any): Promise<any>;
     rejectRequest(requestId: string, data: {

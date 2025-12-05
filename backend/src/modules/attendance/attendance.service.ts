@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChildAttendance, AttendanceStatus } from '@prisma/client';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class AttendanceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private realtimeGateway: RealtimeGateway,
+  ) {}
 
   async recordAttendance(childId: string, tripId: string, status: AttendanceStatus, recordedBy: string): Promise<ChildAttendance> {
     return this.prisma.childAttendance.create({
@@ -18,13 +22,36 @@ export class AttendanceService {
   }
 
   async updateAttendance(id: string, status: AttendanceStatus, recordedBy: string): Promise<ChildAttendance> {
-    return this.prisma.childAttendance.update({
+    // Get the attendance record with child relationship
+    const existing = await this.prisma.childAttendance.findUnique({
+      where: { id },
+      include: { child: true, trip: true },
+    });
+    
+    if (!existing) {
+      throw new Error(`Attendance record ${id} not found`);
+    }
+    
+    // Update the attendance record
+    const updated = await this.prisma.childAttendance.update({
       where: { id },
       data: {
         status,
         recordedBy,
       },
     });
+    
+    // Emit WebSocket event to parent about the status change
+    if (existing.child?.parentId) {
+      this.realtimeGateway.emitAttendanceUpdate(existing.child.parentId, {
+        childId: existing.childId,
+        tripId: existing.tripId,
+        status,
+        timestamp: new Date(),
+      });
+    }
+    
+    return updated;
   }
 
   async getAttendanceByChild(childId: string): Promise<ChildAttendance[]> {

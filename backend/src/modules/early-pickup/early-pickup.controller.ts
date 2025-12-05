@@ -12,7 +12,7 @@ export class EarlyPickupController {
   @Post('request')
   @Roles('PARENT')
   async requestEarlyPickup(
-    @Body() data: { childId: string; tripId: string; reason?: string },
+    @Body() data: { childId: string; tripId: string; reason?: string; timeOfDay?: string },
     @Req() req: any,
   ) {
     const parentId = req.user.sub; // JWT payload user id
@@ -21,6 +21,7 @@ export class EarlyPickupController {
       data.tripId,
       parentId,
       data.reason,
+      data.timeOfDay,
     );
   }
 

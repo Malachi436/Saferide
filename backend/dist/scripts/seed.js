@@ -201,6 +201,50 @@ async function main() {
         },
     });
     console.log('Updated children with pickup locations');
+    const placeholderParent = await prisma.user.create({
+        data: {
+            email: `unassigned-${Date.now()}@placeholder.com`,
+            firstName: 'Unassigned',
+            lastName: 'Parent',
+            role: 'PARENT',
+            passwordHash: 'temp',
+            companyId: company.id,
+        },
+    });
+    const unassignedChild1 = await prisma.child.create({
+        data: {
+            firstName: 'Ama',
+            lastName: 'Asante',
+            dateOfBirth: new Date('2011-03-10'),
+            schoolId: school.id,
+            parentId: placeholderParent.id,
+            pickupType: 'SCHOOL',
+        },
+    });
+    const unassignedChild2 = await prisma.child.create({
+        data: {
+            firstName: 'Kofi',
+            lastName: 'Boateng',
+            dateOfBirth: new Date('2013-07-22'),
+            schoolId: school.id,
+            parentId: placeholderParent.id,
+            pickupType: 'SCHOOL',
+        },
+    });
+    const unassignedChild3 = await prisma.child.create({
+        data: {
+            firstName: 'Abena',
+            lastName: 'Owusu',
+            dateOfBirth: new Date('2010-11-05'),
+            schoolId: school.id,
+            parentId: placeholderParent.id,
+            pickupType: 'HOME',
+            homeLatitude: 5.59,
+            homeLongitude: -0.18,
+            homeAddress: 'Osu Area',
+        },
+    });
+    console.log(`Created unassigned children: ${unassignedChild1.firstName}, ${unassignedChild2.firstName}, ${unassignedChild3.firstName}`);
     const scheduledRoute = await prisma.scheduledRoute.create({
         data: {
             routeId: route.id,
@@ -214,7 +258,7 @@ async function main() {
     });
     console.log(`Created scheduled route: ${scheduledRoute.id}`);
     const today = new Date();
-    today.setHours(7, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
     const trip = await prisma.trip.create({
         data: {
             busId: bus.id,
@@ -224,21 +268,23 @@ async function main() {
             startTime: today,
         },
     });
-    console.log(`Created trip: ${trip.id}`);
+    console.log(`Created trip: ${trip.id} for driver: ${driver.id}`);
+    console.log(`Trip startTime: ${trip.startTime}`);
+    console.log(`Driver userId: ${driver.userId}`);
     await prisma.childAttendance.create({
         data: {
             childId: child1.id,
             tripId: trip.id,
-            status: 'PICKED_UP',
-            recordedBy: driverUser.id,
+            status: client_1.AttendanceStatus.PICKED_UP,
+            recordedBy: 'system',
         },
     });
     await prisma.childAttendance.create({
         data: {
             childId: child2.id,
             tripId: trip.id,
-            status: 'PICKED_UP',
-            recordedBy: driverUser.id,
+            status: client_1.AttendanceStatus.PICKED_UP,
+            recordedBy: 'system',
         },
     });
     console.log('Database seed completed successfully!');

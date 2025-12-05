@@ -36,6 +36,9 @@ let TripsController = class TripsController {
     findActiveByChild(childId) {
         return this.tripsService.findActiveByChildId(childId);
     }
+    findActiveByCompany(companyId) {
+        return this.tripsService.findActiveByCompany(companyId);
+    }
     update(id, updateTripDto) {
         return this.tripsService.update(id, updateTripDto);
     }
@@ -82,6 +85,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TripsController.prototype, "findActiveByChild", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/active'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TripsController.prototype, "findActiveByCompany", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),

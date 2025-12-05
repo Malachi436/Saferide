@@ -4,7 +4,7 @@ export declare class EarlyPickupRequestsService {
     private prisma;
     private realtimeGateway?;
     constructor(prisma: PrismaService, realtimeGateway?: RealtimeGateway);
-    requestEarlyPickup(childId: string, tripId: string, parentId: string, reason?: string): Promise<any>;
+    requestEarlyPickup(childId: string, tripId: string, parentId: string, reason?: string, timeOfDay?: string): Promise<any>;
     approveEarlyPickup(requestId: string, approvedBy: string): Promise<any>;
     rejectEarlyPickup(requestId: string, rejectionReason?: string): Promise<any>;
     cancelRequest(requestId: string): Promise<any>;

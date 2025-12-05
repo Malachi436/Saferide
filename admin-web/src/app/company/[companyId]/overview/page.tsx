@@ -15,6 +15,13 @@ export default function CompanyOverviewPage({
 
   const quickActions = [
     {
+      title: 'Live Dashboard',
+      description: 'Monitor active routes and vehicle locations in real-time',
+      href: `/company/${companyId}/live-dashboard`,
+      color: 'bg-red-50 border-red-200',
+      icon: '🗺️',
+    },
+    {
       title: 'Scheduled Routes',
       description: 'Manage recurring routes and generate daily trips',
       href: `/company/${companyId}/scheduled-routes`,
@@ -26,7 +33,7 @@ export default function CompanyOverviewPage({
       description: 'Create routes based on child density and bus capacity',
       href: `/company/${companyId}/auto-generate-routes`,
       color: 'bg-teal-50 border-teal-200',
-      icon: '🗺️',
+      icon: '🚏',
     },
     {
       title: 'Buses',
@@ -41,6 +48,13 @@ export default function CompanyOverviewPage({
       href: `/company/${companyId}/drivers`,
       color: 'bg-orange-50 border-orange-200',
       icon: '👤',
+    },
+    {
+      title: 'Payment Plans',
+      description: 'Configure payment plans for parents',
+      href: `/company/${companyId}/payment-plans`,
+      color: 'bg-purple-50 border-purple-200',
+      icon: '💳',
     },
   ];
 

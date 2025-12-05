@@ -24,7 +24,7 @@ let EarlyPickupController = class EarlyPickupController {
     }
     async requestEarlyPickup(data, req) {
         const parentId = req.user.sub;
-        return this.earlyPickupService.requestEarlyPickup(data.childId, data.tripId, parentId, data.reason);
+        return this.earlyPickupService.requestEarlyPickup(data.childId, data.tripId, parentId, data.reason, data.timeOfDay);
     }
     async approveRequest(requestId, req) {
         const approvedBy = req.user.sub;

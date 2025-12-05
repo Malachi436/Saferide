@@ -22,12 +22,12 @@ let EarlyPickupRequestsService = class EarlyPickupRequestsService {
         this.prisma = prisma;
         this.realtimeGateway = realtimeGateway;
     }
-    async requestEarlyPickup(childId, tripId, parentId, reason) {
+    async requestEarlyPickup(childId, tripId, parentId, reason, timeOfDay) {
         const existing = await this.prisma.earlyPickupRequest.findUnique({
             where: { childId_tripId: { childId, tripId } },
         });
         if (existing && existing.status === client_1.RequestStatus.PENDING) {
-            throw new Error('Early pickup request already exists for this trip');
+            throw new Error('Parent pickup request already exists for this trip');
         }
         const request = await this.prisma.earlyPickupRequest.create({
             data: {
@@ -35,6 +35,7 @@ let EarlyPickupRequestsService = class EarlyPickupRequestsService {
                 tripId,
                 requestedBy: parentId,
                 reason,
+                timeOfDay,
                 status: client_1.RequestStatus.PENDING,
             },
             include: {
@@ -46,10 +47,12 @@ let EarlyPickupRequestsService = class EarlyPickupRequestsService {
             },
         });
         if (this.realtimeGateway) {
-            await this.realtimeGateway.server.to(`trip:${tripId}`).emit('early_pickup_requested', {
+            await this.realtimeGateway.server.to(`trip:${tripId}`).emit('parent_pickup_requested', {
                 requestId: request.id,
+                childId: request.child.id,
                 childName: `${request.child.firstName} ${request.child.lastName}`,
                 parentName: request.requestedByUser.firstName,
+                timeOfDay: timeOfDay || 'ALL_DAY',
                 reason,
                 timestamp: new Date(),
             });

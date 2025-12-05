@@ -161,7 +161,7 @@ export default function AutoGenerateRoutesPage({
                 <h3 className="font-semibold text-slate-900">Generated Routes</h3>
               </div>
               <div className="divide-y divide-slate-200">
-                {result.routes.map((routeData, idx) => (
+                {result.routes.map((routeData) => (
                   <div key={routeData.route.id} className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div>

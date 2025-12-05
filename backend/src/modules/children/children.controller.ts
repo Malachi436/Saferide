@@ -59,4 +59,43 @@ export class ChildrenController {
       },
     });
   }
+
+  // Get unassigned children for a school (for parent to select during onboarding)
+  @Get('school/:schoolId/available')
+  @Roles('PARENT')
+  async getAvailableChildrenBySchool(@Param('schoolId') schoolId: string) {
+    return this.childrenService.getUnassignedChildrenBySchool(schoolId);
+  }
+
+  // Assign existing child to parent with pickup details
+  @Post(':childId/assign')
+  @Roles('PARENT')
+  async assignChildToParent(
+    @Param('childId') childId: string,
+    @Body() data: any,
+  ) {
+    return this.childrenService.assignChildToParent(childId, data.parentId, data);
+  }
+
+  // Create payment subscription for a child
+  @Post(':childId/subscribe-plan')
+  @Roles('PARENT')
+  async subscribeToPaymentPlan(
+    @Param('childId') childId: string,
+    @Body() data: any,
+  ) {
+    return this.childrenService.createPaymentSubscription(
+      childId,
+      data.parentId,
+      data.planId,
+    );
+  }
+
+  // Get days until payment due for a child
+  @Get(':childId/payment-days-remaining')
+  @Roles('PARENT')
+  async getDaysUntilPaymentDue(@Param('childId') childId: string) {
+    const daysRemaining = await this.childrenService.getDaysUntilPaymentDue(childId);
+    return { childId, daysRemaining };
+  }
 }

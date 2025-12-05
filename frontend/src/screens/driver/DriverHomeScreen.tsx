@@ -17,6 +17,7 @@ import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
+import { socketService } from "../../utils/socket";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
@@ -63,6 +64,14 @@ export default function DriverHomeScreen() {
       }
     }, [user?.id])
   );
+
+  // Connect to WebSocket when component mounts
+  useEffect(() => {
+    socketService.connect();
+    return () => {
+      // Keep connection alive for other screens
+    };
+  }, []);
 
   const childrenOnTrip = trip?.attendances || [];
 

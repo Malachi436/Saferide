@@ -62,6 +62,32 @@ export class TripsService {
     });
   }
 
+  async findActiveByCompany(companyId: string): Promise<Trip[]> {
+    return this.prisma.trip.findMany({
+      where: {
+        status: { in: ['IN_PROGRESS', 'ARRIVED_SCHOOL', 'RETURN_IN_PROGRESS'] },
+        route: {
+          school: {
+            companyId: companyId,
+          },
+        },
+      },
+      include: {
+        bus: {
+          include: {
+            driver: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        route: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async remove(id: string): Promise<Trip> {
     return this.prisma.trip.delete({
       where: { id },

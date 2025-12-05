@@ -108,6 +108,9 @@ let RealtimeGateway = class RealtimeGateway {
     async emitNewNotification(userId, notification) {
         this.server.to(`user:${userId}`).emit('new_notification', notification);
     }
+    async emitAttendanceUpdate(parentId, attendanceData) {
+        this.server.to(`user:${parentId}`).emit('attendance_status_update', attendanceData);
+    }
 };
 exports.RealtimeGateway = RealtimeGateway;
 __decorate([

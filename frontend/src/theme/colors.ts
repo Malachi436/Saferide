@@ -39,6 +39,17 @@ export const colors = {
     overlayMedium: "rgba(255, 255, 255, 0.30)",
     overlayHeavy: "rgba(255, 255, 255, 0.35)",
   },
+
+  // Dark mode support (for react-navigation)
+  dark: false,
+  colors: {
+    primary: "#2A7FF4",
+    background: "#FAF7F2",
+    card: "#FFFFFF",
+    text: "#1D1D1F",
+    border: "#E5E5E5",
+    notification: "#FF8A3D",
+  },
 } as const;
 
 export type Colors = typeof colors;

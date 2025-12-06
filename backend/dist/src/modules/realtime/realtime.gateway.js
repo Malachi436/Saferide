@@ -98,6 +98,27 @@ let RealtimeGateway = class RealtimeGateway {
         client.leave(`bus:${data.busId}`);
         return { success: true };
     }
+    async handleGpsUpdate(client, data) {
+        const userId = this.connectedUsers.get(client.id);
+        console.log(`[GPS Update] Bus: ${data.busId}, User: ${userId}, Lat: ${data.latitude}, Lng: ${data.longitude}`);
+        const locationData = {
+            busId: data.busId,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            speed: data.speed,
+            heading: data.heading,
+            accuracy: data.accuracy,
+            timestamp: new Date().toISOString(),
+        };
+        this.server.to(`bus:${data.busId}`).emit('bus_location', locationData);
+        this.server.emit('new_location_update', locationData);
+        return { success: true };
+    }
+    async handleJoinCompanyRoom(client, data) {
+        client.join(`company:${data.companyId}`);
+        console.log(`[Socket] Client ${client.id} joined company room: ${data.companyId}`);
+        return { success: true };
+    }
     async emitLocationUpdate(busId, locationData) {
         await this.redis.publish('bus_location_updates', JSON.stringify({
             busId,
@@ -133,6 +154,22 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", Promise)
 ], RealtimeGateway.prototype, "handleLeaveBusRoom", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('gps_update'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], RealtimeGateway.prototype, "handleGpsUpdate", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('join_company_room'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], RealtimeGateway.prototype, "handleJoinCompanyRoom", null);
 exports.RealtimeGateway = RealtimeGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {

@@ -23,6 +23,21 @@ export declare class RealtimeGateway implements OnGatewayConnection, OnGatewayDi
     }): Promise<{
         success: boolean;
     }>;
+    handleGpsUpdate(client: Socket, data: {
+        busId: string;
+        latitude: number;
+        longitude: number;
+        speed?: number;
+        heading?: number;
+        accuracy?: number;
+    }): Promise<{
+        success: boolean;
+    }>;
+    handleJoinCompanyRoom(client: Socket, data: {
+        companyId: string;
+    }): Promise<{
+        success: boolean;
+    }>;
     emitLocationUpdate(busId: string, locationData: any): Promise<void>;
     emitNewNotification(userId: string, notification: any): Promise<void>;
     emitAttendanceUpdate(parentId: string, attendanceData: any): Promise<void>;

@@ -136,6 +136,44 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     return { success: true };
   }
 
+  @SubscribeMessage('gps_update')
+  async handleGpsUpdate(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { busId: string; latitude: number; longitude: number; speed?: number; heading?: number; accuracy?: number },
+  ) {
+    const userId = this.connectedUsers.get(client.id);
+    console.log(`[GPS Update] Bus: ${data.busId}, User: ${userId}, Lat: ${data.latitude}, Lng: ${data.longitude}`);
+
+    // Broadcast to all clients in the bus room
+    const locationData = {
+      busId: data.busId,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      speed: data.speed,
+      heading: data.heading,
+      accuracy: data.accuracy,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Emit to bus-specific room
+    this.server.to(`bus:${data.busId}`).emit('bus_location', locationData);
+
+    // Also broadcast as location_update for subscribers
+    this.server.emit('new_location_update', locationData);
+
+    return { success: true };
+  }
+
+  @SubscribeMessage('join_company_room')
+  async handleJoinCompanyRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { companyId: string },
+  ) {
+    client.join(`company:${data.companyId}`);
+    console.log(`[Socket] Client ${client.id} joined company room: ${data.companyId}`);
+    return { success: true };
+  }
+
   // Method to emit location updates (called by other services)
   async emitLocationUpdate(busId: string, locationData: any) {
     // Publish to Redis for potential horizontal scaling

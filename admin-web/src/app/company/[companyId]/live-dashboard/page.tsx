@@ -1,8 +1,11 @@
 'use client';
 
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { ROSAgoMap } from '@/components/ROSAgoMap';
+import { useSocket } from '@/hooks/useSocket';
+import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/lib/api-client';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useMemo } from 'react';
 
 interface Bus {
   id: string;
@@ -21,6 +24,15 @@ interface Location {
   latitude: number;
   longitude: number;
   timestamp: string;
+  plateNumber?: string;
+  driverName?: string;
+}
+
+interface School {
+  id: string;
+  name: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export default function LiveDashboardPage({
@@ -29,21 +41,75 @@ export default function LiveDashboardPage({
   params: Promise<{ companyId: string }>;
 }) {
   const { companyId } = use(params);
+  const { token } = useAuth();
   const [activeTrips, setActiveTrips] = useState<Trip[]>([]);
-  const [locations, setLocations] = useState<{ [busId: string]: Location }>({});
+  const [restLocations, setRestLocations] = useState<{ [busId: string]: Location }>({});
+  const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
-  const [mapContainer, setMapContainer] = useState<HTMLDivElement | null>(null);
+  const [selectedBusId, setSelectedBusId] = useState<string | null>(null);
+
+  // Get bus IDs for socket subscription
+  const busIds = useMemo(() => activeTrips.map((t) => t.bus.id), [activeTrips]);
+
+  // Real-time socket connection
+  const { connected, busLocations: socketLocations } = useSocket({
+    token: token || undefined,
+    companyId,
+    busIds,
+  });
+
+  // Merge REST locations with socket locations (socket takes priority)
+  const mergedLocations = useMemo(() => {
+    const merged: { [busId: string]: Location } = { ...restLocations };
+    
+    // Override with socket locations
+    Object.entries(socketLocations).forEach(([busId, loc]) => {
+      const trip = activeTrips.find((t) => t.bus.id === busId);
+      merged[busId] = {
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        timestamp: loc.timestamp,
+        plateNumber: trip?.bus.plateNumber,
+        driverName: trip ? `${trip.bus.driver.user.firstName} ${trip.bus.driver.user.lastName}` : undefined,
+      };
+    });
+
+    // Add plate numbers to REST locations
+    Object.keys(merged).forEach((busId) => {
+      const trip = activeTrips.find((t) => t.bus.id === busId);
+      if (trip && !merged[busId].plateNumber) {
+        merged[busId].plateNumber = trip.bus.plateNumber;
+        merged[busId].driverName = `${trip.bus.driver.user.firstName} ${trip.bus.driver.user.lastName}`;
+      }
+    });
+
+    return merged;
+  }, [restLocations, socketLocations, activeTrips]);
 
   useEffect(() => {
     fetchActiveTrips();
+    fetchSchools();
+    
+    // Fallback polling when socket is disconnected
     const interval = setInterval(() => {
-      fetchActiveTrips();
-    }, 10000); // Refresh every 10 seconds
+      if (!connected) {
+        fetchActiveTrips();
+      }
+    }, 10000);
 
     return () => clearInterval(interval);
-  }, [companyId]);
+  }, [companyId, connected]);
+
+  const fetchSchools = async () => {
+    try {
+      const response = await apiClient.get(`/admin/company/${companyId}/schools`);
+      const schoolsData = Array.isArray(response) ? response : [];
+      setSchools(schoolsData);
+    } catch (err) {
+      console.log('Failed to load schools');
+    }
+  };
 
   const fetchActiveTrips = async () => {
     try {
@@ -52,7 +118,7 @@ export default function LiveDashboardPage({
       const trips = Array.isArray(response) ? response : [];
       setActiveTrips(trips);
 
-      // Fetch latest location for each bus
+      // Fetch latest location for each bus (REST fallback)
       const locationsMap: { [key: string]: Location } = {};
       for (const trip of trips) {
         try {
@@ -64,13 +130,15 @@ export default function LiveDashboardPage({
               latitude: locationResponse.latitude,
               longitude: locationResponse.longitude,
               timestamp: new Date().toISOString(),
+              plateNumber: trip.bus.plateNumber,
+              driverName: `${trip.bus.driver.user.firstName} ${trip.bus.driver.user.lastName}`,
             };
           }
         } catch (err) {
           console.log(`No location for bus ${trip.bus.id}`);
         }
       }
-      setLocations(locationsMap);
+      setRestLocations(locationsMap);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load active trips');
       console.error('Error loading trips:', err);
@@ -78,6 +146,8 @@ export default function LiveDashboardPage({
       setLoading(false);
     }
   };
+
+  const selectedBus = selectedBusId ? activeTrips.find((t) => t.bus.id === selectedBusId)?.bus : null;
 
   return (
     <DashboardLayout>
@@ -96,7 +166,7 @@ export default function LiveDashboardPage({
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg border border-slate-200 p-6">
             <p className="text-slate-600 text-sm font-semibold">Active Trips</p>
             <p className="text-3xl font-bold text-blue-600 mt-2">{activeTrips.length}</p>
@@ -104,11 +174,24 @@ export default function LiveDashboardPage({
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <p className="text-slate-600 text-sm font-semibold">Buses Moving</p>
+            <p className="text-slate-600 text-sm font-semibold">Buses Tracking</p>
             <p className="text-3xl font-bold text-green-600 mt-2">
-              {Object.keys(locations).length}
+              {Object.keys(mergedLocations).length}
             </p>
-            <p className="text-xs text-slate-500 mt-2">Tracked locations</p>
+            <p className="text-xs text-slate-500 mt-2">Live GPS signals</p>
+          </div>
+
+          <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <p className="text-slate-600 text-sm font-semibold">Connection</p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`w-3 h-3 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+              <p className={`text-lg font-bold ${connected ? 'text-green-600' : 'text-red-600'}`}>
+                {connected ? 'Live' : 'Polling'}
+              </p>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">
+              {connected ? 'WebSocket connected' : 'REST fallback active'}
+            </p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-6">
@@ -116,50 +199,32 @@ export default function LiveDashboardPage({
             <p className="text-xl font-bold text-slate-900 mt-2">
               {new Date().toLocaleTimeString()}
             </p>
-            <p className="text-xs text-slate-500 mt-2">Auto-refresh every 10s</p>
+            <p className="text-xs text-slate-500 mt-2">Auto-refresh</p>
           </div>
         </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Map Placeholder */}
+          {/* 3D Map */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-              <div className="bg-slate-100 h-96 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-slate-500 text-lg font-semibold mb-2">📍 Live Map View</p>
-                  <p className="text-slate-400 text-sm">
-                    Integration with mapping service coming soon
-                  </p>
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg inline-block">
-                    <p className="text-sm text-slate-600">
-                      <strong>Active Trips Coordinates:</strong>
-                    </p>
-                    {activeTrips.length === 0 ? (
-                      <p className="text-xs text-slate-500 mt-2">No active trips</p>
-                    ) : (
-                      <ul className="text-xs text-slate-600 mt-2 space-y-1">
-                        {activeTrips.map((trip) => {
-                          const loc = locations[trip.bus.id];
-                          return (
-                            <li key={trip.id}>
-                              {trip.bus.plateNumber}:{' '}
-                              {loc
-                                ? `${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}`
-                                : 'No location'}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <ROSAgoMap
+                busLocations={mergedLocations}
+                schools={schools.filter((s) => s.latitude && s.longitude).map((s) => ({
+                  id: s.id,
+                  name: s.name,
+                  latitude: s.latitude!,
+                  longitude: s.longitude!,
+                }))}
+                selectedBusId={selectedBusId || undefined}
+                onBusSelect={(busId) => setSelectedBusId(busId)}
+                height="500px"
+              />
             </div>
           </div>
 
           {/* Trips List */}
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden flex flex-col">
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden flex flex-col" style={{ maxHeight: '500px' }}>
             <div className="border-b border-slate-200 p-4">
               <h3 className="font-bold text-slate-900">Active Routes</h3>
             </div>
@@ -176,12 +241,15 @@ export default function LiveDashboardPage({
               ) : (
                 <div className="divide-y divide-slate-200">
                   {activeTrips.map((trip) => {
-                    const loc = locations[trip.bus.id];
+                    const loc = mergedLocations[trip.bus.id];
+                    const isSelected = trip.bus.id === selectedBusId;
                     return (
                       <div
                         key={trip.id}
-                        className="p-4 hover:bg-slate-50 cursor-pointer transition"
-                        onClick={() => setSelectedBus(trip.bus)}
+                        className={`p-4 hover:bg-slate-50 cursor-pointer transition ${
+                          isSelected ? 'bg-teal-50 border-l-4 border-teal-500' : ''
+                        }`}
+                        onClick={() => setSelectedBusId(isSelected ? null : trip.bus.id)}
                       >
                         <p className="font-semibold text-slate-900 text-sm">
                           🚌 {trip.bus.plateNumber}
@@ -238,31 +306,31 @@ export default function LiveDashboardPage({
                 </p>
               </div>
               <button
-                onClick={() => setSelectedBus(null)}
+                onClick={() => setSelectedBusId(null)}
                 className="text-slate-500 hover:text-slate-700 text-2xl"
               >
                 ✕
               </button>
             </div>
 
-            {locations[selectedBus.id] && (
+            {mergedLocations[selectedBus.id] && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-slate-600 font-semibold">Latitude</p>
                   <p className="text-lg font-bold text-slate-900 mt-1">
-                    {locations[selectedBus.id].latitude.toFixed(6)}
+                    {mergedLocations[selectedBus.id].latitude.toFixed(6)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-600 font-semibold">Longitude</p>
                   <p className="text-lg font-bold text-slate-900 mt-1">
-                    {locations[selectedBus.id].longitude.toFixed(6)}
+                    {mergedLocations[selectedBus.id].longitude.toFixed(6)}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-sm text-slate-600 font-semibold">Last Update</p>
                   <p className="text-sm text-slate-900 mt-1">
-                    {new Date(locations[selectedBus.id].timestamp).toLocaleString()}
+                    {new Date(mergedLocations[selectedBus.id].timestamp).toLocaleString()}
                   </p>
                 </div>
               </div>

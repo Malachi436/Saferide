@@ -31,6 +31,7 @@ export default function RootNavigator() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const role = useAuthStore((s) => s.role);
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Wait for persist middleware to hydrate
@@ -38,6 +39,14 @@ export default function RootNavigator() {
     console.log('[RootNavigator] Hydration check - isAuthenticated:', isAuthenticated, 'role:', role, 'user:', user);
     setIsHydrated(true);
   }, []);
+
+  // Auto-logout if isAuthenticated changes to false (indicates token refresh failure)
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated && user) {
+      console.log('[RootNavigator] Auto-logout triggered - tokens were cleared');
+      logout();
+    }
+  }, [isAuthenticated, isHydrated, user, logout]);
 
   if (!isHydrated) {
     return (

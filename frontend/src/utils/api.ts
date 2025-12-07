@@ -86,9 +86,11 @@ class ApiClient {
               return this.axiosInstance(originalRequest);
             } catch (refreshError) {
               this.isRefreshing = false;
-              // Clear tokens and redirect to login
-              await AsyncStorage.removeItem('access_token');
-              await AsyncStorage.removeItem('refresh_token');
+              // Refresh failed - clear tokens and force logout
+              console.log('[API Client] Token refresh failed, clearing tokens');
+              await this.clearTokens();
+              
+              // Force app to reload/redirect to login by throwing error
               throw refreshError;
             }
           } else {

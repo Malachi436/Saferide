@@ -13,8 +13,25 @@ export const LiveTrackingScreen = () => {
   const [socket, setSocket] = useState<any>(null);
 
   useEffect(() => {
-    // Connect to Socket.IO
+    initializeSocket();
+    return () => {
+      socket?.disconnect();
+    };
+  }, [activeTrip?.id]);
+
+  const initializeSocket = async () => {
+    // Get auth token from AsyncStorage
+    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+    const token = await AsyncStorage.getItem('access_token');
+    
+    if (!token) {
+      console.log('[LiveTracking] No auth token found, cannot connect socket');
+      return;
+    }
+
+    // Connect to Socket.IO with authentication
     const newSocket = io('http://192.168.100.8:3000', {
+      auth: { token },
       transports: ['websocket'],
       reconnection: true,
     });
@@ -51,11 +68,7 @@ export const LiveTrackingScreen = () => {
     });
 
     setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [activeTrip?.id]);
+  };
 
   // Mock bus location if no real location yet
   const displayBusLocation = busLocation || {

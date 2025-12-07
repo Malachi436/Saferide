@@ -29,19 +29,42 @@ export const DriverHomeScreen = () => {
   useEffect(() => {
     loadMockData();
     fetchTodayTrip();
-    // Initialize socket connection
-    const newSocket = io('http://192.168.100.8:3000', {
-      transports: ['websocket'],
-      reconnection: true,
-    });
-    setSocket(newSocket);
+    initializeSocket();
     return () => {
       if (gpsService.isTracking()) {
         gpsService.stopTracking();
       }
-      newSocket.disconnect();
+      socket?.disconnect();
     };
   }, []);
+
+  const initializeSocket = async () => {
+    // Get auth token from AsyncStorage
+    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+    const token = await AsyncStorage.getItem('access_token');
+    
+    if (!token) {
+      console.log('[DriverHome] No auth token found, cannot connect socket');
+      return;
+    }
+
+    // Initialize socket connection with authentication
+    const newSocket = io('http://192.168.100.8:3000', {
+      auth: { token },
+      transports: ['websocket'],
+      reconnection: true,
+    });
+
+    newSocket.on('connect', () => {
+      console.log('[DriverHome] Socket connected:', newSocket.id);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('[DriverHome] Socket disconnected');
+    });
+
+    setSocket(newSocket);
+  };
 
   const fetchTodayTrip = async () => {
     try {

@@ -124,6 +124,8 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     @MessageBody() data: { busId: string },
   ) {
     client.join(`bus:${data.busId}`);
+    console.log(`[Socket] Client ${client.id} joined bus room: bus:${data.busId}`);
+    console.log(`[Socket] Total clients in bus:${data.busId}:`, this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0);
     return { success: true };
   }
 
@@ -155,12 +157,16 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       timestamp: new Date().toISOString(),
     };
 
+    const roomSize = this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0;
+    console.log(`[GPS Update] Broadcasting to ${roomSize} clients in room bus:${data.busId}`);
+    
     // Emit to bus-specific room
     this.server.to(`bus:${data.busId}`).emit('bus_location', locationData);
 
     // Also broadcast as location_update for subscribers
     this.server.emit('new_location_update', locationData);
 
+    console.log(`[GPS Update] Broadcasted location data for bus ${data.busId}`);
     return { success: true };
   }
 

@@ -64,26 +64,38 @@ export function useSocket(options: UseSocketOptions) {
     // Listen for location updates
     socket.on('location_update', (data: BusLocation) => {
       console.log('[Socket] Location update:', data);
-      setBusLocations((prev) => ({
-        ...prev,
-        [data.busId]: data,
-      }));
+      setBusLocations((prev) => {
+        const updated = {
+          ...prev,
+          [data.busId]: data,
+        };
+        console.log('[Socket] Updated bus locations:', updated);
+        return updated;
+      });
     });
 
     socket.on('new_location_update', (data: BusLocation) => {
       console.log('[Socket] New location update:', data);
-      setBusLocations((prev) => ({
-        ...prev,
-        [data.busId]: data,
-      }));
+      setBusLocations((prev) => {
+        const updated = {
+          ...prev,
+          [data.busId]: data,
+        };
+        console.log('[Socket] Updated bus locations from new_location_update:', updated);
+        return updated;
+      });
     });
 
     socket.on('bus_location', (data: BusLocation) => {
       console.log('[Socket] Bus location:', data);
-      setBusLocations((prev) => ({
-        ...prev,
-        [data.busId]: data,
-      }));
+      setBusLocations((prev) => {
+        const updated = {
+          ...prev,
+          [data.busId]: data,
+        };
+        console.log('[Socket] Updated bus locations from bus_location:', updated);
+        return updated;
+      });
     });
 
     return () => {

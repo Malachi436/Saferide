@@ -59,7 +59,13 @@ export const DriverHomeScreen = () => {
   };
 
   const activeTrip = todayTrip || mockTrip;
-  const busId = todayTrip?.bus.id || activeTrip?.id || 'unknown-bus';
+  const busId = todayTrip?.bus.id || (activeTrip as any)?.id || 'unknown-bus';
+
+  const displayRouteName = todayTrip?.route?.name || (activeTrip as any)?.route || 'Route A - Morning';
+  const totalChildren = todayTrip?.attendances?.length || (activeTrip as any)?.totalChildren || 4;
+  const pickedUpCount = todayTrip?.attendances?.filter((a: any) => a.status === 'PICKED_UP').length || (activeTrip as any)?.pickedUp || 2;
+  const droppedOffCount = todayTrip?.attendances?.filter((a: any) => a.status === 'DROPPED_OFF').length || (activeTrip as any)?.droppedOff || 0;
+  const absentCount = todayTrip?.attendances?.filter((a: any) => a.status === 'ABSENT').length || (activeTrip as any)?.absent || 0;
 
   const toggleGPSTracking = async () => {
     try {
@@ -73,6 +79,11 @@ export const DriverHomeScreen = () => {
           Alert.alert('Error', 'Connection not ready');
           return;
         }
+        
+        // Join bus room before starting GPS tracking
+        console.log('[DriverHome] Joining bus room:', busId);
+        socket.emit('join_bus_room', { busId });
+        
         await gpsService.startTracking(socket, busId, 5000);
         setTracking(true);
         setError(null);
@@ -121,10 +132,10 @@ export const DriverHomeScreen = () => {
 
       <LiquidCard className="mt-4">
         <Text style={styles.tripTitle}>Today's Trip</Text>
-        <Text style={styles.routeName}>{activeTrip?.route || 'Route A - Morning'}</Text>
+        <Text style={styles.routeName}>{displayRouteName}</Text>
         <View style={styles.tripTime}>
           <Text style={styles.tripTimeText}>
-            {activeTrip?.startTime || '07:00'} - {activeTrip?.endTime || 'In Progress'}
+            {activeTrip?.startTime || '07:00'} - In Progress
           </Text>
         </View>
       </LiquidCard>
@@ -133,7 +144,7 @@ export const DriverHomeScreen = () => {
         <LiquidCard className="flex-1">
           <View style={styles.statCard}>
             <Ionicons name="people-outline" size={24} color="#3B82F6" />
-            <Text style={styles.statValue}>{activeTrip?.totalChildren || 4}</Text>
+            <Text style={styles.statValue}>{totalChildren}</Text>
             <Text style={styles.statLabel}>Total</Text>
           </View>
         </LiquidCard>
@@ -141,7 +152,7 @@ export const DriverHomeScreen = () => {
         <LiquidCard className="flex-1 ml-3">
           <View style={styles.statCard}>
             <Ionicons name="checkmark-circle-outline" size={24} color="#10B981" />
-            <Text style={styles.statValue}>{activeTrip?.pickedUp || 2}</Text>
+            <Text style={styles.statValue}>{pickedUpCount}</Text>
             <Text style={styles.statLabel}>Picked</Text>
           </View>
         </LiquidCard>
@@ -151,7 +162,7 @@ export const DriverHomeScreen = () => {
         <LiquidCard className="flex-1">
           <View style={styles.statCard}>
             <Ionicons name="home-outline" size={24} color="#3B82F6" />
-            <Text style={styles.statValue}>{activeTrip?.droppedOff || 0}</Text>
+            <Text style={styles.statValue}>{droppedOffCount}</Text>
             <Text style={styles.statLabel}>Dropped</Text>
           </View>
         </LiquidCard>
@@ -159,7 +170,7 @@ export const DriverHomeScreen = () => {
         <LiquidCard className="flex-1 ml-3">
           <View style={styles.statCard}>
             <Ionicons name="close-circle-outline" size={24} color="#EF4444" />
-            <Text style={styles.statValue}>{activeTrip?.absent || 0}</Text>
+            <Text style={styles.statValue}>{absentCount}</Text>
             <Text style={styles.statLabel}>Absent</Text>
           </View>
         </LiquidCard>

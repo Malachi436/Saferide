@@ -294,7 +294,7 @@ async function main() {
       busId: bus.id,
       routeId: route.id,
       driverId: driver.id,
-      status: 'SCHEDULED',
+      status: 'IN_PROGRESS',
       startTime: today,
     },
   });

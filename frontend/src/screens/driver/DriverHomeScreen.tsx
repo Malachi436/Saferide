@@ -3,8 +3,8 @@
  * Main dashboard for drivers showing today's trip
  */
 
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Switch, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,6 +18,7 @@ import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
 import { socketService } from "../../utils/socket";
+import { gpsService } from "../../services/gpsService";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
@@ -29,6 +30,8 @@ export default function DriverHomeScreen() {
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isGPSTracking, setIsGPSTracking] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
 
   const fetchTodayTrip = async () => {
     try {
@@ -82,6 +85,48 @@ export default function DriverHomeScreen() {
   const handleLogout = () => {
     logout();
   };
+
+  const toggleGPSTracking = useCallback(async () => {
+    console.log('[DriverHome] GPS toggle pressed, current state:', isGPSTracking);
+    
+    try {
+      if (isGPSTracking) {
+        console.log('[DriverHome] Stopping GPS tracking');
+        gpsService.stopTracking();
+        setIsGPSTracking(false);
+        setGpsError(null);
+        Alert.alert('GPS Stopped', 'Location tracking has been stopped.');
+      } else {
+        console.log('[DriverHome] Starting GPS tracking');
+        
+        // Check socket connection
+        if (!socketService.isConnected()) {
+          console.log('[DriverHome] Socket not connected, reconnecting...');
+          await socketService.connect();
+        }
+        
+        const busId = trip?.bus?.id || trip?.busId || 'unknown-bus';
+        console.log('[DriverHome] Starting GPS for busId:', busId);
+        
+        // Get the socket instance
+        const socket = (socketService as any).socket;
+        if (!socket) {
+          Alert.alert('Error', 'Connection not ready. Please wait and try again.');
+          return;
+        }
+        
+        await gpsService.startTracking(socket, busId, 5000);
+        setIsGPSTracking(true);
+        setGpsError(null);
+        Alert.alert('GPS Started', 'Your location is now being shared.');
+      }
+    } catch (err: any) {
+      console.error('[DriverHome] GPS toggle error:', err);
+      setGpsError(err.message);
+      setIsGPSTracking(false);
+      Alert.alert('GPS Error', err.message || 'Failed to start GPS tracking');
+    }
+  }, [isGPSTracking, trip]);
 
   return (
     <View style={styles.container}>
@@ -154,6 +199,37 @@ export default function DriverHomeScreen() {
                   </View>
                 </View>
               </LiquidGlassCard>
+
+              {/* GPS Tracking Card - Add this after Trip Info Card */}
+              <Pressable onPress={toggleGPSTracking}>
+                <LiquidGlassCard className="mb-4" intensity="medium">
+                  <View style={styles.gpsCard}>
+                    <View style={styles.gpsInfo}>
+                      <Ionicons 
+                        name={isGPSTracking ? "location" : "location-outline"} 
+                        size={24} 
+                        color={isGPSTracking ? colors.accent.successGreen : colors.neutral.textSecondary} 
+                      />
+                      <View style={styles.gpsTextContainer}>
+                        <Text style={styles.gpsTitle}>Live GPS Tracking</Text>
+                        <Text style={[
+                          styles.gpsStatus, 
+                          isGPSTracking && { color: colors.accent.successGreen }
+                        ]}>
+                          {isGPSTracking ? 'Tracking active' : 'Tap to start tracking'}
+                        </Text>
+                        {gpsError && <Text style={styles.gpsErrorText}>{gpsError}</Text>}
+                      </View>
+                    </View>
+                    <Switch
+                      value={isGPSTracking}
+                      onValueChange={toggleGPSTracking}
+                      trackColor={{ false: '#E5E7EB', true: colors.accent.successGreen + '33' }}
+                      thumbColor={isGPSTracking ? colors.accent.successGreen : '#9CA3AF'}
+                    />
+                  </View>
+                </LiquidGlassCard>
+              </Pressable>
 
               {/* Start Trip Button */}
               {trip.status === "SCHEDULED" && (
@@ -414,5 +490,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.neutral.textSecondary,
     textAlign: "center",
+  },
+  gpsCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 8,
+  },
+  gpsInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 12,
+  },
+  gpsTextContainer: {
+    flex: 1,
+  },
+  gpsTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.neutral.textPrimary,
+  },
+  gpsStatus: {
+    fontSize: 13,
+    color: colors.neutral.textSecondary,
+    marginTop: 2,
+  },
+  gpsErrorText: {
+    fontSize: 12,
+    color: colors.status.dangerRed,
+    marginTop: 2,
   },
 });

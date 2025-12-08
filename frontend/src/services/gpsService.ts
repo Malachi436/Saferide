@@ -20,17 +20,17 @@ export const gpsService = {
     try {
       console.log('[GPS] Requesting location permissions...');
       const { status } = await Location.requestForegroundPermissionsAsync();
-      console.log('[GPS] Permission status:', status);
+      console.log('[GPS] Permission request completed. Status:', status);
       
       if (status !== 'granted') {
-        console.warn('[GPS] Location permission denied');
-        throw new Error('Location permission denied. Please enable location access in Settings.');
+        console.warn('[GPS] Location permission denied. Status:', status);
+        throw new Error(`Location permission denied (${status}). Please enable location access in Settings.`);
       }
       
       console.log('[GPS] Location permission granted');
       return true;
-    } catch (error) {
-      console.error('[GPS] Permission request failed:', error);
+    } catch (error: any) {
+      console.error('[GPS] Permission request failed:', error?.message || error);
       throw error;
     }
   },

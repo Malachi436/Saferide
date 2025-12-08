@@ -3,9 +3,13 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // Enable WebSocket adapter
+  app.useWebSocketAdapter(new IoAdapter(app));
   
   // Set up global logger
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));

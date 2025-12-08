@@ -5,8 +5,10 @@ const app_module_1 = require("./app.module");
 const common_1 = require("@nestjs/common");
 const nest_winston_1 = require("nest-winston");
 const http_exception_filter_1 = require("./common/filters/http-exception.filter");
+const platform_socket_io_1 = require("@nestjs/platform-socket.io");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.useWebSocketAdapter(new platform_socket_io_1.IoAdapter(app));
     app.useLogger(app.get(nest_winston_1.WINSTON_MODULE_NEST_PROVIDER));
     const corsOrigins = process.env.CORS_ORIGINS
         ? process.env.CORS_ORIGINS.split(',')

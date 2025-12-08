@@ -203,6 +203,9 @@ exports.RealtimeGateway = RealtimeGateway = __decorate([
         cors: {
             origin: '*',
         },
+        transports: ['websocket', 'polling'],
+        pingInterval: 25000,
+        pingTimeout: 60000,
     }),
     __metadata("design:paramtypes", [jwt_1.JwtService, prisma_service_1.PrismaService])
 ], RealtimeGateway);

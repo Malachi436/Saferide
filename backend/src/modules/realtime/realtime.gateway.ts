@@ -8,6 +8,9 @@ import { PrismaService } from '../../prisma/prisma.service';
   cors: {
     origin: '*',
   },
+  transports: ['websocket', 'polling'],
+  pingInterval: 25000,  // Send ping every 25 seconds
+  pingTimeout: 60000,   // Wait 60 seconds for pong response
 })
 export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

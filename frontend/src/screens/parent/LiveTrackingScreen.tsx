@@ -18,18 +18,18 @@ export default function LiveTrackingScreen() {
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
   // TODO: Implement real GPS tracking with API
-  const trip: any = null;
-  const driver: any = null;
-  const userChildren: any[] = [];
+  const trip = null;
+  const driver = null;
+  const userChildren = [];
 
-  const selectedChild: any = null;
+  const selectedChild = null;
 
   // Calculate ETA (mock)
   const eta = "8 mins";
 
   const initialRegion = {
-    latitude: 5.6037,
-    longitude: -0.187,
+    latitude: selectedChild?.pickupLocation.latitude || 5.6037,
+    longitude: selectedChild?.pickupLocation.longitude || -0.187,
     latitudeDelta: 0.02,
     longitudeDelta: 0.02,
   };
@@ -114,7 +114,7 @@ export default function LiveTrackingScreen() {
                     >
                       {child.name
                         .split(" ")
-                        .map((n: string) => n[0])
+                        .map((n) => n[0])
                         .join("")}
                     </Text>
                   </View>
@@ -182,7 +182,7 @@ export default function LiveTrackingScreen() {
                 <Text style={styles.driverAvatarText}>
                   {driver.name
                     .split(" ")
-                    .map((n: string) => n[0])
+                    .map((n) => n[0])
                     .join("")}
                 </Text>
               </View>

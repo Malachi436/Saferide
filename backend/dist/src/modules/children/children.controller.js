@@ -53,19 +53,6 @@ let ChildrenController = class ChildrenController {
             },
         });
     }
-    async getAvailableChildrenBySchool(schoolId) {
-        return this.childrenService.getUnassignedChildrenBySchool(schoolId);
-    }
-    async assignChildToParent(childId, data) {
-        return this.childrenService.assignChildToParent(childId, data.parentId, data);
-    }
-    async subscribeToPaymentPlan(childId, data) {
-        return this.childrenService.createPaymentSubscription(childId, data.parentId, data.planId);
-    }
-    async getDaysUntilPaymentDue(childId) {
-        const daysRemaining = await this.childrenService.getDaysUntilPaymentDue(childId);
-        return { childId, daysRemaining };
-    }
 };
 exports.ChildrenController = ChildrenController;
 __decorate([
@@ -123,40 +110,6 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ChildrenController.prototype, "getSchools", null);
-__decorate([
-    (0, common_1.Get)('school/:schoolId/available'),
-    (0, roles_decorator_1.Roles)('PARENT'),
-    __param(0, (0, common_1.Param)('schoolId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ChildrenController.prototype, "getAvailableChildrenBySchool", null);
-__decorate([
-    (0, common_1.Post)(':childId/assign'),
-    (0, roles_decorator_1.Roles)('PARENT'),
-    __param(0, (0, common_1.Param)('childId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], ChildrenController.prototype, "assignChildToParent", null);
-__decorate([
-    (0, common_1.Post)(':childId/subscribe-plan'),
-    (0, roles_decorator_1.Roles)('PARENT'),
-    __param(0, (0, common_1.Param)('childId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], ChildrenController.prototype, "subscribeToPaymentPlan", null);
-__decorate([
-    (0, common_1.Get)(':childId/payment-days-remaining'),
-    (0, roles_decorator_1.Roles)('PARENT'),
-    __param(0, (0, common_1.Param)('childId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ChildrenController.prototype, "getDaysUntilPaymentDue", null);
 exports.ChildrenController = ChildrenController = __decorate([
     (0, common_1.Controller)('children'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

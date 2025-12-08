@@ -8,7 +8,7 @@ export default function CompanyAnalyticsPage({
 }: {
   params: Promise<{ companyId: string }>;
 }) {
-  use(params);
+  const { companyId } = use(params);
 
   return (
     <DashboardLayout>

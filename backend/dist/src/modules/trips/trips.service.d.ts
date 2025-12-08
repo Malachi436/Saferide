@@ -8,7 +8,6 @@ export declare class TripsService {
     update(id: string, data: any): Promise<Trip>;
     findAll(): Promise<Trip[]>;
     findActiveByChildId(childId: string): Promise<Trip | null>;
-    findActiveByCompany(companyId: string): Promise<Trip[]>;
     remove(id: string): Promise<Trip>;
     transitionTripStatus(tripId: string, newStatus: TripStatus, userId: string): Promise<Trip>;
     private isValidTransition;

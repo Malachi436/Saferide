@@ -2,8 +2,9 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // API configuration
-// Use localhost for web, or machine IP (192.168.100.8) for mobile/Expo Go
-const API_BASE_URL = 'http://192.168.100.8:3000';
+// Use your computer's IP address for physical devices or emulators
+// For local development, change 192.168.1.X to your computer's actual IP
+const API_BASE_URL = 'http://192.168.100.3:3000';
 
 interface ApiRequestConfig {
   headers?: Record<string, string>;
@@ -86,11 +87,9 @@ class ApiClient {
               return this.axiosInstance(originalRequest);
             } catch (refreshError) {
               this.isRefreshing = false;
-              // Refresh failed - clear tokens and force logout
-              console.log('[API Client] Token refresh failed, clearing tokens');
-              await this.clearTokens();
-              
-              // Force app to reload/redirect to login by throwing error
+              // Clear tokens and redirect to login
+              await AsyncStorage.removeItem('access_token');
+              await AsyncStorage.removeItem('refresh_token');
               throw refreshError;
             }
           } else {

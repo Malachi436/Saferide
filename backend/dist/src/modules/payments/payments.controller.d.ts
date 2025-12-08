@@ -9,12 +9,12 @@ export declare class PaymentsController {
     constructor(paymentsService: PaymentsService);
     createPaymentIntent(createPaymentIntentDto: CreatePaymentIntentDto): Promise<{
         id: string;
+        status: string;
         createdAt: Date;
         updatedAt: Date;
-        parentId: string;
-        status: string;
         amount: number;
         currency: string;
+        parentId: string;
         hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
     }>;
@@ -23,23 +23,23 @@ export declare class PaymentsController {
     }>;
     getPaymentHistory(parentId: string): Promise<{
         id: string;
+        status: string;
         createdAt: Date;
         updatedAt: Date;
-        parentId: string;
-        status: string;
         amount: number;
         currency: string;
+        parentId: string;
         hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
     }[]>;
     getPaymentById(id: string): Promise<{
         id: string;
+        status: string;
         createdAt: Date;
         updatedAt: Date;
-        parentId: string;
-        status: string;
         amount: number;
         currency: string;
+        parentId: string;
         hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
     }>;

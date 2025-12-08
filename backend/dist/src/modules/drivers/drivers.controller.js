@@ -23,19 +23,13 @@ let DriversController = class DriversController {
         this.driversService = driversService;
     }
     create(createDriverDto) {
-        console.log('[DriversController] POST /drivers called with data:', createDriverDto);
         return this.driversService.create(createDriverDto);
     }
     findAll() {
         return this.driversService.findAll();
     }
-    async getTodayTrip(userId, req) {
+    async getTodayTrip(userId) {
         console.log('[DriversController] getTodayTrip called with userId:', userId);
-        console.log('[DriversController] Authenticated user:', req.user);
-        if (req.user.userId !== userId) {
-            console.warn('[DriversController] User mismatch - token userId:', req.user.userId, 'requested:', userId);
-            throw new common_1.ForbiddenException('You can only access your own trip data');
-        }
         const driver = await this.driversService.findByUserId(userId);
         console.log('[DriversController] Found driver:', driver);
         if (!driver) {
@@ -76,9 +70,8 @@ __decorate([
     (0, common_1.Get)(':id/today-trip'),
     (0, roles_decorator_1.Roles)('DRIVER'),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DriversController.prototype, "getTodayTrip", null);
 __decorate([

@@ -25,7 +25,6 @@ export default function ManageChildrenScreen({ navigation }: Props) {
   const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [paymentDaysRemaining, setPaymentDaysRemaining] = useState<{ [key: string]: number | null }>({});
 
   const fetchChildren = async () => {
     if (!user?.id) return;
@@ -35,23 +34,6 @@ export default function ManageChildrenScreen({ navigation }: Props) {
       const response = await apiClient.get<Child[]>(`/children/parent/${user.id}`);
       console.log('[ManageChildren] Fetched children:', response);
       setChildren(Array.isArray(response) ? response : []);
-      
-      // Fetch payment days remaining for each child
-      if (Array.isArray(response)) {
-        const daysMap: { [key: string]: number | null } = {};
-        for (const child of response) {
-          try {
-            const daysResponse = await apiClient.get(
-              `/children/${child.id}/payment-days-remaining`
-            ) as { daysRemaining: number | null };
-            daysMap[child.id] = daysResponse?.daysRemaining || null;
-          } catch (err) {
-            console.log(`[ManageChildren] No payment subscription for ${child.id}`);
-            daysMap[child.id] = null;
-          }
-        }
-        setPaymentDaysRemaining(daysMap);
-      }
     } catch (error) {
       console.error('[ManageChildren] Error fetching children:', error);
       setChildren([]);
@@ -142,23 +124,6 @@ export default function ManageChildrenScreen({ navigation }: Props) {
                       <Text style={styles.childDetails}>
                         School: {child.school?.name || 'Not assigned'}
                       </Text>
-                      {paymentDaysRemaining[child.id] !== null && paymentDaysRemaining[child.id] !== undefined && (
-                        <View style={styles.paymentStatus}>
-                          <Ionicons
-                            name={paymentDaysRemaining[child.id]! <= 7 ? "warning" : "checkmark-circle"}
-                            size={14}
-                            color={paymentDaysRemaining[child.id]! <= 7 ? colors.status.dangerRed : colors.primary.teal}
-                          />
-                          <Text
-                            style={[
-                              styles.paymentText,
-                              paymentDaysRemaining[child.id]! <= 7 && styles.paymentTextWarning,
-                            ]}
-                          >
-                            {paymentDaysRemaining[child.id]} days left
-                          </Text>
-                        </View>
-                      )}
                     </View>
                     <Pressable style={styles.editButton}>
                       <Ionicons name="create-outline" size={20} color={colors.primary.blue} />
@@ -285,19 +250,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.neutral.textSecondary,
     textAlign: "center",
-  },
-  paymentStatus: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 6,
-    gap: 4,
-  },
-  paymentText: {
-    fontSize: 12,
-    color: colors.primary.teal,
-    fontWeight: "500",
-  },
-  paymentTextWarning: {
-    color: colors.status.dangerRed,
   },
 });

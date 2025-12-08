@@ -2,7 +2,6 @@ import { Controller, Post, Body, Get, Param, Patch, UseGuards } from '@nestjs/co
 import { AttendanceService } from './attendance.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AttendanceStatus } from '@prisma/client';
 
 class RecordAttendanceDto {
@@ -13,7 +12,7 @@ class RecordAttendanceDto {
 }
 
 @Controller('attendance')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(RolesGuard)
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 

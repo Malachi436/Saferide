@@ -10,8 +10,6 @@ exports.PaymentsModule = void 0;
 const common_1 = require("@nestjs/common");
 const payments_service_1 = require("./payments.service");
 const payments_controller_1 = require("./payments.controller");
-const payment_plan_service_1 = require("./payment-plan.service");
-const payment_plan_controller_1 = require("./payment-plan.controller");
 const prisma_module_1 = require("../../prisma/prisma.module");
 let PaymentsModule = class PaymentsModule {
 };
@@ -19,9 +17,9 @@ exports.PaymentsModule = PaymentsModule;
 exports.PaymentsModule = PaymentsModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule],
-        controllers: [payments_controller_1.PaymentsController, payment_plan_controller_1.PaymentPlanController],
-        providers: [payments_service_1.PaymentsService, payment_plan_service_1.PaymentPlanService],
-        exports: [payments_service_1.PaymentsService, payment_plan_service_1.PaymentPlanService],
+        controllers: [payments_controller_1.PaymentsController],
+        providers: [payments_service_1.PaymentsService],
+        exports: [payments_service_1.PaymentsService],
     })
 ], PaymentsModule);
 //# sourceMappingURL=payments.module.js.map

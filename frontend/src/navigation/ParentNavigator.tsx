@@ -14,7 +14,6 @@ import ParentHomeScreen from "../screens/parent/ParentHomeScreen";
 import LiveTrackingScreen from "../screens/parent/LiveTrackingScreen";
 import NotificationsScreen from "../screens/parent/NotificationsScreen";
 import SettingsScreen from "../screens/parent/SettingsScreen";
-import SelectChildScreen from "../screens/parent/SelectChildScreen";
 import AddChildScreen from "../screens/parent/AddChildScreen";
 import EditProfileScreen from "../screens/parent/EditProfileScreen";
 import ManageChildrenScreen from "../screens/parent/ManageChildrenScreen";
@@ -123,7 +122,7 @@ export default function ParentNavigator() {
       />
       <Stack.Screen
         name="AddChild"
-        component={SelectChildScreen}
+        component={AddChildScreen}
         options={{
           title: "Add Child",
           presentation: "modal",

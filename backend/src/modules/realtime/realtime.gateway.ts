@@ -124,8 +124,6 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     @MessageBody() data: { busId: string },
   ) {
     client.join(`bus:${data.busId}`);
-    console.log(`[Socket] Client ${client.id} joined bus room: bus:${data.busId}`);
-    console.log(`[Socket] Total clients in bus:${data.busId}:`, this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0);
     return { success: true };
   }
 
@@ -141,12 +139,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage('gps_update')
   async handleGpsUpdate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { busId: string; latitude: number; longitude: number; speed?: number; heading?: number; accuracy?: number },
+    @MessageBody() data: { busId: string; latitude: number; longitude: number; speed?: number; heading?: number; accuracy?: number; timestamp?: string },
   ) {
-    const userId = this.connectedUsers.get(client.id);
-    console.log(`[GPS Update] Bus: ${data.busId}, User: ${userId}, Lat: ${data.latitude}, Lng: ${data.longitude}`);
-
-    // Broadcast to all clients in the bus room
+    console.log('[GPS Update] Received from client:', client.id, 'Bus:', data.busId);
+    
     const locationData = {
       busId: data.busId,
       latitude: data.latitude,
@@ -154,19 +150,18 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       speed: data.speed,
       heading: data.heading,
       accuracy: data.accuracy,
-      timestamp: new Date().toISOString(),
+      timestamp: data.timestamp || new Date().toISOString(),
     };
 
+    // Broadcast to bus-specific room
     const roomSize = this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0;
     console.log(`[GPS Update] Broadcasting to ${roomSize} clients in room bus:${data.busId}`);
     
-    // Emit to bus-specific room
     this.server.to(`bus:${data.busId}`).emit('bus_location', locationData);
-
-    // Also broadcast as location_update for subscribers
+    
+    // Also broadcast to all connected clients for admin dashboard
     this.server.emit('new_location_update', locationData);
-
-    console.log(`[GPS Update] Broadcasted location data for bus ${data.busId}`);
+    
     return { success: true };
   }
 
@@ -195,10 +190,5 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   // Method to emit notification events
   async emitNewNotification(userId: string, notification: any) {
     this.server.to(`user:${userId}`).emit('new_notification', notification);
-  }
-
-  // Method to emit attendance status updates (called by AttendanceService)
-  async emitAttendanceUpdate(parentId: string, attendanceData: any) {
-    this.server.to(`user:${parentId}`).emit('attendance_status_update', attendanceData);
   }
 }

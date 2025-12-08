@@ -1,31 +1,44 @@
 'use client';
 
+import { useEffect, useState, use } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { ROSAgoMap } from '@/components/ROSAgoMap';
-import { useSocket } from '@/hooks/useSocket';
-import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/lib/api-client';
-import { useState, useEffect, use, useMemo } from 'react';
+import { useSocket } from '@/hooks/useSocket';
+import dynamic from 'next/dynamic';
 
-interface Bus {
-  id: string;
-  plateNumber: string;
-  driver: { id: string; user: { firstName: string; lastName: string } };
-}
-
-interface Trip {
-  id: string;
-  bus: Bus;
-  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED';
-  startTime: string;
-}
+// Dynamically import ROSAgoMap to avoid SSR issues with MapLibre
+const ROSAgoMap = dynamic(
+  () => import('@/components/ROSAgoMapClient').then((mod) => mod.ROSAgoMapClient),
+  { ssr: false, loading: () => <div className="h-[500px] bg-slate-100 animate-pulse rounded-lg" /> }
+);
 
 interface Location {
   latitude: number;
   longitude: number;
-  timestamp: string;
+  timestamp?: string;
   plateNumber?: string;
   driverName?: string;
+}
+
+interface Trip {
+  id: string;
+  status: string;
+  startTime: string;
+  bus: {
+    id: string;
+    plateNumber: string;
+    driver: {
+      id: string;
+      user: {
+        firstName: string;
+        lastName: string;
+      };
+    };
+  };
+  route: {
+    id: string;
+    name: string;
+  };
 }
 
 interface School {
@@ -35,63 +48,38 @@ interface School {
   longitude?: number;
 }
 
-export default function LiveDashboardPage({
-  params,
-}: {
-  params: Promise<{ companyId: string }>;
-}) {
-  const { companyId } = use(params);
-  const { token } = useAuth();
+export default function LiveDashboardPage({ params }: { params: Promise<{ companyId: string }> }) {
+  const resolvedParams = use(params);
+  const companyId = resolvedParams.companyId;
+  
   const [activeTrips, setActiveTrips] = useState<Trip[]>([]);
-  const [restLocations, setRestLocations] = useState<{ [busId: string]: Location }>({});
   const [schools, setSchools] = useState<School[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [restLocations, setRestLocations] = useState<{ [key: string]: Location }>({});
   const [selectedBusId, setSelectedBusId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Get bus IDs for socket subscription
-  const busIds = useMemo(() => activeTrips.map((t) => t.bus.id), [activeTrips]);
+  const { connected, busLocations } = useSocket(companyId);
 
-  // Real-time socket connection
-  const { connected, busLocations: socketLocations } = useSocket({
-    token: token || undefined,
-    companyId,
-    busIds,
+  // Merge socket locations with REST locations
+  const mergedLocations = { ...restLocations };
+  Object.keys(busLocations).forEach((busId) => {
+    const loc = busLocations[busId];
+    const trip = activeTrips.find((t) => t.bus.id === busId);
+    mergedLocations[busId] = {
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+      timestamp: loc.timestamp,
+      plateNumber: trip?.bus.plateNumber,
+      driverName: trip ? `${trip.bus.driver.user.firstName} ${trip.bus.driver.user.lastName}` : undefined,
+    };
   });
-
-  // Merge REST locations with socket locations (socket takes priority)
-  const mergedLocations = useMemo(() => {
-    const merged: { [busId: string]: Location } = { ...restLocations };
-    
-    // Override with socket locations
-    Object.entries(socketLocations).forEach(([busId, loc]) => {
-      const trip = activeTrips.find((t) => t.bus.id === busId);
-      merged[busId] = {
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-        timestamp: loc.timestamp,
-        plateNumber: trip?.bus.plateNumber,
-        driverName: trip ? `${trip.bus.driver.user.firstName} ${trip.bus.driver.user.lastName}` : undefined,
-      };
-    });
-
-    // Add plate numbers to REST locations
-    Object.keys(merged).forEach((busId) => {
-      const trip = activeTrips.find((t) => t.bus.id === busId);
-      if (trip && !merged[busId].plateNumber) {
-        merged[busId].plateNumber = trip.bus.plateNumber;
-        merged[busId].driverName = `${trip.bus.driver.user.firstName} ${trip.bus.driver.user.lastName}`;
-      }
-    });
-
-    return merged;
-  }, [restLocations, socketLocations, activeTrips]);
 
   useEffect(() => {
     fetchActiveTrips();
     fetchSchools();
-    
-    // Fallback polling when socket is disconnected
+
+    // Poll for updates every 10 seconds as fallback
     const interval = setInterval(() => {
       if (!connected) {
         fetchActiveTrips();
@@ -104,8 +92,8 @@ export default function LiveDashboardPage({
   const fetchSchools = async () => {
     try {
       const response = await apiClient.get(`/admin/company/${companyId}/schools`);
-      const schoolsData = Array.isArray(response) ? response : [];
-      setSchools(schoolsData);
+      const schoolList = Array.isArray(response) ? response : [];
+      setSchools(schoolList);
     } catch (err) {
       console.log('Failed to load schools');
     }
@@ -252,7 +240,7 @@ export default function LiveDashboardPage({
                         onClick={() => setSelectedBusId(isSelected ? null : trip.bus.id)}
                       >
                         <p className="font-semibold text-slate-900 text-sm">
-                          🚌 {trip.bus.plateNumber}
+                          {trip.bus.plateNumber}
                         </p>
                         <p className="text-xs text-slate-600 mt-1">
                           Driver: {trip.bus.driver.user.firstName}{' '}
@@ -266,7 +254,7 @@ export default function LiveDashboardPage({
                           ></span>
                           <p className="text-xs text-slate-500">
                             {loc
-                              ? `📍 ${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}`
+                              ? `${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}`
                               : 'No GPS'}
                           </p>
                         </div>
@@ -307,34 +295,39 @@ export default function LiveDashboardPage({
               </div>
               <button
                 onClick={() => setSelectedBusId(null)}
-                className="text-slate-500 hover:text-slate-700 text-2xl"
+                className="text-slate-400 hover:text-slate-600"
               >
-                ✕
+                Close
               </button>
             </div>
-
-            {mergedLocations[selectedBus.id] && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-slate-600 font-semibold">Latitude</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">
-                    {mergedLocations[selectedBus.id].latitude.toFixed(6)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600 font-semibold">Longitude</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">
-                    {mergedLocations[selectedBus.id].longitude.toFixed(6)}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-slate-600 font-semibold">Last Update</p>
-                  <p className="text-sm text-slate-900 mt-1">
-                    {new Date(mergedLocations[selectedBus.id].timestamp).toLocaleString()}
-                  </p>
-                </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <p className="text-xs text-slate-500">Status</p>
+                <p className="font-semibold text-green-600">Active</p>
               </div>
-            )}
+              <div>
+                <p className="text-xs text-slate-500">Speed</p>
+                <p className="font-semibold">
+                  {mergedLocations[selectedBusId!]?.latitude ? 'Moving' : 'Stopped'}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">Last Update</p>
+                <p className="font-semibold">
+                  {mergedLocations[selectedBusId!]?.timestamp
+                    ? new Date(mergedLocations[selectedBusId!].timestamp!).toLocaleTimeString()
+                    : 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">Coordinates</p>
+                <p className="font-semibold text-xs">
+                  {mergedLocations[selectedBusId!]
+                    ? `${mergedLocations[selectedBusId!].latitude.toFixed(4)}, ${mergedLocations[selectedBusId!].longitude.toFixed(4)}`
+                    : 'N/A'}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>

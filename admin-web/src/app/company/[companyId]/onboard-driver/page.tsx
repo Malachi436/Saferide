@@ -15,7 +15,6 @@ interface FormData {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
   phone: string;
   license: string;
   plateNumber: string;
@@ -37,7 +36,6 @@ export default function OnboardDriverPage({
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
     phone: '',
     license: '',
     plateNumber: '',
@@ -49,7 +47,7 @@ export default function OnboardDriverPage({
 
   const fetchBuses = async () => {
     try {
-      const data = (await apiClient.get(`/buses/company/${companyId}`)) as Bus[];
+      const data = await apiClient.get(`/buses/company/${companyId}`);
       setBuses(data || []);
     } catch (err: any) {
       console.error('Error loading buses:', err);
@@ -81,21 +79,22 @@ export default function OnboardDriverPage({
 
     try {
       // Step 1: Create the driver user account
-      const driverResponse = (await apiClient.post('/auth/signup', {
+      const driverResponse = await apiClient.post('/auth/signup', {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        password: formData.password,
+        password: `${formData.firstName.toLowerCase()}@${Math.random().toString(36).substring(7)}`,
+        role: 'DRIVER',
         phone: formData.phone,
-      })) as { userId: string };
+        companyId,
+      });
 
-      const driverId = driverResponse.userId;
+      const driverId = driverResponse.id;
 
       // Step 2: Create driver profile with license
       await apiClient.post('/drivers', {
         userId: driverId,
         license: formData.license,
-        companyId,
       });
 
       // Step 3: Find or create bus and assign driver
@@ -104,11 +103,11 @@ export default function OnboardDriverPage({
 
         if (!bus) {
           // Create new bus if it doesn't exist
-          const busResponse = (await apiClient.post('/buses', {
+          const busResponse = await apiClient.post('/buses', {
             plateNumber: formData.plateNumber,
             capacity: 50,
             driverId,
-          })) as Bus;
+          });
           bus = busResponse;
         } else {
           // Assign existing bus to driver
@@ -131,13 +130,12 @@ export default function OnboardDriverPage({
       }
 
       setSuccess(
-        `✅ Driver ${formData.firstName} ${formData.lastName} onboarded successfully!`
+        `✅ Driver ${formData.firstName} ${formData.lastName} onboarded successfully! Temporary password sent to their email.`
       );
       setFormData({
         firstName: '',
         lastName: '',
         email: '',
-        password: '',
         phone: '',
         license: '',
         plateNumber: '',
@@ -212,20 +210,6 @@ export default function OnboardDriverPage({
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="john@example.com"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Password *</label>
-                <input
-                  type="password"
-                  name="password"
-                  required
-                  minLength={6}
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Must contain uppercase, lowercase, and number"
-                />
-                <p className="text-xs text-slate-500 mt-1">At least 6 characters with uppercase, lowercase, and number</p>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Phone Number *</label>
@@ -332,7 +316,6 @@ export default function OnboardDriverPage({
                   firstName: '',
                   lastName: '',
                   email: '',
-                  password: '',
                   phone: '',
                   license: '',
                   plateNumber: '',
@@ -346,7 +329,7 @@ export default function OnboardDriverPage({
           </div>
 
           <p className="text-xs text-slate-600 mt-6">
-            * Required fields. The driver will use this email and password to login to the driver app.
+            * Required fields. A temporary password will be automatically generated and sent to the driver's email.
           </p>
         </form>
       </div>

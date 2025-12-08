@@ -13,11 +13,9 @@ exports.AttendanceService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const client_1 = require("@prisma/client");
-const realtime_gateway_1 = require("../realtime/realtime.gateway");
 let AttendanceService = class AttendanceService {
-    constructor(prisma, realtimeGateway) {
+    constructor(prisma) {
         this.prisma = prisma;
-        this.realtimeGateway = realtimeGateway;
     }
     async recordAttendance(childId, tripId, status, recordedBy) {
         return this.prisma.childAttendance.create({
@@ -30,29 +28,13 @@ let AttendanceService = class AttendanceService {
         });
     }
     async updateAttendance(id, status, recordedBy) {
-        const existing = await this.prisma.childAttendance.findUnique({
-            where: { id },
-            include: { child: true, trip: true },
-        });
-        if (!existing) {
-            throw new Error(`Attendance record ${id} not found`);
-        }
-        const updated = await this.prisma.childAttendance.update({
+        return this.prisma.childAttendance.update({
             where: { id },
             data: {
                 status,
                 recordedBy,
             },
         });
-        if (existing.child?.parentId) {
-            this.realtimeGateway.emitAttendanceUpdate(existing.child.parentId, {
-                childId: existing.childId,
-                tripId: existing.tripId,
-                status,
-                timestamp: new Date(),
-            });
-        }
-        return updated;
     }
     async getAttendanceByChild(childId) {
         return this.prisma.childAttendance.findMany({
@@ -84,7 +66,6 @@ let AttendanceService = class AttendanceService {
 exports.AttendanceService = AttendanceService;
 exports.AttendanceService = AttendanceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        realtime_gateway_1.RealtimeGateway])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], AttendanceService);
 //# sourceMappingURL=attendance.service.js.map

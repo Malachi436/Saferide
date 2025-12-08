@@ -1,4 +1,4 @@
-import { PrismaClient, AttendanceStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -205,57 +205,6 @@ async function main() {
 
   console.log('Updated children with pickup locations');
 
-  // Create unassigned children for parents to select during onboarding
-  // Create a placeholder parent user for these children
-  const placeholderParent = await prisma.user.create({
-    data: {
-      email: `unassigned-${Date.now()}@placeholder.com`,
-      firstName: 'Unassigned',
-      lastName: 'Parent',
-      role: 'PARENT',
-      passwordHash: 'temp',
-      companyId: company.id,
-    },
-  });
-
-  const unassignedChild1 = await prisma.child.create({
-    data: {
-      firstName: 'Ama',
-      lastName: 'Asante',
-      dateOfBirth: new Date('2011-03-10'),
-      schoolId: school.id,
-      parentId: placeholderParent.id,
-      pickupType: 'SCHOOL',
-    },
-  });
-
-  const unassignedChild2 = await prisma.child.create({
-    data: {
-      firstName: 'Kofi',
-      lastName: 'Boateng',
-      dateOfBirth: new Date('2013-07-22'),
-      schoolId: school.id,
-      parentId: placeholderParent.id,
-      pickupType: 'SCHOOL',
-    },
-  });
-
-  const unassignedChild3 = await prisma.child.create({
-    data: {
-      firstName: 'Abena',
-      lastName: 'Owusu',
-      dateOfBirth: new Date('2010-11-05'),
-      schoolId: school.id,
-      parentId: placeholderParent.id,
-      pickupType: 'HOME',
-      homeLatitude: 5.59,
-      homeLongitude: -0.18,
-      homeAddress: 'Osu Area',
-    },
-  });
-
-  console.log(`Created unassigned children: ${unassignedChild1.firstName}, ${unassignedChild2.firstName}, ${unassignedChild3.firstName}`);
-
   // Create a scheduled route (recurring Monday-Friday at 7:00 AM)
   const scheduledRoute = await prisma.scheduledRoute.create({
     data: {
@@ -271,45 +220,28 @@ async function main() {
 
   console.log(`Created scheduled route: ${scheduledRoute.id}`);
 
-  // Create a 24/7 testing route (active all days)
-  const testingRoute = await prisma.scheduledRoute.create({
-    data: {
-      routeId: route.id,
-      driverId: driver.id,
-      busId: bus.id,
-      scheduledTime: '00:00',
-      recurringDays: ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'],
-      status: 'ACTIVE',
-      autoAssignChildren: true,
-    },
-  });
-
-  console.log(`Created 24/7 testing route: ${testingRoute.id}`);
-
   // Create a trip for today (for immediate testing)
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set to midnight today
+  today.setHours(7, 0, 0, 0); // Set to 7:00 AM today
   const trip = await prisma.trip.create({
     data: {
       busId: bus.id,
       routeId: route.id,
       driverId: driver.id,
-      status: 'IN_PROGRESS',
+      status: 'SCHEDULED',
       startTime: today,
     },
   });
 
-  console.log(`Created trip: ${trip.id} for driver: ${driver.id}`);
-  console.log(`Trip startTime: ${trip.startTime}`);
-  console.log(`Driver userId: ${driver.userId}`);
+  console.log(`Created trip: ${trip.id}`);
 
-  // Create attendance records with PICKED_UP status (driver already picked them up)
+  // Create attendance records
   await prisma.childAttendance.create({
     data: {
       childId: child1.id,
       tripId: trip.id,
-      status: AttendanceStatus.PICKED_UP,
-      recordedBy: 'system',
+      status: 'PICKED_UP',
+      recordedBy: driverUser.id,
     },
   });
 
@@ -317,8 +249,8 @@ async function main() {
     data: {
       childId: child2.id,
       tripId: trip.id,
-      status: AttendanceStatus.PICKED_UP,
-      recordedBy: 'system',
+      status: 'PICKED_UP',
+      recordedBy: driverUser.id,
     },
   });
 

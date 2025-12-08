@@ -75,15 +75,15 @@ export default function ChildrenPage({
     try {
       setLoading(true);
       // Fetch schools
-      const schoolsData = (await apiClient.get(`/admin/company/${companyId}/schools`)) as Array<{ id: string; name: string }>;
+      const schoolsData = await apiClient.get(`/admin/company/${companyId}/schools`);
       setSchools(schoolsData || []);
 
       // Fetch children
-      const childrenData = (await apiClient.get(`/admin/company/${companyId}/children`)) as Child[];
+      const childrenData = await apiClient.get(`/admin/company/${companyId}/children`);
       setChildren(childrenData || []);
 
       // Fetch payment status
-      const paymentsData = (await apiClient.get(`/admin/company/${companyId}/children/payments`)) as PaymentStatus[];
+      const paymentsData = await apiClient.get(`/admin/company/${companyId}/children/payments`);
       if (paymentsData && Array.isArray(paymentsData)) {
         const paymentsMap = new Map();
         paymentsData.forEach((payment: PaymentStatus) => {

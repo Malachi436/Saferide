@@ -57,9 +57,9 @@ function createBusMarkerElement(plateNumber?: string, isSelected?: boolean): HTM
     transform: translate(-50%, -50%);
     width: 50px;
     height: 50px;
-    background: rgba(255, 152, 0, 0.3);
+    background: rgba(0, 188, 212, 0.3);
     border-radius: 50%;
-    animation: pulse 1.5s ease-out infinite;
+    animation: pulse 2s ease-out infinite;
   `;
   container.appendChild(pulse);
 
@@ -71,13 +71,13 @@ function createBusMarkerElement(plateNumber?: string, isSelected?: boolean): HTM
     transform: translate(-50%, -50%);
     width: 36px;
     height: 36px;
-    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    background: linear-gradient(135deg, #00BCD4 0%, #00838F 100%);
     border: 3px solid ${isSelected ? '#FFD700' : '#FFFFFF'};
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     z-index: 10;
   `;
 
@@ -96,7 +96,7 @@ function createBusMarkerElement(plateNumber?: string, isSelected?: boolean): HTM
       left: 50%;
       transform: translateX(-50%);
       margin-top: 4px;
-      background: rgba(255, 152, 0, 0.95);
+      background: rgba(28, 45, 59, 0.9);
       color: white;
       padding: 2px 6px;
       border-radius: 4px;

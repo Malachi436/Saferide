@@ -1,29 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../stores/authStore';
 import { useAttendanceStore } from '../stores/attendanceStore';
-import { useGPSStore } from '../stores/gpsStore';
 import { LiquidCard, LargeCTAButton } from '../components';
 import { Ionicons } from '@expo/vector-icons';
 import { gpsService } from '../services/gpsService';
 import { apiClient } from '../utils/api';
-import { io } from 'socket.io-client';
-
-interface Trip {
-  id: string;
-  bus: { id: string; plateNumber: string };
-  route: { name: string };
-  startTime: string;
-  attendances: Array<{ child: any }>;
-}
+import { Trip } from '../types';
 
 export const DriverHomeScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
-  const { activeTrip: mockTrip, children, loadMockData } = useAttendanceStore();
-  const { isTracking, setTracking, error, setError } = useGPSStore();
-  const [socket, setSocket] = useState<any>(null);
+  const { activeTrip, loadMockData } = useAttendanceStore();
+  const [isTracking, setTracking] = useState(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [todayTrip, setTodayTrip] = useState<Trip | null>(null);
 
   useEffect(() => {
@@ -33,14 +26,12 @@ export const DriverHomeScreen = () => {
     
     // Sync GPS state on mount
     const actualGPSState = gpsService.isTracking();
-    console.log('[DriverHome] Syncing GPS state on mount:', actualGPSState);
     if (actualGPSState !== isTracking) {
       setTracking(actualGPSState);
     }
     
     return () => {
       if (gpsService.isTracking()) {
-        console.log('[DriverHome] Component unmounting, stopping GPS');
         gpsService.stopTracking();
       }
       socket?.disconnect();
@@ -48,16 +39,14 @@ export const DriverHomeScreen = () => {
   }, []);
 
   const initializeSocket = async () => {
-    // Get auth token from AsyncStorage
     const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
     const token = await AsyncStorage.getItem('access_token');
     
     if (!token) {
-      console.log('[DriverHome] No auth token found, cannot connect socket');
+      console.log('[DriverHome] No auth token found');
       return;
     }
 
-    // Initialize socket connection with authentication
     const newSocket = io('http://192.168.100.8:3000', {
       auth: { token },
       transports: ['websocket'],
@@ -78,9 +67,7 @@ export const DriverHomeScreen = () => {
   const fetchTodayTrip = async () => {
     try {
       if (!user?.id) return;
-      const response = await apiClient.get<Trip>(
-        `/drivers/${user.id}/today-trip`
-      );
+      const response = await apiClient.get<Trip>(`/drivers/${user.id}/today-trip`);
       if (response) {
         console.log('[DriverHome] Today trip fetched:', response);
         setTodayTrip(response);
@@ -90,9 +77,8 @@ export const DriverHomeScreen = () => {
     }
   };
 
-  const activeTrip = todayTrip || mockTrip;
-  const busId = todayTrip?.bus.id || (activeTrip as any)?.id || 'unknown-bus';
-
+  const tripData = todayTrip || activeTrip;
+  const busId = todayTrip?.bus?.id || (activeTrip as any)?.id || 'unknown-bus';
   const displayRouteName = todayTrip?.route?.name || (activeTrip as any)?.route || 'Route A - Morning';
   const totalChildren = todayTrip?.attendances?.length || (activeTrip as any)?.totalChildren || 4;
   const pickedUpCount = todayTrip?.attendances?.filter((a: any) => a.status === 'PICKED_UP').length || (activeTrip as any)?.pickedUp || 2;
@@ -100,63 +86,45 @@ export const DriverHomeScreen = () => {
   const absentCount = todayTrip?.attendances?.filter((a: any) => a.status === 'ABSENT').length || (activeTrip as any)?.absent || 0;
 
   const toggleGPSTracking = async () => {
-    console.log('[DriverHome] Toggle GPS clicked, current state:', isTracking);
-    
     try {
       if (isTracking) {
-        // Stop tracking
-        console.log('[DriverHome] Stopping GPS tracking...');
         gpsService.stopTracking();
         setTracking(false);
         setError(null);
         Alert.alert('GPS Stopped', 'Location tracking stopped');
       } else {
-        // Start tracking
-        console.log('[DriverHome] Starting GPS tracking...');
-        
         if (!socket) {
-          console.error('[DriverHome] Socket not ready');
-          Alert.alert('Error', 'Connection not ready. Please wait and try again.');
+          Alert.alert('Error', 'Connection not ready. Please wait.');
           return;
         }
 
         if (!socket.connected) {
-          console.error('[DriverHome] Socket not connected');
-          Alert.alert('Error', 'Not connected to server. Please check your internet connection.');
+          Alert.alert('Error', 'Not connected to server.');
           return;
         }
         
-        // Join bus room before starting GPS tracking
-        console.log('[DriverHome] Joining bus room:', busId);
         socket.emit('join_bus_room', { busId });
         
-        // Start GPS tracking - this will request permissions
         try {
           await gpsService.startTracking(socket, busId, 5000);
           
-          // Only set tracking to true if startTracking succeeded
           if (gpsService.isTracking()) {
             setTracking(true);
             setError(null);
-            Alert.alert('GPS Started', `Location tracking started for bus ${busId}`);
-            console.log('[DriverHome] GPS tracking started successfully');
+            Alert.alert('GPS Started', `Tracking bus ${busId}`);
           } else {
-            throw new Error('GPS tracking failed to start');
+            throw new Error('GPS failed to start');
           }
         } catch (gpsError: any) {
-          console.error('[DriverHome] GPS start error:', gpsError);
           setTracking(false);
-          const errorMsg = gpsError.message || 'Failed to start GPS tracking';
-          setError(errorMsg);
-          Alert.alert('GPS Error', errorMsg);
+          setError(gpsError.message);
+          Alert.alert('GPS Error', gpsError.message);
         }
       }
     } catch (err: any) {
-      console.error('[DriverHome] Toggle error:', err);
-      const errorMsg = err.message || 'Failed to toggle GPS';
-      setError(errorMsg);
+      setError(err.message);
       setTracking(false);
-      Alert.alert('Error', errorMsg);
+      Alert.alert('Error', err.message);
     }
   };
 
@@ -180,7 +148,7 @@ export const DriverHomeScreen = () => {
             <View style={styles.gpsText}>
               <Text style={styles.gpsTitle}>Live GPS Tracking</Text>
               <Text style={styles.gpsStatus}>
-                {isTracking ? '🟢 Tracking active' : '⚪ Tracking inactive'}
+                {isTracking ? 'Tracking active' : 'Tracking inactive'}
               </Text>
               {error && <Text style={styles.gpsError}>Error: {error}</Text>}
             </View>
@@ -199,7 +167,7 @@ export const DriverHomeScreen = () => {
         <Text style={styles.routeName}>{displayRouteName}</Text>
         <View style={styles.tripTime}>
           <Text style={styles.tripTimeText}>
-            {activeTrip?.startTime || '07:00'} - In Progress
+            {tripData?.startTime || '07:00'} - In Progress
           </Text>
         </View>
       </LiquidCard>
@@ -337,7 +305,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 12,
   },
   gpsText: {
     marginLeft: 12,
@@ -349,12 +316,12 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   gpsStatus: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#6B7280',
     marginTop: 2,
   },
   gpsError: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#EF4444',
     marginTop: 2,
   },

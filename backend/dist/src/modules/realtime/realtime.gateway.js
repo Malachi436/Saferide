@@ -92,8 +92,6 @@ let RealtimeGateway = class RealtimeGateway {
     }
     async handleJoinBusRoom(client, data) {
         client.join(`bus:${data.busId}`);
-        console.log(`[Socket] Client ${client.id} joined bus room: bus:${data.busId}`);
-        console.log(`[Socket] Total clients in bus:${data.busId}:`, this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0);
         return { success: true };
     }
     async handleLeaveBusRoom(client, data) {
@@ -101,8 +99,7 @@ let RealtimeGateway = class RealtimeGateway {
         return { success: true };
     }
     async handleGpsUpdate(client, data) {
-        const userId = this.connectedUsers.get(client.id);
-        console.log(`[GPS Update] Bus: ${data.busId}, User: ${userId}, Lat: ${data.latitude}, Lng: ${data.longitude}`);
+        console.log('[GPS Update] Received from client:', client.id, 'Bus:', data.busId);
         const locationData = {
             busId: data.busId,
             latitude: data.latitude,
@@ -110,13 +107,12 @@ let RealtimeGateway = class RealtimeGateway {
             speed: data.speed,
             heading: data.heading,
             accuracy: data.accuracy,
-            timestamp: new Date().toISOString(),
+            timestamp: data.timestamp || new Date().toISOString(),
         };
         const roomSize = this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0;
         console.log(`[GPS Update] Broadcasting to ${roomSize} clients in room bus:${data.busId}`);
         this.server.to(`bus:${data.busId}`).emit('bus_location', locationData);
         this.server.emit('new_location_update', locationData);
-        console.log(`[GPS Update] Broadcasted location data for bus ${data.busId}`);
         return { success: true };
     }
     async handleJoinCompanyRoom(client, data) {
@@ -133,9 +129,6 @@ let RealtimeGateway = class RealtimeGateway {
     }
     async emitNewNotification(userId, notification) {
         this.server.to(`user:${userId}`).emit('new_notification', notification);
-    }
-    async emitAttendanceUpdate(parentId, attendanceData) {
-        this.server.to(`user:${parentId}`).emit('attendance_status_update', attendanceData);
     }
 };
 exports.RealtimeGateway = RealtimeGateway;

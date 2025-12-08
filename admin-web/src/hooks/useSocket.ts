@@ -1,92 +1,69 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:3000';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000';
 
-interface BusLocation {
+export interface BusLocation {
   busId: string;
   latitude: number;
   longitude: number;
   speed?: number;
   heading?: number;
-  accuracy?: number;
-  timestamp: string;
+  timestamp?: string;
 }
 
-interface UseSocketOptions {
-  token?: string;
-  companyId?: string;
-  busIds?: string[];
-}
-
-export function useSocket(options: UseSocketOptions) {
-  const { token, companyId, busIds = [] } = options;
-  const socketRef = useRef<Socket | null>(null);
+export function useSocket(companyId: string | null) {
   const [connected, setConnected] = useState(false);
   const [busLocations, setBusLocations] = useState<{ [busId: string]: BusLocation }>({});
+  const socketRef = useRef<Socket | null>(null);
 
-  useEffect(() => {
-    if (!token) return;
+  const connect = useCallback(() => {
+    if (!companyId) {
+      console.log('[Socket] No companyId, skipping connection');
+      return;
+    }
 
-    // Initialize socket connection
-    const socket = io(SOCKET_URL, {
+    if (socketRef.current?.connected) {
+      console.log('[Socket] Already connected');
+      return;
+    }
+
+    console.log('[Socket] Connecting to:', SOCKET_URL);
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+    socketRef.current = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
     });
 
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      console.log('[Socket] Connected');
+    socketRef.current.on('connect', () => {
+      console.log('[Socket] Connected:', socketRef.current?.id);
       setConnected(true);
 
       // Join company room
-      if (companyId) {
-        socket.emit('join_company_room', { companyId });
-      }
-
-      // Join bus rooms
-      busIds.forEach((busId) => {
-        socket.emit('join_bus_room', { busId });
-      });
+      socketRef.current?.emit('join_company_room', { companyId });
+      console.log('[Socket] Joined company room:', companyId);
     });
 
-    socket.on('disconnect', () => {
-      console.log('[Socket] Disconnected');
+    socketRef.current.on('disconnect', (reason) => {
+      console.log('[Socket] Disconnected:', reason);
       setConnected(false);
     });
 
-    // Listen for location updates
-    socket.on('location_update', (data: BusLocation) => {
-      console.log('[Socket] Location update:', data);
-      setBusLocations((prev) => {
-        const updated = {
-          ...prev,
-          [data.busId]: data,
-        };
-        console.log('[Socket] Updated bus locations:', updated);
-        return updated;
-      });
+    socketRef.current.on('connect_error', (error) => {
+      console.error('[Socket] Connection error:', error.message);
+      setConnected(false);
     });
 
-    socket.on('new_location_update', (data: BusLocation) => {
-      console.log('[Socket] New location update:', data);
-      setBusLocations((prev) => {
-        const updated = {
-          ...prev,
-          [data.busId]: data,
-        };
-        console.log('[Socket] Updated bus locations from new_location_update:', updated);
-        return updated;
-      });
-    });
-
-    socket.on('bus_location', (data: BusLocation) => {
+    // Listen for GPS updates
+    socketRef.current.on('bus_location', (data: BusLocation) => {
       console.log('[Socket] Bus location:', data);
       setBusLocations((prev) => {
         const updated = {
@@ -98,29 +75,48 @@ export function useSocket(options: UseSocketOptions) {
       });
     });
 
-    return () => {
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [token, companyId, busIds.join(',')]);
+    // Listen for new location updates (broadcast to all)
+    socketRef.current.on('new_location_update', (data: BusLocation) => {
+      console.log('[Socket] New location update:', data);
+      setBusLocations((prev) => {
+        const updated = {
+          ...prev,
+          [data.busId]: data,
+        };
+        console.log('[Socket] Updated bus locations from new_location_update:', updated);
+        return updated;
+      });
+    });
+  }, [companyId]);
 
-  // Join additional bus rooms dynamically
+  const disconnect = useCallback(() => {
+    if (socketRef.current) {
+      console.log('[Socket] Disconnecting...');
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setConnected(false);
+    }
+  }, []);
+
   const joinBusRoom = useCallback((busId: string) => {
     if (socketRef.current?.connected) {
+      console.log('[Socket] Joining bus room:', busId);
       socketRef.current.emit('join_bus_room', { busId });
     }
   }, []);
 
-  const leaveBusRoom = useCallback((busId: string) => {
-    if (socketRef.current?.connected) {
-      socketRef.current.emit('leave_bus_room', { busId });
-    }
-  }, []);
+  useEffect(() => {
+    connect();
+    return () => {
+      disconnect();
+    };
+  }, [connect, disconnect]);
 
   return {
     connected,
     busLocations,
     joinBusRoom,
-    leaveBusRoom,
+    connect,
+    disconnect,
   };
 }

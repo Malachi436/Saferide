@@ -79,8 +79,6 @@ export const useAuthStore = create<AuthState>()(
           role: null,
           error: null,
         });
-        // Force clear the persisted storage
-        await AsyncStorage.removeItem('auth-storage');
       },
 
       register: async (data: SignUpData) => {

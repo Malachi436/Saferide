@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const realtime_gateway_1 = require("./realtime.gateway");
 const jwt_1 = require("@nestjs/jwt");
 const auth_module_1 = require("../auth/auth.module");
+const prisma_module_1 = require("../../prisma/prisma.module");
 let RealtimeModule = class RealtimeModule {
 };
 exports.RealtimeModule = RealtimeModule;
@@ -19,6 +20,7 @@ exports.RealtimeModule = RealtimeModule = __decorate([
         imports: [
             jwt_1.JwtModule.register({}),
             auth_module_1.AuthModule,
+            prisma_module_1.PrismaModule,
         ],
         providers: [realtime_gateway_1.RealtimeGateway],
         exports: [realtime_gateway_1.RealtimeGateway],

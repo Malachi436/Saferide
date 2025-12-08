@@ -52,14 +52,28 @@ export const DriverHomeScreen = () => {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: Infinity,
+      pingInterval: 25000,  // Match server ping interval
+      pingTimeout: 60000,   // Match server ping timeout
+      upgrade: true,        // Upgrade polling to websocket
     });
 
     newSocket.on('connect', () => {
       console.log('[DriverHome] Socket connected:', newSocket.id);
     });
 
-    newSocket.on('disconnect', () => {
-      console.log('[DriverHome] Socket disconnected');
+    newSocket.on('disconnect', (reason) => {
+      console.log('[DriverHome] Socket disconnected:', reason);
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('[DriverHome] Socket connect error:', error);
+    });
+
+    newSocket.on('error', (error) => {
+      console.error('[DriverHome] Socket error:', error);
     });
 
     setSocket(newSocket);

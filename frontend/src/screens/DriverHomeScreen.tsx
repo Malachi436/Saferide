@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { io, Socket } from 'socket.io-client';
@@ -86,7 +86,7 @@ export const DriverHomeScreen = () => {
   const droppedOffCount = todayTrip?.attendances?.filter((a: any) => a.status === 'DROPPED_OFF').length || todayTrip?.droppedOff || (activeTrip as any)?.droppedOff || 0;
   const absentCount = todayTrip?.attendances?.filter((a: any) => a.status === 'ABSENT').length || todayTrip?.absent || (activeTrip as any)?.absent || 0;
 
-  const toggleGPSTracking = async () => {
+  const toggleGPSTracking = useCallback(async () => {
     console.log('[DriverHome] GPS toggle pressed, current state:', isTracking);
     try {
       if (isTracking) {
@@ -138,7 +138,7 @@ export const DriverHomeScreen = () => {
       setTracking(false);
       Alert.alert('Error', err.message);
     }
-  };
+  }, [isTracking, socket, busId]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -166,13 +166,11 @@ export const DriverHomeScreen = () => {
             </View>
           </View>
           <Switch 
+            testID="gps-toggle-switch"
             value={isTracking} 
-            onValueChange={(newValue) => {
-              console.log('[Switch] Value changed to:', newValue);
-              toggleGPSTracking().catch((err) => {
-                console.error('[Switch] Error:', err);
-                Alert.alert('Error', 'Failed to toggle GPS');
-              });
+            onValueChange={() => {
+              console.log('[Switch] onValueChange fired!');
+              toggleGPSTracking();
             }}
             trackColor={{ false: '#E5E7EB', true: '#D1FAE533' }}
             thumbColor={isTracking ? '#10B981' : '#9CA3AF'}

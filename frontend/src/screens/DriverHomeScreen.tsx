@@ -47,7 +47,7 @@ export const DriverHomeScreen = () => {
       return;
     }
 
-    const SOCKET_URL = __DEV__ ? 'http://localhost:3000' : 'http://192.168.100.3:3000';
+    const SOCKET_URL = __DEV__ ? 'http://192.168.100.8:3000' : 'http://192.168.100.8:3000';
     const newSocket = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling'],

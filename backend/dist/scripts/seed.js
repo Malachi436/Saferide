@@ -213,6 +213,40 @@ async function main() {
         },
     });
     console.log(`Created scheduled route: ${scheduledRoute.id}`);
+    const testRoute = await prisma.route.create({
+        data: {
+            name: '24/7 TEST ROUTE - Always Active',
+            schoolId: school.id,
+            stops: {
+                create: [
+                    {
+                        name: 'Test Stop 1',
+                        latitude: 5.5600,
+                        longitude: -0.2000,
+                        order: 1,
+                    },
+                    {
+                        name: 'Test Stop 2',
+                        latitude: 5.5700,
+                        longitude: -0.1900,
+                        order: 2,
+                    },
+                ],
+            },
+        },
+    });
+    const testScheduledRoute = await prisma.scheduledRoute.create({
+        data: {
+            routeId: testRoute.id,
+            driverId: driver.id,
+            busId: bus.id,
+            scheduledTime: '00:00',
+            recurringDays: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'],
+            status: 'ACTIVE',
+            autoAssignChildren: false,
+        },
+    });
+    console.log(`Created 24/7 test scheduled route: ${testScheduledRoute.id}`);
     const today = new Date();
     today.setHours(7, 0, 0, 0);
     const trip = await prisma.trip.create({
@@ -225,6 +259,16 @@ async function main() {
         },
     });
     console.log(`Created trip: ${trip.id}`);
+    const testTrip = await prisma.trip.create({
+        data: {
+            busId: bus.id,
+            routeId: testRoute.id,
+            driverId: driver.id,
+            status: 'IN_PROGRESS',
+            startTime: new Date(),
+        },
+    });
+    console.log(`Created 24/7 TEST trip (IN_PROGRESS): ${testTrip.id}`);
     await prisma.childAttendance.create({
         data: {
             childId: child1.id,
@@ -244,6 +288,8 @@ async function main() {
     console.log('Database seed completed successfully!');
     console.log('\n=== SUMMARY ===');
     console.log('- Scheduled Route: Every weekday at 7:00 AM');
+    console.log('- 24/7 TEST ROUTE: Always active for GPS testing');
+    console.log('- 24/7 TEST TRIP: Always IN_PROGRESS for live dashboard testing');
     console.log('- Children will be auto-assigned to trips based on their pickup locations');
     console.log('- Trips will be auto-generated daily at midnight');
     console.log('- Manual generation: POST /trips/generate-today');

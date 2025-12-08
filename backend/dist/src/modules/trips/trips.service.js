@@ -72,11 +72,9 @@ let TripsService = class TripsService {
         return this.prisma.trip.findMany({
             where: {
                 status: { in: ['IN_PROGRESS', 'ARRIVED_SCHOOL', 'RETURN_IN_PROGRESS', 'SCHEDULED'] },
-                bus: {
-                    driver: {
-                        user: {
-                            companyId: companyId,
-                        },
+                driver: {
+                    user: {
+                        companyId: companyId,
                     },
                 },
             },

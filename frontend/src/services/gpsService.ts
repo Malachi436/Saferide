@@ -18,11 +18,20 @@ export const gpsService = {
    */
   async requestPermissions(): Promise<boolean> {
     try {
+      console.log('[GPS] Requesting location permissions...');
       const { status } = await Location.requestForegroundPermissionsAsync();
-      return status === 'granted';
+      console.log('[GPS] Permission status:', status);
+      
+      if (status !== 'granted') {
+        console.warn('[GPS] Location permission denied');
+        throw new Error('Location permission denied. Please enable location access in Settings.');
+      }
+      
+      console.log('[GPS] Location permission granted');
+      return true;
     } catch (error) {
       console.error('[GPS] Permission request failed:', error);
-      return false;
+      throw error;
     }
   },
 
@@ -31,14 +40,17 @@ export const gpsService = {
    */
   async startTracking(socket: Socket, busId: string, interval: number = 5000): Promise<void> {
     try {
-      // Request permissions first
-      const hasPermission = await this.requestPermissions();
-      if (!hasPermission) {
-        console.warn('[GPS] Location permission not granted');
-        return;
+      console.log('[GPS] Checking if already tracking...');
+      if (locationSubscription) {
+        console.log('[GPS] Already tracking, stopping previous session');
+        this.stopTracking();
       }
 
-      console.log('[GPS] Starting location tracking...');
+      // Request permissions first
+      console.log('[GPS] Requesting permissions...');
+      await this.requestPermissions();
+
+      console.log('[GPS] Starting location tracking with interval:', interval);
 
       // Watch for location updates
       locationSubscription = await Location.watchPositionAsync(
@@ -57,18 +69,30 @@ export const gpsService = {
             timestamp: new Date().toISOString(),
           };
 
+          console.log('[GPS] Location update received:', {
+            lat: gpsData.latitude,
+            lng: gpsData.longitude,
+            accuracy: gpsData.accuracy
+          });
+
           // Emit to backend
           if (socket.connected) {
             socket.emit('gps_update', {
               busId,
               ...gpsData,
             });
-            console.log('[GPS] Emitted location:', gpsData);
+            console.log('[GPS] Emitted to server for bus:', busId);
+          } else {
+            console.warn('[GPS] Socket not connected, cannot emit location');
           }
         }
       );
+
+      console.log('[GPS] Location tracking started successfully');
     } catch (error) {
       console.error('[GPS] Failed to start tracking:', error);
+      locationSubscription = null;
+      throw error;
     }
   },
 

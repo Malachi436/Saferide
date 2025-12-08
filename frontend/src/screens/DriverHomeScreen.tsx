@@ -30,8 +30,17 @@ export const DriverHomeScreen = () => {
     loadMockData();
     fetchTodayTrip();
     initializeSocket();
+    
+    // Sync GPS state on mount
+    const actualGPSState = gpsService.isTracking();
+    console.log('[DriverHome] Syncing GPS state on mount:', actualGPSState);
+    if (actualGPSState !== isTracking) {
+      setTracking(actualGPSState);
+    }
+    
     return () => {
       if (gpsService.isTracking()) {
+        console.log('[DriverHome] Component unmounting, stopping GPS');
         gpsService.stopTracking();
       }
       socket?.disconnect();
@@ -91,15 +100,29 @@ export const DriverHomeScreen = () => {
   const absentCount = todayTrip?.attendances?.filter((a: any) => a.status === 'ABSENT').length || (activeTrip as any)?.absent || 0;
 
   const toggleGPSTracking = async () => {
+    console.log('[DriverHome] Toggle GPS clicked, current state:', isTracking);
+    
     try {
       if (isTracking) {
+        // Stop tracking
+        console.log('[DriverHome] Stopping GPS tracking...');
         gpsService.stopTracking();
         setTracking(false);
         setError(null);
-        Alert.alert('Success', 'Location tracking stopped');
+        Alert.alert('GPS Stopped', 'Location tracking stopped');
       } else {
+        // Start tracking
+        console.log('[DriverHome] Starting GPS tracking...');
+        
         if (!socket) {
-          Alert.alert('Error', 'Connection not ready');
+          console.error('[DriverHome] Socket not ready');
+          Alert.alert('Error', 'Connection not ready. Please wait and try again.');
+          return;
+        }
+
+        if (!socket.connected) {
+          console.error('[DriverHome] Socket not connected');
+          Alert.alert('Error', 'Not connected to server. Please check your internet connection.');
           return;
         }
         
@@ -107,14 +130,32 @@ export const DriverHomeScreen = () => {
         console.log('[DriverHome] Joining bus room:', busId);
         socket.emit('join_bus_room', { busId });
         
-        await gpsService.startTracking(socket, busId, 5000);
-        setTracking(true);
-        setError(null);
-        Alert.alert('Success', `Location tracking started for bus ${busId}`);
+        // Start GPS tracking - this will request permissions
+        try {
+          await gpsService.startTracking(socket, busId, 5000);
+          
+          // Only set tracking to true if startTracking succeeded
+          if (gpsService.isTracking()) {
+            setTracking(true);
+            setError(null);
+            Alert.alert('GPS Started', `Location tracking started for bus ${busId}`);
+            console.log('[DriverHome] GPS tracking started successfully');
+          } else {
+            throw new Error('GPS tracking failed to start');
+          }
+        } catch (gpsError: any) {
+          console.error('[DriverHome] GPS start error:', gpsError);
+          setTracking(false);
+          const errorMsg = gpsError.message || 'Failed to start GPS tracking';
+          setError(errorMsg);
+          Alert.alert('GPS Error', errorMsg);
+        }
       }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to toggle GPS';
+    } catch (err: any) {
+      console.error('[DriverHome] Toggle error:', err);
+      const errorMsg = err.message || 'Failed to toggle GPS';
       setError(errorMsg);
+      setTracking(false);
       Alert.alert('Error', errorMsg);
     }
   };

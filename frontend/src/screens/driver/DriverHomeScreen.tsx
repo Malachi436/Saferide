@@ -108,12 +108,14 @@ export default function DriverHomeScreen() {
         const busId = trip?.bus?.id || trip?.busId || 'unknown-bus';
         console.log('[DriverHome] Starting GPS for busId:', busId);
         
-        // Get the socket instance
-        const socket = (socketService as any).socket;
+        // Get the socket instance using proper getter
+        const socket = socketService.getSocket();
         if (!socket) {
           Alert.alert('Error', 'Connection not ready. Please wait and try again.');
           return;
         }
+        
+        console.log('[DriverHome] Socket ID:', socket.id, 'Connected:', socket.connected);
         
         await gpsService.startTracking(socket, busId, 5000);
         setIsGPSTracking(true);

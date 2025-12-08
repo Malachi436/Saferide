@@ -117,6 +117,13 @@ class SocketService {
   }
 
   /**
+   * Get the socket instance for external use (e.g., gpsService)
+   */
+  getSocket(): Socket | null {
+    return this.socket;
+  }
+
+  /**
    * Setup default event handlers
    */
   private setupEventHandlers(): void {

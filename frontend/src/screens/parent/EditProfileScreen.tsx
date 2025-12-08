@@ -23,7 +23,7 @@ import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { ParentStackParamList } from "../../navigation/ParentNavigator";
-import { useAuthStore } from "../../state/authStore";
+import { useAuthStore } from "../../stores/authStore";
 
 type Props = NativeStackScreenProps<ParentStackParamList, "EditProfile">;
 

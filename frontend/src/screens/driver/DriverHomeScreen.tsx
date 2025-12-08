@@ -76,6 +76,47 @@ export default function DriverHomeScreen() {
     };
   }, []);
 
+  // Subscribe to trip room for notifications
+  useEffect(() => {
+    if (trip?.id) {
+      console.log('[DriverHome] Subscribing to trip room:', trip.id);
+      socketService.subscribeToTrip(trip.id);
+
+      // Listen for parent pickup requests
+      const handleParentPickup = (data: any) => {
+        console.log('[DriverHome] Parent pickup requested:', data);
+        Alert.alert(
+          'Parent Pickup Request',
+          `${data.parentName} will pick up ${data.childName} in the ${data.timeOfDay?.toLowerCase() || 'day'}.\n\n${data.reason || ''}`,
+          [
+            { text: 'OK', onPress: fetchTodayTrip }
+          ]
+        );
+      };
+
+      // Listen for trip skip requests
+      const handleTripSkip = (data: any) => {
+        console.log('[DriverHome] Trip skip requested:', data);
+        Alert.alert(
+          'Child Skipping Trip',
+          `${data.childName} will not join the bus today.\n\n${data.reason || ''}`,
+          [
+            { text: 'OK', onPress: fetchTodayTrip }
+          ]
+        );
+      };
+
+      socketService.on('parent_pickup_requested', handleParentPickup);
+      socketService.on('trip_skip_requested', handleTripSkip);
+
+      return () => {
+        socketService.off('parent_pickup_requested', handleParentPickup);
+        socketService.off('trip_skip_requested', handleTripSkip);
+        socketService.unsubscribeFromTrip(trip.id);
+      };
+    }
+  }, [trip?.id]);
+
   const childrenOnTrip = trip?.attendances || [];
 
   const handleStartTrip = () => {

@@ -210,6 +210,26 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     return { success: true };
   }
 
+  @SubscribeMessage('subscribe_trip_tracking')
+  async handleSubscribeTripTracking(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { tripId: string },
+  ) {
+    client.join(`trip:${data.tripId}`);
+    console.log(`[Socket] Client ${client.id} subscribed to trip: ${data.tripId}`);
+    return { success: true };
+  }
+
+  @SubscribeMessage('unsubscribe_trip_tracking')
+  async handleUnsubscribeTripTracking(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { tripId: string },
+  ) {
+    client.leave(`trip:${data.tripId}`);
+    console.log(`[Socket] Client ${client.id} unsubscribed from trip: ${data.tripId}`);
+    return { success: true };
+  }
+
   // Method to emit location updates (called by other services)
   async emitLocationUpdate(busId: string, locationData: any) {
     // Publish to Redis for potential horizontal scaling

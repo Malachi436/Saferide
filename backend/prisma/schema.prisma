@@ -27,6 +27,7 @@ enum TripStatus {
 }
 
 enum AttendanceStatus {
+  PENDING
   PICKED_UP
   DROPPED
   MISSED
@@ -36,6 +37,10 @@ enum NotificationType {
   INFO
   WARNING
   ALERT
+  PICKUP
+  DROPOFF
+  DELAY
+  PAYMENT
 }
 
 enum PickupType {

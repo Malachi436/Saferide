@@ -7,7 +7,7 @@ import React, { useState, useMemo } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView, Linking, Platform, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -106,7 +106,7 @@ export default function RouteMapScreen() {
     <View style={styles.container}>
       {/* Map View */}
       <MapView
-        provider={PROVIDER_GOOGLE}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         style={styles.map}
         initialRegion={initialRegion}
         showsUserLocation

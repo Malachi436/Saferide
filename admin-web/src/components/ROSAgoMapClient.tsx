@@ -218,9 +218,14 @@ export function ROSAgoMapClient({
   }, []);
 
   useEffect(() => {
-    if (!map.current || !mapLoaded) return;
+    if (!map.current || !mapLoaded) {
+      console.log('[ROSAgoMap] Map not ready - map.current:', !!map.current, 'mapLoaded:', mapLoaded);
+      return;
+    }
 
     const currentBusIds = Object.keys(busLocations);
+    console.log('[ROSAgoMap] Updating bus markers, count:', currentBusIds.length);
+    console.log('[ROSAgoMap] Bus locations:', JSON.stringify(busLocations));
 
     Object.keys(busMarkers.current).forEach((busId) => {
       if (!currentBusIds.includes(busId)) {
@@ -231,6 +236,14 @@ export function ROSAgoMapClient({
 
     currentBusIds.forEach((busId) => {
       const loc = busLocations[busId];
+      console.log('[ROSAgoMap] Processing bus:', busId, 'lat:', loc.latitude, 'lng:', loc.longitude);
+      
+      // Validate coordinates
+      if (!loc.latitude || !loc.longitude || isNaN(loc.latitude) || isNaN(loc.longitude)) {
+        console.warn('[ROSAgoMap] Invalid coordinates for bus:', busId);
+        return;
+      }
+      
       const lngLat: LngLatLike = [loc.longitude, loc.latitude];
       const isSelected = busId === selectedBusId;
 
@@ -238,8 +251,10 @@ export function ROSAgoMapClient({
         const marker = busMarkers.current[busId];
         const currentPos = marker.getLngLat();
         const targetPos = { lng: loc.longitude, lat: loc.latitude };
+        console.log('[ROSAgoMap] Animating existing marker for bus:', busId);
         animateMarker(marker, currentPos, targetPos);
       } else {
+        console.log('[ROSAgoMap] Creating NEW marker for bus:', busId, 'at', lngLat);
         const el = createBusMarkerElement(loc.plateNumber, isSelected);
         el.onclick = () => onBusSelect?.(busId);
 
@@ -248,6 +263,18 @@ export function ROSAgoMapClient({
           .addTo(map.current!);
 
         busMarkers.current[busId] = marker;
+        console.log('[ROSAgoMap] Marker created and added to map');
+        
+        // Auto-center on first bus location
+        if (Object.keys(busMarkers.current).length === 1) {
+          console.log('[ROSAgoMap] First bus - centering map on location');
+          map.current!.flyTo({
+            center: lngLat,
+            zoom: 14,
+            pitch: 45,
+            duration: 1500,
+          });
+        }
       }
     });
 

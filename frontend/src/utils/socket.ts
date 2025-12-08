@@ -6,7 +6,8 @@
 import { io, Socket } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SOCKET_URL = __DEV__ ? 'http://192.168.100.8:3000' : 'http://192.168.100.8:3000';
+// Use the same base URL as the API client
+const SOCKET_URL = 'http://192.168.100.8:3000';
 
 class SocketService {
   private socket: Socket | null = null;
@@ -29,13 +30,22 @@ class SocketService {
 
     console.log('[Socket] Connecting to:', SOCKET_URL);
 
+    // Disconnect existing socket if any
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+
     this.socket = io(SOCKET_URL, {
       auth: { token },
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'], // Try polling first (more reliable on mobile)
+      upgrade: true, // Upgrade to websocket if possible
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      timeout: 20000,
+      forceNew: true, // Force new connection
     });
 
     this.setupEventHandlers();
@@ -81,13 +91,16 @@ class SocketService {
       this.listeners.set(event, new Set());
     }
     this.listeners.get(event)!.add(callback);
+    console.log(`[Socket] Registered listener for: ${event}`);
 
-    if (this.socket) {
+    // If socket is already connected, attach the listener immediately
+    if (this.socket?.connected) {
       this.socket.on(event, (data: any) => {
         console.log(`[Socket] Event received: ${event}`, data);
         callback(data);
       });
     }
+    // Otherwise, it will be attached when connection is established (in setupEventHandlers)
   }
 
   /**

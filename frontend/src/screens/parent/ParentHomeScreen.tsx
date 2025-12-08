@@ -3,8 +3,8 @@
  * Main dashboard for parents showing children, pickup status, driver info, and quick actions
  */
 
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { CompositeNavigationProp } from "@react-navigation/native";
@@ -22,6 +22,7 @@ import { DriverInfoBanner } from "../../components/shared/DriverInfoBanner";
 import { ETAChip } from "../../components/shared/ETAChip";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
+import { socketService } from "../../utils/socket";
 import { ParentStackParamList, ParentTabParamList } from "../../navigation/ParentNavigator";
 import { Child } from "../../types";
 
@@ -46,6 +47,75 @@ export default function ParentHomeScreen() {
       fetchChildren();
     }, [user?.id])
   );
+
+  // Setup WebSocket listeners for real-time updates
+  useEffect(() => {
+    console.log('[ParentHome] Setting up WebSocket listeners');
+    
+    // Listen for attendance updates
+    const handleAttendanceUpdate = (data: any) => {
+      console.log('[ParentHome] Attendance update received:', data);
+      
+      // Show notification to parent
+      let title = 'Status Update';
+      let message = '';
+      
+      if (data.status === 'PICKED_UP') {
+        title = 'Child Picked Up!';
+        message = `${data.childName} has been picked up by the bus driver.`;
+      } else if (data.status === 'DROPPED') {
+        title = 'Child Dropped Off!';
+        message = `${data.childName} has been safely dropped off at school.`;
+      }
+
+      if (message) {
+        Alert.alert(title, message);
+      }
+
+      // Refresh the data to reflect changes
+      fetchChildren();
+    };
+
+    // Listen for early pickup approvals/rejections
+    const handleEarlyPickupApproved = (data: any) => {
+      console.log('[ParentHome] Early pickup approved:', data);
+      Alert.alert(
+        'Pickup Approved!',
+        `Your early pickup request for ${data.childName} has been approved.`
+      );
+      fetchChildren();
+    };
+
+    const handleEarlyPickupRejected = (data: any) => {
+      console.log('[ParentHome] Early pickup rejected:', data);
+      Alert.alert(
+        'Pickup Rejected',
+        `Your early pickup request for ${data.childName} was rejected.${data.reason ? ` Reason: ${data.reason}` : ''}`
+      );
+      fetchChildren();
+    };
+
+    // Connect to socket and register listeners
+    const initSocket = async () => {
+      await socketService.connect();
+      console.log('[ParentHome] Socket connected, registering listeners');
+    };
+    
+    // Register listeners first (they'll be re-registered on reconnect)
+    socketService.on('attendance_updated', handleAttendanceUpdate);
+    socketService.on('early_pickup_approved', handleEarlyPickupApproved);
+    socketService.on('early_pickup_rejected', handleEarlyPickupRejected);
+    
+    // Then connect
+    initSocket();
+
+    return () => {
+      console.log('[ParentHome] Cleaning up WebSocket listeners');
+      socketService.off('attendance_updated', handleAttendanceUpdate);
+      socketService.off('early_pickup_approved', handleEarlyPickupApproved);
+      socketService.off('early_pickup_rejected', handleEarlyPickupRejected);
+    };
+  }, []);
 
 
 

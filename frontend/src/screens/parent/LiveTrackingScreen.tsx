@@ -1,57 +1,314 @@
 /**
  * Live Tracking Screen
- * Real-time tracking of children and bus location
+ * Real-time tracking of children and bus location with WebSocket GPS updates
  */
 
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Linking, Platform, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
-import { useAuthStore } from "../../state/authStore";
+import { useAuthStore } from "../../stores/authStore";
+import { apiClient } from "../../utils/api";
+import { socketService } from "../../utils/socket";
+
+interface Child {
+  id: string;
+  firstName: string;
+  lastName: string;
+  pickupLatitude?: number;
+  pickupLongitude?: number;
+  homeLatitude?: number;
+  homeLongitude?: number;
+  pickupDescription?: string;
+  homeAddress?: string;
+  school?: { name: string; latitude?: number; longitude?: number };
+}
+
+interface TripInfo {
+  id: string;
+  status: string;
+  bus: {
+    id: string;
+    plateNumber: string;
+    driver?: {
+      user?: {
+        firstName: string;
+        lastName: string;
+        phone?: string;
+      };
+    };
+  };
+  route?: { name: string };
+}
+
+interface BusLocation {
+  busId: string;
+  latitude: number;
+  longitude: number;
+  speed?: number;
+  heading?: number;
+  timestamp?: string;
+}
+
+// Calculate distance in km using Haversine formula
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Calculate ETA based on distance and average speed (default 30 km/h in city)
+function calculateETA(distanceKm: number, speedKmh: number = 30): string {
+  if (distanceKm < 0.1) return "Arriving";
+  const timeMinutes = Math.round((distanceKm / speedKmh) * 60);
+  if (timeMinutes < 1) return "< 1 min";
+  if (timeMinutes === 1) return "1 min";
+  return `${timeMinutes} mins`;
+}
 
 export default function LiveTrackingScreen() {
   const user = useAuthStore((s) => s.user);
+  const mapRef = useRef<MapView>(null);
+  
+  const [children, setChildren] = useState<Child[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const [trip, setTrip] = useState<TripInfo | null>(null);
+  const [busLocation, setBusLocation] = useState<BusLocation | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-  // TODO: Implement real GPS tracking with API
-  const trip = null;
-  const driver = null;
-  const userChildren = [];
+  // Get selected child
+  const selectedChild = selectedChildId 
+    ? children.find(c => c.id === selectedChildId) 
+    : children[0];
 
-  const selectedChild = null;
+  // Get pickup location for selected child
+  const pickupLocation = selectedChild ? {
+    latitude: selectedChild.pickupLatitude || selectedChild.homeLatitude || 5.6037,
+    longitude: selectedChild.pickupLongitude || selectedChild.homeLongitude || -0.187,
+  } : null;
 
-  // Calculate ETA (mock)
-  const eta = "8 mins";
+  // Calculate distance and ETA
+  const distance = busLocation && pickupLocation 
+    ? calculateDistance(busLocation.latitude, busLocation.longitude, pickupLocation.latitude, pickupLocation.longitude)
+    : null;
+  
+  const eta = distance !== null 
+    ? calculateETA(distance, busLocation?.speed || 30) 
+    : "--";
 
-  const initialRegion = {
-    latitude: selectedChild?.pickupLocation.latitude || 5.6037,
-    longitude: selectedChild?.pickupLocation.longitude || -0.187,
+  const distanceText = distance !== null 
+    ? distance < 1 
+      ? `${Math.round(distance * 1000)} m` 
+      : `${distance.toFixed(1)} km`
+    : "--";
+
+  // Driver info
+  const driver = trip?.bus?.driver?.user;
+  const driverName = driver ? `${driver.firstName} ${driver.lastName}` : "No driver assigned";
+  const driverPhone = driver?.phone || "";
+
+  // Fetch children and trip data
+  const fetchData = useCallback(async () => {
+    if (!user?.id) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch parent's children
+      const childrenResponse = await apiClient.get<Child[]>(`/children/parent/${user.id}`);
+      const childrenList = Array.isArray(childrenResponse) ? childrenResponse : [];
+      setChildren(childrenList);
+      console.log('[LiveTracking] Fetched children:', childrenList.length);
+      
+      if (childrenList.length > 0) {
+        // Set first child as selected
+        if (!selectedChildId) {
+          setSelectedChildId(childrenList[0].id);
+        }
+        
+        // Fetch trip for the first child
+        try {
+          const tripResponse = await apiClient.get<TripInfo>(`/trips/child/${childrenList[0].id}`);
+          setTrip(tripResponse);
+          console.log('[LiveTracking] Fetched trip:', tripResponse);
+        } catch (tripErr: any) {
+          console.log('[LiveTracking] No active trip for child');
+        }
+      }
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || 'Failed to load data';
+      console.error('[LiveTracking] Error:', errorMsg);
+      setError(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id, selectedChildId]);
+
+  // Connect to WebSocket and listen for bus location updates
+  useEffect(() => {
+    const setupSocket = async () => {
+      try {
+        await socketService.connect();
+        setIsConnected(socketService.isConnected());
+        console.log('[LiveTracking] Socket connected:', socketService.isConnected());
+
+        // Join bus room if we have a trip
+        if (trip?.bus?.id) {
+          const socket = socketService.getSocket();
+          if (socket) {
+            console.log('[LiveTracking] Joining bus room:', trip.bus.id);
+            socket.emit('join_bus_room', { busId: trip.bus.id });
+          }
+        }
+
+        // Listen for bus location updates
+        const handleBusLocation = (data: BusLocation) => {
+          console.log('[LiveTracking] Bus location received:', data);
+          // Only update if it's our bus
+          if (trip?.bus?.id && data.busId === trip.bus.id) {
+            setBusLocation(data);
+            
+            // Animate map to show bus
+            if (mapRef.current && data.latitude && data.longitude) {
+              mapRef.current.animateToRegion({
+                latitude: data.latitude,
+                longitude: data.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }, 500);
+            }
+          }
+        };
+
+        socketService.on('bus_location', handleBusLocation);
+        socketService.on('new_location_update', handleBusLocation);
+
+        // Listen for attendance updates
+        const handleAttendanceUpdate = (data: any) => {
+          console.log('[LiveTracking] Attendance update received:', data);
+          
+          let title = 'Status Update';
+          let message = '';
+          
+          if (data.status === 'PICKED_UP') {
+            title = 'Child Picked Up!';
+            message = `${data.childName} has been picked up by the bus driver.`;
+          } else if (data.status === 'DROPPED') {
+            title = 'Child Dropped Off!';
+            message = `${data.childName} has been safely dropped off at school.`;
+          }
+
+          if (message) {
+            Alert.alert(title, message);
+          }
+
+          // Refresh data
+          fetchData();
+        };
+
+        socketService.on('attendance_updated', handleAttendanceUpdate);
+
+        return () => {
+          socketService.off('bus_location', handleBusLocation);
+          socketService.off('new_location_update', handleBusLocation);
+          socketService.off('attendance_updated', handleAttendanceUpdate);
+        };
+      } catch (err) {
+        console.error('[LiveTracking] Socket setup error:', err);
+        setIsConnected(false);
+      }
+    };
+
+    if (trip?.bus?.id) {
+      setupSocket();
+    }
+  }, [trip?.bus?.id]);
+
+  // Fetch data when screen focuses
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
+
+  // Initial map region
+  const initialRegion: Region = {
+    latitude: busLocation?.latitude || pickupLocation?.latitude || 5.6037,
+    longitude: busLocation?.longitude || pickupLocation?.longitude || -0.187,
     latitudeDelta: 0.02,
     longitudeDelta: 0.02,
   };
+
+  // Call driver
+  const handleCallDriver = () => {
+    if (driverPhone) {
+      Linking.openURL(`tel:${driverPhone}`);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary.blue} />
+        <Text style={styles.loadingText}>Loading tracking data...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="warning" size={48} color={colors.accent.sunsetOrange} />
+        <Text style={styles.errorText}>{error}</Text>
+        <Pressable style={styles.retryButton} onPress={fetchData}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  if (children.length === 0) {
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="people" size={48} color={colors.neutral.textSecondary} />
+        <Text style={styles.errorText}>No children registered</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       {/* Map View */}
       <MapView
-        provider={PROVIDER_GOOGLE}
+        ref={mapRef}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         style={styles.map}
         initialRegion={initialRegion}
         showsUserLocation
       >
-        {/* Bus Location */}
-        {trip.currentLocation && (
+        {/* Bus Location Marker */}
+        {busLocation && (
           <Marker
             coordinate={{
-              latitude: trip.currentLocation.latitude,
-              longitude: trip.currentLocation.longitude,
+              latitude: busLocation.latitude,
+              longitude: busLocation.longitude,
             }}
             title="School Bus"
-            description={`Driver: ${driver.name}`}
+            description={`Driver: ${driverName}`}
           >
             <View style={styles.busMarker}>
               <Ionicons name="bus" size={24} color={colors.neutral.pureWhite} />
@@ -59,36 +316,57 @@ export default function LiveTrackingScreen() {
           </Marker>
         )}
 
-        {/* Child Pickup Location */}
-        {selectedChild && (
+        {/* Child Pickup Location Marker */}
+        {pickupLocation && selectedChild && (
           <Marker
-            coordinate={{
-              latitude: selectedChild.pickupLocation.latitude,
-              longitude: selectedChild.pickupLocation.longitude,
-            }}
-            title={selectedChild.name}
-            description="Pickup Location"
+            coordinate={pickupLocation}
+            title={`${selectedChild.firstName}'s Pickup`}
+            description={selectedChild.pickupDescription || selectedChild.homeAddress || "Pickup Location"}
           >
             <View style={styles.childMarker}>
               <Ionicons name="location" size={24} color={colors.neutral.pureWhite} />
             </View>
           </Marker>
         )}
+
+        {/* School Location Marker */}
+        {selectedChild?.school?.latitude && selectedChild?.school?.longitude && (
+          <Marker
+            coordinate={{
+              latitude: selectedChild.school.latitude,
+              longitude: selectedChild.school.longitude,
+            }}
+            title={selectedChild.school.name}
+            description="School"
+          >
+            <View style={styles.schoolMarker}>
+              <Ionicons name="school" size={20} color={colors.neutral.pureWhite} />
+            </View>
+          </Marker>
+        )}
       </MapView>
+
+      {/* Connection Status Badge */}
+      <View style={styles.connectionBadge}>
+        <View style={[styles.connectionDot, { backgroundColor: isConnected ? colors.accent.successGreen : colors.accent.sunsetOrange }]} />
+        <Text style={styles.connectionText}>
+          {isConnected ? 'Live' : 'Connecting...'}
+        </Text>
+      </View>
 
       {/* Bottom Sheet */}
       <View style={styles.bottomSheet}>
         <View style={styles.handle} />
 
         {/* Child Selector */}
-        {userChildren.length > 1 && (
+        {children.length > 1 && (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.childSelector}
             contentContainerStyle={styles.childSelectorContent}
           >
-            {userChildren.map((child, index) => (
+            {children.map((child, index) => (
               <Animated.View
                 key={child.id}
                 entering={FadeInDown.delay(100 + index * 50).springify()}
@@ -112,10 +390,7 @@ export default function LiveTrackingScreen() {
                         selectedChild?.id === child.id && styles.childChipAvatarTextActive,
                       ]}
                     >
-                      {child.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {(child.firstName || 'X')[0]}{(child.lastName || 'X')[0]}
                     </Text>
                   </View>
                   <Text
@@ -124,7 +399,7 @@ export default function LiveTrackingScreen() {
                       selectedChild?.id === child.id && styles.childChipTextActive,
                     ]}
                   >
-                    {child.name.split(" ")[0]}
+                    {child.firstName || 'Child'}
                   </Text>
                 </Pressable>
               </Animated.View>
@@ -132,27 +407,28 @@ export default function LiveTrackingScreen() {
           </ScrollView>
         )}
 
-        {/* Status Card */}
+        {/* Status Card with ETA and Distance */}
         <Animated.View entering={FadeInDown.delay(200).springify()}>
           <LiquidGlassCard intensity="heavy" className="mb-4">
             <View style={styles.statusCard}>
               <View style={styles.statusHeader}>
                 <View style={styles.statusLeft}>
-                  <Text style={styles.childName}>{selectedChild?.name}</Text>
+                  <Text style={styles.childName}>
+                    {selectedChild ? `${selectedChild.firstName} ${selectedChild.lastName}` : 'No child selected'}
+                  </Text>
                   <View style={styles.statusBadge}>
                     <View
                       style={[
                         styles.statusDot,
                         {
-                          backgroundColor:
-                            selectedChild?.status === "picked_up"
-                              ? colors.accent.successGreen
-                              : colors.status.warningYellow,
+                          backgroundColor: busLocation 
+                            ? colors.accent.successGreen 
+                            : colors.status.warningYellow,
                         },
                       ]}
                     />
                     <Text style={styles.statusText}>
-                      {selectedChild?.status === "picked_up" ? "On the bus" : "Waiting for pickup"}
+                      {busLocation ? "Bus is on the way" : "Waiting for bus"}
                     </Text>
                   </View>
                 </View>
@@ -164,39 +440,67 @@ export default function LiveTrackingScreen() {
 
               <View style={styles.divider} />
 
-              <View style={styles.locationInfo}>
-                <Ionicons name="location" size={16} color={colors.neutral.textSecondary} />
-                <Text style={styles.addressText} numberOfLines={2}>
-                  {selectedChild?.pickupLocation.address}
-                </Text>
+              {/* Distance and Bus Info Row */}
+              <View style={styles.infoRow}>
+                <View style={styles.infoItem}>
+                  <Ionicons name="navigate" size={16} color={colors.primary.blue} />
+                  <Text style={styles.infoLabel}>Distance</Text>
+                  <Text style={styles.infoValue}>{distanceText}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Ionicons name="bus" size={16} color={colors.primary.teal} />
+                  <Text style={styles.infoLabel}>Bus</Text>
+                  <Text style={styles.infoValue}>{trip?.bus?.plateNumber || "--"}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Ionicons name="speedometer" size={16} color={colors.accent.sunsetOrange} />
+                  <Text style={styles.infoLabel}>Speed</Text>
+                  <Text style={styles.infoValue}>
+                    {busLocation?.speed ? `${Math.round(busLocation.speed)} km/h` : "--"}
+                  </Text>
+                </View>
               </View>
             </View>
           </LiquidGlassCard>
         </Animated.View>
 
         {/* Driver Info */}
-        <Animated.View entering={FadeInDown.delay(300).springify()}>
-          <LiquidGlassCard intensity="medium">
-            <View style={styles.driverCard}>
-              <View style={styles.driverAvatar}>
-                <Text style={styles.driverAvatarText}>
-                  {driver.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </Text>
+        {driver && (
+          <Animated.View entering={FadeInDown.delay(300).springify()}>
+            <LiquidGlassCard intensity="medium">
+              <View style={styles.driverCard}>
+                <View style={styles.driverAvatar}>
+                  <Text style={styles.driverAvatarText}>
+                    {(driver.firstName || 'D')[0]}{(driver.lastName || 'R')[0]}
+                  </Text>
+                </View>
+                <View style={styles.driverInfo}>
+                  <Text style={styles.driverLabel}>Your Driver</Text>
+                  <Text style={styles.driverName}>{driverName}</Text>
+                  {driverPhone && <Text style={styles.driverPhone}>{driverPhone}</Text>}
+                </View>
+                {driverPhone && (
+                  <Pressable style={styles.callButton} onPress={handleCallDriver}>
+                    <Ionicons name="call" size={20} color={colors.neutral.pureWhite} />
+                  </Pressable>
+                )}
               </View>
-              <View style={styles.driverInfo}>
-                <Text style={styles.driverLabel}>Your Driver</Text>
-                <Text style={styles.driverName}>{driver.name}</Text>
-                <Text style={styles.driverPhone}>{driver.phone}</Text>
+            </LiquidGlassCard>
+          </Animated.View>
+        )}
+
+        {/* No Trip Message */}
+        {!trip && (
+          <Animated.View entering={FadeInDown.delay(300).springify()}>
+            <LiquidGlassCard intensity="medium">
+              <View style={styles.noTripCard}>
+                <Ionicons name="calendar-outline" size={32} color={colors.neutral.textSecondary} />
+                <Text style={styles.noTripText}>No active trip today</Text>
+                <Text style={styles.noTripSubtext}>Check back when a trip is scheduled</Text>
               </View>
-              <Pressable style={styles.callButton}>
-                <Ionicons name="call" size={20} color={colors.neutral.pureWhite} />
-              </Pressable>
-            </View>
-          </LiquidGlassCard>
-        </Animated.View>
+            </LiquidGlassCard>
+          </Animated.View>
+        )}
       </View>
     </View>
   );
@@ -206,6 +510,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.creamWhite,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.neutral.creamWhite,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: colors.neutral.textSecondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.neutral.creamWhite,
+    padding: 24,
+  },
+  errorText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: colors.neutral.textSecondary,
+    textAlign: "center",
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: colors.primary.blue,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: colors.neutral.pureWhite,
+    fontWeight: "600",
   },
   map: {
     flex: 1,
@@ -239,6 +578,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  schoolMarker: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: colors.primary.teal,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: colors.neutral.pureWhite,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  connectionBadge: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+  },
+  connectionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  connectionText: {
+    color: colors.neutral.pureWhite,
+    fontSize: 12,
+    fontWeight: "600",
   },
   bottomSheet: {
     position: "absolute",
@@ -361,16 +737,22 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.textSecondary + "20",
     marginVertical: 12,
   },
-  locationInfo: {
+  infoRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
+    justifyContent: "space-around",
   },
-  addressText: {
-    flex: 1,
-    fontSize: 14,
+  infoItem: {
+    alignItems: "center",
+    gap: 4,
+  },
+  infoLabel: {
+    fontSize: 11,
     color: colors.neutral.textSecondary,
-    lineHeight: 20,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.neutral.textPrimary,
   },
   driverCard: {
     flexDirection: "row",
@@ -416,5 +798,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary.blue,
     alignItems: "center",
     justifyContent: "center",
+  },
+  noTripCard: {
+    padding: 24,
+    alignItems: "center",
+    gap: 8,
+  },
+  noTripText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.neutral.textPrimary,
+  },
+  noTripSubtext: {
+    fontSize: 14,
+    color: colors.neutral.textSecondary,
   },
 });

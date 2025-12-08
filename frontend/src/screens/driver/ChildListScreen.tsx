@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -19,6 +19,24 @@ import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
 type NavigationProp = NativeStackNavigationProp<DriverStackParamList>;
 type ChildListRouteProp = RouteProp<DriverStackParamList, "ChildList">;
+
+// Map to get previous status for reverting
+const getPreviousStatus = (currentStatus: string): string => {
+  switch (currentStatus) {
+    case 'PICKED_UP': return 'PENDING';
+    case 'DROPPED': return 'PICKED_UP';
+    default: return 'PENDING';
+  }
+};
+
+const getStatusLabel = (status: string): string => {
+  switch (status) {
+    case 'PENDING': return 'Waiting';
+    case 'PICKED_UP': return 'Picked Up';
+    case 'DROPPED': return 'Dropped Off';
+    default: return status;
+  }
+};
 
 export default function ChildListScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -117,6 +135,40 @@ export default function ChildListScreen() {
     } finally {
       setUpdatingChild(null);
     }
+  };
+
+  const handleRevertStatus = async (attendanceId: string, currentStatus: string, childName: string) => {
+    const previousStatus = getPreviousStatus(currentStatus);
+    const previousLabel = getStatusLabel(previousStatus);
+    const currentLabel = getStatusLabel(currentStatus);
+
+    Alert.alert(
+      'Revert Status',
+      `Are you sure you want to revert ${childName}'s status from "${currentLabel}" to "${previousLabel}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Revert',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setUpdatingChild(attendanceId);
+              await apiClient.patch(`/attendance/${attendanceId}`, {
+                status: previousStatus,
+                recordedBy: user?.id,
+              });
+              console.log(`[ChildListScreen] Reverted ${childName}'s status to ${previousStatus}`);
+              await fetchTodayTrip();
+            } catch (err: any) {
+              console.error('[ChildListScreen] Error reverting attendance:', err);
+              Alert.alert('Error', 'Failed to revert status. Please try again.');
+            } finally {
+              setUpdatingChild(null);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const getFilterTitle = () => {
@@ -337,35 +389,61 @@ export default function ChildListScreen() {
                           )}
 
                           {status === "PICKED_UP" && (
-                            <Pressable
-                              onPress={() => handleDropoff(attendance.id)}
-                              disabled={updatingChild === attendance.id}
-                              style={[styles.actionButton, styles.dropoffButton]}
-                            >
-                              {updatingChild === attendance.id ? (
-                                <ActivityIndicator size="small" color={colors.neutral.pureWhite} />
-                              ) : (
-                                <>
-                                  <Ionicons
-                                    name="checkmark-circle"
-                                    size={20}
-                                    color={colors.neutral.pureWhite}
-                                  />
-                                  <Text style={styles.actionButtonText}>Drop Off</Text>
-                                </>
-                              )}
-                            </Pressable>
+                            <>
+                              <Pressable
+                                onPress={() => handleDropoff(attendance.id)}
+                                disabled={updatingChild === attendance.id}
+                                style={[styles.actionButton, styles.dropoffButton]}
+                              >
+                                {updatingChild === attendance.id ? (
+                                  <ActivityIndicator size="small" color={colors.neutral.pureWhite} />
+                                ) : (
+                                  <>
+                                    <Ionicons
+                                      name="checkmark-circle"
+                                      size={20}
+                                      color={colors.neutral.pureWhite}
+                                    />
+                                    <Text style={styles.actionButtonText}>Drop Off</Text>
+                                  </>
+                                )}
+                              </Pressable>
+                              <Pressable
+                                onPress={() => handleRevertStatus(attendance.id, status, childName)}
+                                disabled={updatingChild === attendance.id}
+                                style={[styles.actionButton, styles.revertButton]}
+                              >
+                                <Ionicons
+                                  name="arrow-undo"
+                                  size={18}
+                                  color={colors.neutral.textSecondary}
+                                />
+                              </Pressable>
+                            </>
                           )}
 
                           {status === "DROPPED" && (
-                            <View style={styles.completedBadge}>
-                              <Ionicons
-                                name="checkmark-circle"
-                                size={20}
-                                color={colors.accent.successGreen}
-                              />
-                              <Text style={styles.completedText}>Completed</Text>
-                            </View>
+                            <>
+                              <View style={styles.completedBadge}>
+                                <Ionicons
+                                  name="checkmark-circle"
+                                  size={20}
+                                  color={colors.accent.successGreen}
+                                />
+                                <Text style={styles.completedText}>Completed</Text>
+                              </View>
+                              <Pressable
+                                onPress={() => handleRevertStatus(attendance.id, status, childName)}
+                                disabled={updatingChild === attendance.id}
+                                style={[styles.actionButton, styles.revertButton]}
+                              >
+                                <Ionicons
+                                  name="arrow-undo"
+                                  size={18}
+                                  color={colors.neutral.textSecondary}
+                                />
+                              </Pressable>
+                            </>
                           )}
                         </View>
                       </View>
@@ -515,6 +593,13 @@ const styles = StyleSheet.create({
   },
   dropoffButton: {
     backgroundColor: colors.accent.successGreen,
+  },
+  revertButton: {
+    flex: 0,
+    width: 44,
+    backgroundColor: colors.neutral.creamWhite,
+    borderWidth: 1,
+    borderColor: colors.neutral.textSecondary + "40",
   },
   actionButtonText: {
     fontSize: 15,

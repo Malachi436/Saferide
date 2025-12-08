@@ -14,7 +14,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { ParentStackParamList } from "../../navigation/ParentNavigator";
-import { useAuthStore } from "../../state/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
 import { Child } from "../../types";
 

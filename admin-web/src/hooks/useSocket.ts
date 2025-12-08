@@ -69,28 +69,35 @@ export function useSocket(companyId: string | null) {
 
     // Listen for GPS updates
     socketRef.current.on('bus_location', (data: BusLocation) => {
-      console.log('[Socket] Bus location:', data);
+      console.log('[Socket] *** BUS_LOCATION EVENT RECEIVED ***');
+      console.log('[Socket] Bus location data:', JSON.stringify(data));
       setBusLocations((prev) => {
         const updated = {
           ...prev,
           [data.busId]: data,
         };
-        console.log('[Socket] Updated bus locations from bus_location:', updated);
+        console.log('[Socket] Updated bus locations:', Object.keys(updated).length, 'buses');
         return updated;
       });
     });
 
     // Listen for new location updates (broadcast to all)
     socketRef.current.on('new_location_update', (data: BusLocation) => {
-      console.log('[Socket] New location update:', data);
+      console.log('[Socket] *** NEW_LOCATION_UPDATE EVENT RECEIVED ***');
+      console.log('[Socket] Location update data:', JSON.stringify(data));
       setBusLocations((prev) => {
         const updated = {
           ...prev,
           [data.busId]: data,
         };
-        console.log('[Socket] Updated bus locations from new_location_update:', updated);
+        console.log('[Socket] Updated bus locations:', Object.keys(updated).length, 'buses');
         return updated;
       });
+    });
+
+    // Listen for ALL events for debugging
+    socketRef.current.onAny((eventName, ...args) => {
+      console.log('[Socket] Event received:', eventName, args);
     });
   }, [companyId]);
 

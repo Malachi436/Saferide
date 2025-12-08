@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, Alert, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../stores/authStore';
@@ -55,8 +55,6 @@ export const DriverHomeScreen = () => {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: Infinity,
-      pingInterval: 25000,  // Match server ping interval
-      pingTimeout: 60000,   // Match server ping timeout
       upgrade: true,        // Upgrade polling to websocket
     });
 
@@ -164,32 +162,37 @@ export const DriverHomeScreen = () => {
       </View>
 
       <LiquidCard className="mt-6">
-        <View style={styles.gpsSection}>
-          <View style={styles.gpsInfo}>
-            <Ionicons 
-              name={isTracking ? 'location' : 'location-outline'} 
-              size={24} 
-              color={isTracking ? '#10B981' : '#6B7280'} 
-            />
-            <View style={styles.gpsText}>
-              <Text style={styles.gpsTitle}>Live GPS Tracking</Text>
-              <Text style={styles.gpsStatus}>
-                {isTracking ? 'Tracking active' : 'Tracking inactive'}
-              </Text>
-              {error && <Text style={styles.gpsError}>Error: {error}</Text>}
+        <Pressable 
+          onPress={() => {
+            console.log('[GPSCard Press] Toggling GPS from state:', isTracking);
+            toggleGPSTracking();
+          }}
+          style={styles.gpsPressable}
+        >
+          <View style={styles.gpsSection}>
+            <View style={styles.gpsInfo}>
+              <Ionicons 
+                name={isTracking ? 'location' : 'location-outline'} 
+                size={24} 
+                color={isTracking ? '#10B981' : '#6B7280'} 
+              />
+              <View style={styles.gpsText}>
+                <Text style={styles.gpsTitle}>Live GPS Tracking</Text>
+                <Text style={styles.gpsStatus}>
+                  {isTracking ? 'Tracking active' : 'Tracking inactive'}
+                </Text>
+                {error && <Text style={styles.gpsError}>Error: {error}</Text>}
+              </View>
             </View>
+            <Switch 
+              testID="gps-toggle-switch"
+              value={isTracking}
+              pointerEvents="none"
+              trackColor={{ false: '#E5E7EB', true: '#D1FAE533' }}
+              thumbColor={isTracking ? '#10B981' : '#9CA3AF'}
+            />
           </View>
-          <Switch 
-            testID="gps-toggle-switch"
-            value={isTracking} 
-            onValueChange={() => {
-              console.log('[Switch] onValueChange fired!');
-              toggleGPSTracking();
-            }}
-            trackColor={{ false: '#E5E7EB', true: '#D1FAE533' }}
-            thumbColor={isTracking ? '#10B981' : '#9CA3AF'}
-          />
-        </View>
+        </Pressable>
       </LiquidCard>
 
       <LiquidCard className="mt-4">
@@ -325,6 +328,9 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     marginTop: 24,
+  },
+  gpsPressable: {
+    padding: 0,
   },
   gpsSection: {
     flexDirection: 'row',

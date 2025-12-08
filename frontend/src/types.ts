@@ -58,16 +58,18 @@ export interface AddChildData {
 // Trip
 export interface Trip {
   id: string;
-  route: string;
-  driverId: string;
-  busId: string;
-  date: string;
-  startTime: string;
+  route?: { id: string; name: string } | string;
+  bus?: { id: string; plateNumber: string; driver?: { user?: { firstName: string; lastName: string } } };
+  driverId?: string;
+  busId?: string;
+  date?: string;
+  startTime?: string;
   endTime?: string;
-  totalChildren: number;
-  pickedUp: number;
-  droppedOff: number;
-  absent: number;
+  totalChildren?: number;
+  pickedUp?: number;
+  droppedOff?: number;
+  absent?: number;
+  attendances?: Array<{ status: 'PICKED_UP' | 'DROPPED_OFF' | 'ABSENT' | 'WAITING' }>;
   status: 'SCHEDULED' | 'IN_PROGRESS' | 'ARRIVED_SCHOOL' | 'RETURN_IN_PROGRESS' | 'COMPLETED';
 }
 

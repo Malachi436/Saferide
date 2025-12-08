@@ -47,9 +47,10 @@ export const DriverHomeScreen = () => {
       return;
     }
 
-    const newSocket = io('http://192.168.100.8:3000', {
+    const SOCKET_URL = __DEV__ ? 'http://localhost:3000' : 'http://192.168.100.3:3000';
+    const newSocket = io(SOCKET_URL, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],
       reconnection: true,
     });
 
@@ -78,12 +79,12 @@ export const DriverHomeScreen = () => {
   };
 
   const tripData = todayTrip || activeTrip;
-  const busId = todayTrip?.bus?.id || (activeTrip as any)?.id || 'unknown-bus';
-  const displayRouteName = todayTrip?.route?.name || (activeTrip as any)?.route || 'Route A - Morning';
-  const totalChildren = todayTrip?.attendances?.length || (activeTrip as any)?.totalChildren || 4;
-  const pickedUpCount = todayTrip?.attendances?.filter((a: any) => a.status === 'PICKED_UP').length || (activeTrip as any)?.pickedUp || 2;
-  const droppedOffCount = todayTrip?.attendances?.filter((a: any) => a.status === 'DROPPED_OFF').length || (activeTrip as any)?.droppedOff || 0;
-  const absentCount = todayTrip?.attendances?.filter((a: any) => a.status === 'ABSENT').length || (activeTrip as any)?.absent || 0;
+  const busId = todayTrip?.bus?.id || todayTrip?.busId || (activeTrip as any)?.id || 'unknown-bus';
+  const displayRouteName = typeof todayTrip?.route === 'string' ? todayTrip.route : (todayTrip?.route as any)?.name || (activeTrip as any)?.route || 'Route A - Morning';
+  const totalChildren = todayTrip?.attendances?.length || todayTrip?.totalChildren || (activeTrip as any)?.totalChildren || 4;
+  const pickedUpCount = todayTrip?.attendances?.filter((a: any) => a.status === 'PICKED_UP').length || todayTrip?.pickedUp || (activeTrip as any)?.pickedUp || 2;
+  const droppedOffCount = todayTrip?.attendances?.filter((a: any) => a.status === 'DROPPED_OFF').length || todayTrip?.droppedOff || (activeTrip as any)?.droppedOff || 0;
+  const absentCount = todayTrip?.attendances?.filter((a: any) => a.status === 'ABSENT').length || todayTrip?.absent || (activeTrip as any)?.absent || 0;
 
   const toggleGPSTracking = async () => {
     try {

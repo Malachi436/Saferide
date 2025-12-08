@@ -11,53 +11,53 @@ export declare class AttendanceController {
     constructor(attendanceService: AttendanceService);
     recordAttendance(recordAttendanceDto: RecordAttendanceDto): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }>;
     updateAttendance(id: string, updateDto: any): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }>;
     getAttendanceByChild(childId: string): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }[]>;
     getAttendanceByTrip(tripId: string): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }[]>;
     getAttendanceById(id: string): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }>;
 }
 export {};

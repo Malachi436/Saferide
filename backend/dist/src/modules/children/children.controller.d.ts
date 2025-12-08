@@ -11,7 +11,6 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
-        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -30,7 +29,6 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
-        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -49,7 +47,6 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
-        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -68,7 +65,6 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
-        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -87,7 +83,6 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
-        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;
@@ -106,7 +101,6 @@ export declare class ChildrenController {
         firstName: string;
         lastName: string;
         schoolId: string;
-        driverId: string | null;
         dateOfBirth: Date;
         pickupType: import(".prisma/client").$Enums.PickupType;
         pickupLatitude: number | null;

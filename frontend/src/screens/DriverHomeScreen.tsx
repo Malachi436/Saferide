@@ -87,42 +87,53 @@ export const DriverHomeScreen = () => {
   const absentCount = todayTrip?.attendances?.filter((a: any) => a.status === 'ABSENT').length || todayTrip?.absent || (activeTrip as any)?.absent || 0;
 
   const toggleGPSTracking = async () => {
+    console.log('[DriverHome] GPS toggle pressed, current state:', isTracking);
     try {
       if (isTracking) {
+        console.log('[DriverHome] Stopping GPS');
         gpsService.stopTracking();
         setTracking(false);
         setError(null);
         Alert.alert('GPS Stopped', 'Location tracking stopped');
       } else {
+        console.log('[DriverHome] Starting GPS, socket:', socket?.id, 'connected:', socket?.connected);
         if (!socket) {
+          console.error('[DriverHome] Socket is null');
           Alert.alert('Error', 'Connection not ready. Please wait.');
           return;
         }
 
         if (!socket.connected) {
+          console.error('[DriverHome] Socket not connected');
           Alert.alert('Error', 'Not connected to server.');
           return;
         }
         
+        console.log('[DriverHome] Emitting join_bus_room for busId:', busId);
         socket.emit('join_bus_room', { busId });
         
         try {
+          console.log('[DriverHome] Calling gpsService.startTracking');
           await gpsService.startTracking(socket, busId, 5000);
           
           if (gpsService.isTracking()) {
+            console.log('[DriverHome] GPS tracking confirmed active');
             setTracking(true);
             setError(null);
             Alert.alert('GPS Started', `Tracking bus ${busId}`);
           } else {
+            console.error('[DriverHome] GPS failed to start (not tracking)');
             throw new Error('GPS failed to start');
           }
         } catch (gpsError: any) {
+          console.error('[DriverHome] GPS error:', gpsError);
           setTracking(false);
           setError(gpsError.message);
           Alert.alert('GPS Error', gpsError.message);
         }
       }
     } catch (err: any) {
+      console.error('[DriverHome] Toggle error:', err);
       setError(err.message);
       setTracking(false);
       Alert.alert('Error', err.message);
@@ -156,7 +167,13 @@ export const DriverHomeScreen = () => {
           </View>
           <Switch 
             value={isTracking} 
-            onValueChange={toggleGPSTracking}
+            onValueChange={(newValue) => {
+              console.log('[Switch] Value changed to:', newValue);
+              toggleGPSTracking().catch((err) => {
+                console.error('[Switch] Error:', err);
+                Alert.alert('Error', 'Failed to toggle GPS');
+              });
+            }}
             trackColor={{ false: '#E5E7EB', true: '#D1FAE533' }}
             thumbColor={isTracking ? '#10B981' : '#9CA3AF'}
           />

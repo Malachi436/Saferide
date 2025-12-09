@@ -347,6 +347,7 @@ export function ROSAgoMapClient({
     if (!map.current || !mapLoaded) return;
 
     // Update pickup markers
+    console.log('[ROSAgoMap] Updating pickup markers, count:', pickups?.length || 0);
     const currentPickupIds = new Set(Object.keys(pickupMarkers.current));
     const newPickupIds = new Set(pickups?.map((p) => p.childId) || []);
 
@@ -363,6 +364,7 @@ export function ROSAgoMapClient({
       const pickupId = pickup.childId;
 
       if (!pickupMarkers.current[pickupId]) {
+        console.log('[ROSAgoMap] Creating pickup marker for:', pickup.childName, 'at', pickup.latitude, pickup.longitude);
         const markerElement = createPickupMarkerElement(pickup.childName, pickupId === selectedPickupId);
         const marker = new maplibregl.Marker({ element: markerElement })
           .setLngLat([pickup.longitude, pickup.latitude])

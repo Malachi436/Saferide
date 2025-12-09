@@ -150,6 +150,7 @@ export default function LiveDashboardPage({ params }: { params: Promise<{ compan
     try {
       const response = await apiClient.get(`/admin/company/${companyId}/children`);
       const children = Array.isArray(response) ? response : [];
+      console.log('[LiveDashboard] Fetched children:', children.length);
       const pickupList = children
         .filter((child: any) => child.homeLatitude && child.homeLongitude)
         .map((child: any) => ({
@@ -160,9 +161,10 @@ export default function LiveDashboardPage({ params }: { params: Promise<{ compan
           longitude: child.homeLongitude,
           pickupType: child.pickupType,
         }));
+      console.log('[LiveDashboard] Filtered pickups:', pickupList.length);
       setPickups(pickupList);
     } catch (err) {
-      console.log('Failed to load pickups');
+      console.log('Failed to load pickups', err);
     }
   };
 

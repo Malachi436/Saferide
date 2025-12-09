@@ -366,27 +366,25 @@ export function ROSAgoMapClient({
       if (!pickupMarkers.current[pickupId]) {
         console.log('[ROSAgoMap] Creating pickup marker for:', pickup.childName, 'at', pickup.latitude, pickup.longitude);
         const markerElement = createPickupMarkerElement(pickup.childName, pickupId === selectedPickupId);
-        const marker = new maplibregl.Marker({ element: markerElement })
-          .setLngLat([pickup.longitude, pickup.latitude])
-          .addTo(map.current!);
-
-        // Create popup
-        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
-          <div style="padding: 12px; font-family: Arial, sans-serif;">
-            <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">${pickup.childName}</h3>
-            <p style="margin: 4px 0; font-size: 12px; color: #666;">Parent: ${pickup.parentName}</p>
-            <p style="margin: 4px 0; font-size: 12px; color: #666;">Type: ${pickup.pickupType}</p>
-            <p style="margin: 4px 0; font-size: 11px; color: #999;">Lat: ${pickup.latitude.toFixed(4)}</p>
-            <p style="margin: 4px 0; font-size: 11px; color: #999;">Lon: ${pickup.longitude.toFixed(4)}</p>
+        
+        // Create popup first
+        const popup = new maplibregl.Popup({ 
+          offset: 25,
+          closeButton: true,
+          closeOnClick: false
+        }).setHTML(`
+          <div style="padding: 12px; font-family: Arial, sans-serif; min-width: 180px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold; color: #333;">🏠 ${pickup.childName}</h3>
+            <p style="margin: 4px 0; font-size: 12px; color: #666;"><strong>Parent:</strong> ${pickup.parentName}</p>
+            <p style="margin: 4px 0; font-size: 12px; color: #666;"><strong>Type:</strong> ${pickup.pickupType}</p>
+            <p style="margin: 4px 0; font-size: 11px; color: #999;">📍 ${pickup.latitude.toFixed(4)}, ${pickup.longitude.toFixed(4)}</p>
           </div>
         `);
 
-        marker.setPopup(popup);
-
-        markerElement.addEventListener('click', () => {
-          onPickupSelect?.(pickupId);
-          marker.togglePopup();
-        });
+        const marker = new maplibregl.Marker({ element: markerElement })
+          .setLngLat([pickup.longitude, pickup.latitude])
+          .setPopup(popup)
+          .addTo(map.current!);
 
         pickupMarkers.current[pickupId] = marker;
       }
@@ -498,6 +496,19 @@ export function ROSAgoMapClient({
         .maplibregl-canvas-container {
           width: 100% !important;
           height: 100% !important;
+        }
+        .maplibregl-popup {
+          z-index: 100 !important;
+        }
+        .maplibregl-popup-content {
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          padding: 0;
+        }
+        .maplibregl-popup-close-button {
+          font-size: 18px;
+          padding: 4px 8px;
         }
       ` }} />
     </div>

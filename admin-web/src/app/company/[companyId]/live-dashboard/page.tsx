@@ -187,7 +187,7 @@ export default function LiveDashboardPage({ params }: { params: Promise<{ compan
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <div className="bg-white rounded-lg border border-slate-200 p-6">
             <p className="text-slate-600 text-sm font-semibold">Active Trips</p>
             <p className="text-3xl font-bold text-blue-600 mt-2">{activeTrips.length}</p>
@@ -200,6 +200,14 @@ export default function LiveDashboardPage({ params }: { params: Promise<{ compan
               {Object.keys(mergedLocations).length}
             </p>
             <p className="text-xs text-slate-500 mt-2">Live GPS signals</p>
+          </div>
+
+          <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <p className="text-slate-600 text-sm font-semibold">Home Pickups</p>
+            <p className="text-3xl font-bold text-orange-600 mt-2">
+              {pickups.length}
+            </p>
+            <p className="text-xs text-slate-500 mt-2">Locations on map</p>
           </div>
 
           <div className="bg-white rounded-lg border border-slate-200 p-6">

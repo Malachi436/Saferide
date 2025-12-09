@@ -23,6 +23,7 @@ import HelpSupportScreen from "../screens/parent/HelpSupportScreen";
 import TermsPrivacyScreen from "../screens/parent/TermsPrivacyScreen";
 import PaymentsScreen from "../screens/parent/PaymentsScreen";
 import ReceiptHistoryScreen from "../screens/parent/ReceiptHistoryScreen";
+import HomePickupMapScreen from "../screens/parent/HomePickupMapScreen";
 
 export type ParentTabParamList = {
   Home: undefined;
@@ -42,6 +43,7 @@ export type ParentStackParamList = {
   TermsPrivacy: undefined;
   Payments: undefined;
   ReceiptHistory: undefined;
+  SetHomePickup: { childId: string };
 };
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
@@ -173,6 +175,14 @@ export default function ParentNavigator() {
         name="ReceiptHistory"
         component={ReceiptHistoryScreen}
         options={{ title: "Receipt History" }}
+      />
+      <Stack.Screen
+        name="SetHomePickup"
+        component={HomePickupMapScreen}
+        options={{
+          title: "Set Home Pickup Location",
+          presentation: "modal",
+        }}
       />
     </Stack.Navigator>
   );

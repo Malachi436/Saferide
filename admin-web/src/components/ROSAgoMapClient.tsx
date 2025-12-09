@@ -31,11 +31,23 @@ interface SchoolLocation {
   longitude: number;
 }
 
+interface PickupLocation {
+  childId: string;
+  childName: string;
+  parentName: string;
+  latitude: number;
+  longitude: number;
+  pickupType: string;
+}
+
 interface ROSAgoMapClientProps {
   busLocations: { [busId: string]: BusLocation };
   schools?: SchoolLocation[];
+  pickups?: PickupLocation[];
   selectedBusId?: string;
+  selectedPickupId?: string;
   onBusSelect?: (busId: string) => void;
+  onPickupSelect?: (pickupId: string) => void;
   height?: string;
 }
 
@@ -163,17 +175,45 @@ function createSchoolMarkerElement(name: string): HTMLElement {
   return container;
 }
 
+function createPickupMarkerElement(childName?: string, isSelected?: boolean): HTMLElement {
+  const container = document.createElement('div');
+  container.className = 'rosago-pickup-marker';
+  container.style.cssText = `
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: ${isSelected ? '#ef4444' : '#f97316'};
+    border: 3px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  `;
+  container.textContent = '🏠';
+  return container;
+}
+
 export function ROSAgoMapClient({
   busLocations,
   schools = [],
+  pickups = [],
   selectedBusId,
+  selectedPickupId,
   onBusSelect,
+  onPickupSelect,
   height = '500px',
 }: ROSAgoMapClientProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const busMarkers = useRef<{ [busId: string]: Marker }>({});
   const schoolMarkers = useRef<{ [schoolId: string]: Marker }>({});
+  const pickupMarkers = useRef<{ [pickupId: string]: Marker }>({});
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
@@ -302,6 +342,54 @@ export function ROSAgoMapClient({
       }
     });
   }, [schools, mapLoaded]);
+
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+
+    // Update pickup markers
+    const currentPickupIds = new Set(Object.keys(pickupMarkers.current));
+    const newPickupIds = new Set(pickups?.map((p) => p.childId) || []);
+
+    // Remove old pickup markers
+    for (const id of currentPickupIds) {
+      if (!newPickupIds.has(id)) {
+        pickupMarkers.current[id].remove();
+        delete pickupMarkers.current[id];
+      }
+    }
+
+    // Add or update pickup markers
+    for (const pickup of pickups || []) {
+      const pickupId = pickup.childId;
+
+      if (!pickupMarkers.current[pickupId]) {
+        const markerElement = createPickupMarkerElement(pickup.childName, pickupId === selectedPickupId);
+        const marker = new maplibregl.Marker({ element: markerElement })
+          .setLngLat([pickup.longitude, pickup.latitude])
+          .addTo(map.current);
+
+        // Create popup
+        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
+          <div style="padding: 12px; font-family: Arial, sans-serif;">
+            <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">${pickup.childName}</h3>
+            <p style="margin: 4px 0; font-size: 12px; color: #666;">Parent: ${pickup.parentName}</p>
+            <p style="margin: 4px 0; font-size: 12px; color: #666;">Type: ${pickup.pickupType}</p>
+            <p style="margin: 4px 0; font-size: 11px; color: #999;">Lat: ${pickup.latitude.toFixed(4)}</p>
+            <p style="margin: 4px 0; font-size: 11px; color: #999;">Lon: ${pickup.longitude.toFixed(4)}</p>
+          </div>
+        `);
+
+        marker.setPopup(popup);
+
+        markerElement.addEventListener('click', () => {
+          onPickupSelect?.(pickupId);
+          marker.togglePopup();
+        });
+
+        pickupMarkers.current[pickupId] = marker;
+      }
+    }
+  }, [mapLoaded, pickups, selectedPickupId, onPickupSelect]);
 
   const animateMarker = useCallback(
     (marker: Marker, from: maplibregl.LngLat, to: { lng: number; lat: number }) => {

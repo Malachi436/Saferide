@@ -119,6 +119,26 @@ export default function LiveTrackingScreen() {
   const driver = trip?.bus?.driver?.user;
   const driverName = driver ? `${driver.firstName} ${driver.lastName}` : "No driver assigned";
   const driverPhone = driver?.phone || "";
+  
+  const handleCallDriver = async () => {
+    if (!driverPhone) {
+      Alert.alert("Error", "Driver phone number not available");
+      return;
+    }
+  
+    try {
+      const phoneUrl = `tel:${driverPhone.replace(/\D/g, '')}`;
+      const canOpen = await Linking.canOpenURL(phoneUrl);
+      if (canOpen) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        Alert.alert("Error", "Cannot initiate phone call on this device");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Could not place call");
+      console.error("Error calling driver:", error);
+    }
+  };
 
   // Fetch children and trip data
   const fetchData = useCallback(async () => {

@@ -125,9 +125,17 @@ export default function ManageChildrenScreen({ navigation }: Props) {
                         School: {child.school?.name || 'Not assigned'}
                       </Text>
                     </View>
-                    <Pressable style={styles.editButton}>
-                      <Ionicons name="create-outline" size={20} color={colors.primary.blue} />
-                    </Pressable>
+                    <View style={styles.actionButtons}>
+                      <Pressable 
+                        style={styles.actionButton}
+                        onPress={() => navigation.navigate("SetHomePickup", { childId: child.id })}
+                      >
+                        <Ionicons name="location" size={18} color={colors.primary.blue} />
+                      </Pressable>
+                      <Pressable style={styles.editButton}>
+                        <Ionicons name="create-outline" size={20} color={colors.primary.blue} />
+                      </Pressable>
+                    </View>
                   </View>
                 </LiquidGlassCard>
               </Animated.View>
@@ -221,6 +229,18 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     backgroundColor: colors.primary.blue + "20",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionButtons: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  actionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.accent.sunsetOrange + "20",
     alignItems: "center",
     justifyContent: "center",
   },

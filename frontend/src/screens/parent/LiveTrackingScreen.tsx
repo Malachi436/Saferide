@@ -273,13 +273,6 @@ export default function LiveTrackingScreen() {
     longitudeDelta: 0.02,
   };
 
-  // Call driver
-  const handleCallDriver = () => {
-    if (driverPhone) {
-      Linking.openURL(`tel:${driverPhone}`);
-    }
-  };
-
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>

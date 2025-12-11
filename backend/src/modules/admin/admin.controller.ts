@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Delete, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { Roles } from '../roles/roles.decorator';
@@ -90,5 +90,35 @@ export class AdminController {
   @Roles('PLATFORM_ADMIN')
   async deleteCompany(@Param('companyId') companyId: string) {
     return this.adminService.deleteCompany(companyId);
+  }
+
+  @Put('school/:schoolId')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async updateSchool(@Param('schoolId') schoolId: string, @Body() updateSchoolDto: any) {
+    return this.adminService.updateSchool(schoolId, updateSchoolDto);
+  }
+
+  @Delete('school/:schoolId')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async deleteSchool(@Param('schoolId') schoolId: string) {
+    return this.adminService.deleteSchool(schoolId);
+  }
+
+  @Get('company/:companyId/analytics')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getCompanyAnalytics(@Param('companyId') companyId: string) {
+    return this.adminService.getCompanyAnalytics(companyId);
+  }
+
+  @Get('company/:companyId/trips')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getCompanyTrips(@Param('companyId') companyId: string) {
+    return this.adminService.getCompanyTrips(companyId);
+  }
+
+  @Get('company/:companyId/trips/active')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getCompanyActiveTrips(@Param('companyId') companyId: string) {
+    return this.adminService.getCompanyActiveTrips(companyId);
   }
 }

@@ -15,4 +15,9 @@ export declare class AdminService {
     saveDriverPhoto(driverId: string, file: any): Promise<any>;
     getCompanyById(companyId: string): Promise<any>;
     deleteCompany(companyId: string): Promise<any>;
+    updateSchool(schoolId: string, data: any): Promise<any>;
+    deleteSchool(schoolId: string): Promise<any>;
+    getCompanyAnalytics(companyId: string): Promise<any>;
+    getCompanyTrips(companyId: string): Promise<any>;
+    getCompanyActiveTrips(companyId: string): Promise<any>;
 }

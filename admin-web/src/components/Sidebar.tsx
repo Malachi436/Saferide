@@ -24,13 +24,12 @@ export function Sidebar() {
     : [
         { label: 'Overview', href: `/company/${companyId}/overview` },
         { label: 'Live Dashboard', href: `/company/${companyId}/live-dashboard` },
+        { label: 'Schools', href: `/company/${companyId}/schools` },
         { label: 'Scheduled Routes', href: `/company/${companyId}/scheduled-routes` },
-        { label: 'Auto Generate Routes', href: `/company/${companyId}/auto-generate-routes` },
+        { label: 'Trips', href: `/company/${companyId}/trips` },
         { label: 'Children', href: `/company/${companyId}/children` },
         { label: 'Buses', href: `/company/${companyId}/buses` },
         { label: 'Drivers', href: `/company/${companyId}/drivers` },
-        { label: 'Onboard Driver', href: `/company/${companyId}/onboard-driver` },
-        { label: 'Bus Fares', href: `/company/${companyId}/bus-fares` },
         { label: 'Analytics', href: `/company/${companyId}/analytics` },
       ];
 

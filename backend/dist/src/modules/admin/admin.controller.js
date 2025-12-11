@@ -62,6 +62,21 @@ let AdminController = class AdminController {
     async deleteCompany(companyId) {
         return this.adminService.deleteCompany(companyId);
     }
+    async updateSchool(schoolId, updateSchoolDto) {
+        return this.adminService.updateSchool(schoolId, updateSchoolDto);
+    }
+    async deleteSchool(schoolId) {
+        return this.adminService.deleteSchool(schoolId);
+    }
+    async getCompanyAnalytics(companyId) {
+        return this.adminService.getCompanyAnalytics(companyId);
+    }
+    async getCompanyTrips(companyId) {
+        return this.adminService.getCompanyTrips(companyId);
+    }
+    async getCompanyActiveTrips(companyId) {
+        return this.adminService.getCompanyActiveTrips(companyId);
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -168,6 +183,47 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "deleteCompany", null);
+__decorate([
+    (0, common_1.Put)('school/:schoolId'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('schoolId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "updateSchool", null);
+__decorate([
+    (0, common_1.Delete)('school/:schoolId'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('schoolId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "deleteSchool", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/analytics'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCompanyAnalytics", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/trips'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCompanyTrips", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/trips/active'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCompanyActiveTrips", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

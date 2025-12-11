@@ -298,4 +298,207 @@ export class AdminService {
       where: { id: companyId },
     });
   }
+
+  async updateSchool(schoolId: string, data: any): Promise<any> {
+    return this.prisma.school.update({
+      where: { id: schoolId },
+      data,
+    });
+  }
+
+  async deleteSchool(schoolId: string): Promise<any> {
+    // Delete associated routes first
+    await this.prisma.route.deleteMany({
+      where: { schoolId },
+    });
+
+    // Delete associated children
+    await this.prisma.child.deleteMany({
+      where: { schoolId },
+    });
+
+    return this.prisma.school.delete({
+      where: { id: schoolId },
+    });
+  }
+
+  async getCompanyAnalytics(companyId: string): Promise<any> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const [totalTrips, completedTrips, inProgressTrips, totalChildren, activeChildren, totalPayments, successfulPayments, missedPickups, onTimeTrips] = await Promise.all([
+      this.prisma.trip.count({
+        where: { bus: { driver: { user: { companyId } } } },
+      }),
+      this.prisma.trip.count({
+        where: {
+          bus: { driver: { user: { companyId } } },
+          status: 'COMPLETED',
+        },
+      }),
+      this.prisma.trip.count({
+        where: {
+          bus: { driver: { user: { companyId } } },
+          status: 'IN_PROGRESS',
+        },
+      }),
+      this.prisma.child.count({
+        where: { school: { companyId } },
+      }),
+      this.prisma.child.count({
+        where: {
+          school: { companyId },
+          attendance: {
+            some: {
+              trip: {
+                status: 'IN_PROGRESS',
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.paymentIntent.count({
+        where: {
+          parent: { companyId },
+        },
+      }),
+      this.prisma.paymentIntent.count({
+        where: {
+          parent: { companyId },
+          status: 'succeeded',
+        },
+      }),
+      this.prisma.childAttendance.count({
+        where: {
+          trip: { bus: { driver: { user: { companyId } } } },
+          status: 'MISSED',
+          createdAt: { gte: thirtyDaysAgo },
+        },
+      }),
+      this.prisma.trip.count({
+        where: {
+          bus: { driver: { user: { companyId } } },
+          status: 'COMPLETED',
+          createdAt: { gte: thirtyDaysAgo },
+        },
+      }),
+    ]);
+
+    const tripCompletionRate = totalTrips > 0 ? (completedTrips / totalTrips) * 100 : 0;
+    const paymentSuccessRate = totalPayments > 0 ? (successfulPayments / totalPayments) * 100 : 0;
+    const attendanceRate = totalChildren > 0 ? ((totalChildren - missedPickups) / totalChildren) * 100 : 100;
+
+    return {
+      trips: {
+        total: totalTrips,
+        completed: completedTrips,
+        inProgress: inProgressTrips,
+        completionRate: tripCompletionRate,
+      },
+      children: {
+        total: totalChildren,
+        active: activeChildren,
+      },
+      payments: {
+        total: totalPayments,
+        successful: successfulPayments,
+        successRate: paymentSuccessRate,
+      },
+      attendance: {
+        missedPickups,
+        rate: attendanceRate,
+      },
+      performance: {
+        onTimeTrips,
+        tripCompletionRate,
+      },
+    };
+  }
+
+  async getCompanyTrips(companyId: string): Promise<any> {
+    return this.prisma.trip.findMany({
+      where: {
+        bus: { driver: { user: { companyId } } },
+      },
+      include: {
+        bus: {
+          include: {
+            driver: {
+              include: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        route: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        attendances: {
+          include: {
+            child: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 100,
+    });
+  }
+
+  async getCompanyActiveTrips(companyId: string): Promise<any> {
+    return this.prisma.trip.findMany({
+      where: {
+        bus: { driver: { user: { companyId } } },
+        status: 'IN_PROGRESS',
+      },
+      include: {
+        bus: {
+          include: {
+            driver: {
+              include: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        route: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        attendances: {
+          include: {
+            child: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }

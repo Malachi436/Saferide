@@ -1,6 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { DriverHomeScreen, AttendanceScreen, BroadcastMessageScreen, RouteMapScreen } from '../screens';
+import { DriverHomeScreen, AttendanceScreen, BroadcastMessageScreen, RouteMapScreen, SettingsScreen } from '../screens';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +37,11 @@ export const DriverStackNavigator = () => {
         name="RouteMap"
         component={RouteMapScreen}
         options={{ title: 'Route Map' }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ title: 'Settings' }}
       />
     </Stack.Navigator>
   );

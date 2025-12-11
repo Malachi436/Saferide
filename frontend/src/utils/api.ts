@@ -3,9 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { socketService } from './socket';
 
 // API configuration
-// Development environment: http://192.168.100.8:8081
-// Backend API: http://192.168.100.8:3000
-const API_BASE_URL = __DEV__ ? 'http://192.168.100.8:3000' : 'http://192.168.100.8:3000';
+// Development environment: http://192.168.100.13:8081
+// Backend API: http://192.168.100.13:3000
+const API_BASE_URL = __DEV__ ? 'http://192.168.100.13:3000' : 'http://192.168.100.13:3000';
 
 interface ApiRequestConfig {
   headers?: Record<string, string>;

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://192.168.100.8:3000';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://192.168.100.13:3000';
 
 export interface BusLocation {
   busId: string;

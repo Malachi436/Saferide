@@ -1,20 +1,26 @@
 /**
  * WebSocket Service for Real-time Notifications
  * Handles Socket.IO connection and event subscriptions
+ * Optimized for cross-platform (iOS/Android) reliability
  */
 
 import { io, Socket } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 // Use the same base URL as the API client
-const SOCKET_URL = 'http://192.168.100.8:3000';
+const SOCKET_URL = 'http://192.168.100.13:3000';
 
 class SocketService {
   private socket: Socket | null = null;
   private listeners: Map<string, Set<Function>> = new Map();
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 20;
+  private isReconnecting = false;
 
   /**
    * Connect to WebSocket server with authentication
+   * Uses platform-specific optimizations for reliability
    */
   async connect(): Promise<void> {
     if (this.socket?.connected) {
@@ -28,7 +34,7 @@ class SocketService {
       return;
     }
 
-    console.log('[Socket] Connecting to:', SOCKET_URL);
+    console.log('[Socket] Connecting to:', SOCKET_URL, 'Platform:', Platform.OS);
 
     // Disconnect existing socket if any
     if (this.socket) {
@@ -36,19 +42,31 @@ class SocketService {
       this.socket = null;
     }
 
+    // Platform-specific transport configuration
+    // Android works better with websocket first, iOS with polling first
+    const transports = Platform.OS === 'android' 
+      ? ['websocket', 'polling'] 
+      : ['polling', 'websocket'];
+
     this.socket = io(SOCKET_URL, {
       auth: { token },
-      transports: ['polling', 'websocket'], // Try polling first (more reliable on mobile)
-      upgrade: true, // Upgrade to websocket if possible
+      transports,
+      upgrade: true,
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 10,
-      timeout: 20000,
-      forceNew: true, // Force new connection
+      reconnectionDelayMax: 10000,
+      reconnectionAttempts: this.maxReconnectAttempts,
+      timeout: 30000, // Increased timeout for Android
+      forceNew: true,
+      // Android-specific: use larger ping interval
+      ...(Platform.OS === 'android' && {
+        pingInterval: 25000,
+        pingTimeout: 20000,
+      }),
     });
 
     this.setupEventHandlers();
+    this.reconnectAttempts = 0;
   }
 
   /**

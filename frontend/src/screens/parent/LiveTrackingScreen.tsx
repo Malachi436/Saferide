@@ -1,6 +1,7 @@
 /**
  * Live Tracking Screen
  * Real-time tracking of children and bus location with WebSocket GPS updates
+ * Uses SocketContext for persistent connection across app navigation
  */
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
@@ -15,6 +16,7 @@ import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
 import { socketService } from "../../utils/socket";
+import { useSocket } from "../../context/SocketContext";
 
 interface Child {
   id: string;
@@ -80,6 +82,7 @@ function calculateETA(distanceKm: number, speedKmh: number = 30): string {
 export default function LiveTrackingScreen() {
   const user = useAuthStore((s) => s.user);
   const mapRef = useRef<MapView>(null);
+  const { isConnected: socketConnected, busLocations, subscribeToBus, unsubscribeFromBus, reconnect } = useSocket();
   
   const [children, setChildren] = useState<Child[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -94,26 +97,57 @@ export default function LiveTrackingScreen() {
     ? children.find(c => c.id === selectedChildId) 
     : children[0];
 
-  // Get pickup location for selected child
-  const pickupLocation = selectedChild ? {
-    latitude: selectedChild.pickupLatitude || selectedChild.homeLatitude || 5.6037,
-    longitude: selectedChild.pickupLongitude || selectedChild.homeLongitude || -0.187,
-  } : null;
+  // Get pickup location for selected child - ALWAYS use stored home location, never device location
+  // This ensures ETA is calculated to the child's home, not where the device currently is
+  const getStoredHomeLocation = useCallback((child: Child | undefined): { latitude: number; longitude: number } | null => {
+    if (!child) return null;
+    
+    // First priority: stored pickup coordinates
+    if (child.pickupLatitude && child.pickupLongitude) {
+      console.log('[LiveTracking] Using stored pickup location:', child.pickupLatitude, child.pickupLongitude);
+      return {
+        latitude: child.pickupLatitude,
+        longitude: child.pickupLongitude,
+      };
+    }
+    
+    // Second priority: stored home coordinates
+    if (child.homeLatitude && child.homeLongitude) {
+      console.log('[LiveTracking] Using stored home location:', child.homeLatitude, child.homeLongitude);
+      return {
+        latitude: child.homeLatitude,
+        longitude: child.homeLongitude,
+      };
+    }
+    
+    // No stored location - return null (don't fallback to device location)
+    console.log('[LiveTracking] No stored home location for child:', child.id);
+    return null;
+  }, []);
 
-  // Calculate distance and ETA
+  const pickupLocation = getStoredHomeLocation(selectedChild);
+
+  // Calculate distance and ETA - only if we have a stored home location
+  const hasStoredLocation = pickupLocation !== null;
+  
   const distance = busLocation && pickupLocation 
     ? calculateDistance(busLocation.latitude, busLocation.longitude, pickupLocation.latitude, pickupLocation.longitude)
     : null;
   
-  const eta = distance !== null 
-    ? calculateETA(distance, busLocation?.speed || 30) 
-    : "--";
+  // Show "Set Home" instead of ETA if no home location is stored
+  const eta = !hasStoredLocation
+    ? "Set Home"
+    : distance !== null 
+      ? calculateETA(distance, busLocation?.speed || 30) 
+      : "--";
 
-  const distanceText = distance !== null 
-    ? distance < 1 
-      ? `${Math.round(distance * 1000)} m` 
-      : `${distance.toFixed(1)} km`
-    : "--";
+  const distanceText = !hasStoredLocation
+    ? "--"
+    : distance !== null 
+      ? distance < 1 
+        ? `${Math.round(distance * 1000)} m` 
+        : `${distance.toFixed(1)} km`
+      : "--";
 
   // Driver info
   const driver = trip?.bus?.driver?.user;
@@ -178,85 +212,75 @@ export default function LiveTrackingScreen() {
     }
   }, [user?.id, selectedChildId]);
 
-  // Connect to WebSocket and listen for bus location updates
+  // Subscribe to bus room via SocketContext and update local bus location
   useEffect(() => {
-    const setupSocket = async () => {
-      try {
-        await socketService.connect();
-        setIsConnected(socketService.isConnected());
-        console.log('[LiveTracking] Socket connected:', socketService.isConnected());
+    if (trip?.bus?.id) {
+      console.log('[LiveTracking] Subscribing to bus via context:', trip.bus.id);
+      subscribeToBus(trip.bus.id);
+      setIsConnected(socketConnected);
+    }
 
-        // Join bus room if we have a trip
-        if (trip?.bus?.id) {
-          const socket = socketService.getSocket();
-          if (socket) {
-            console.log('[LiveTracking] Joining bus room:', trip.bus.id);
-            socket.emit('join_bus_room', { busId: trip.bus.id });
-          }
-        }
-
-        // Listen for bus location updates
-        const handleBusLocation = (data: BusLocation) => {
-          console.log('[LiveTracking] Bus location received:', data);
-          // Only update if it's our bus
-          if (trip?.bus?.id && data.busId === trip.bus.id) {
-            setBusLocation(data);
-            
-            // Animate map to show bus
-            if (mapRef.current && data.latitude && data.longitude) {
-              mapRef.current.animateToRegion({
-                latitude: data.latitude,
-                longitude: data.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }, 500);
-            }
-          }
-        };
-
-        socketService.on('bus_location', handleBusLocation);
-        socketService.on('new_location_update', handleBusLocation);
-
-        // Listen for attendance updates
-        const handleAttendanceUpdate = (data: any) => {
-          console.log('[LiveTracking] Attendance update received:', data);
-          
-          let title = 'Status Update';
-          let message = '';
-          
-          if (data.status === 'PICKED_UP') {
-            title = 'Child Picked Up!';
-            message = `${data.childName} has been picked up by the bus driver.`;
-          } else if (data.status === 'DROPPED') {
-            title = 'Child Dropped Off!';
-            message = `${data.childName} has been safely dropped off at school.`;
-          }
-
-          if (message) {
-            Alert.alert(title, message);
-          }
-
-          // Refresh data
-          fetchData();
-        };
-
-        socketService.on('attendance_updated', handleAttendanceUpdate);
-
-        return () => {
-          socketService.off('bus_location', handleBusLocation);
-          socketService.off('new_location_update', handleBusLocation);
-          socketService.off('attendance_updated', handleAttendanceUpdate);
-        };
-      } catch (err) {
-        console.error('[LiveTracking] Socket setup error:', err);
-        setIsConnected(false);
+    return () => {
+      if (trip?.bus?.id) {
+        unsubscribeFromBus(trip.bus.id);
       }
     };
+  }, [trip?.bus?.id, subscribeToBus, unsubscribeFromBus, socketConnected]);
 
-    if (trip?.bus?.id) {
-      setupSocket();
+  // Update local bus location from context's busLocations
+  useEffect(() => {
+    if (trip?.bus?.id && busLocations[trip.bus.id]) {
+      const location = busLocations[trip.bus.id];
+      console.log('[LiveTracking] Bus location from context:', location);
+      setBusLocation(location);
+      
+      // Animate map to show bus
+      if (mapRef.current && location.latitude && location.longitude) {
+        mapRef.current.animateToRegion({
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }, 500);
+      }
     }
-  }, [trip?.bus?.id]);
+  }, [trip?.bus?.id, busLocations]);
+
+  // Update connection status from context
+  useEffect(() => {
+    setIsConnected(socketConnected);
+  }, [socketConnected]);
+
+  // Listen for attendance updates via socketService (still needed for alerts)
+  useEffect(() => {
+    const handleAttendanceUpdate = (data: any) => {
+      console.log('[LiveTracking] Attendance update received:', data);
+      
+      let title = 'Status Update';
+      let message = '';
+      
+      if (data.status === 'PICKED_UP') {
+        title = 'Child Picked Up!';
+        message = `${data.childName} has been picked up by the bus driver.`;
+      } else if (data.status === 'DROPPED') {
+        title = 'Child Dropped Off!';
+        message = `${data.childName} has been safely dropped off at school.`;
+      }
+
+      if (message) {
+        Alert.alert(title, message);
+      }
+
+      // Refresh data
+      fetchData();
+    };
+
+    socketService.on('attendance_updated', handleAttendanceUpdate);
+
+    return () => {
+      socketService.off('attendance_updated', handleAttendanceUpdate);
+    };
+  }, [fetchData]);
 
   // Fetch data when screen focuses
   useFocusEffect(

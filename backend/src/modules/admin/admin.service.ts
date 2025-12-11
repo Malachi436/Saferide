@@ -502,10 +502,30 @@ export class AdminService {
     });
   }
 
-  async getAttendanceReport(companyId: string): Promise<any> {
+  async getAttendanceReport(companyId: string, range?: string): Promise<any> {
+    // Calculate date filter based on range
+    const now = new Date();
+    let startDate: Date;
+    
+    switch (range) {
+      case 'daily':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Last 24 hours
+        break;
+      case 'weekly':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+        break;
+      case 'monthly':
+      default:
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // Last 30 days (4 weeks)
+        break;
+    }
+
     const attendances = await this.prisma.childAttendance.findMany({
       where: {
         trip: { bus: { driver: { user: { companyId } } } },
+        timestamp: {
+          gte: startDate,
+        },
       },
       include: {
         child: {
@@ -568,10 +588,30 @@ export class AdminService {
     }));
   }
 
-  async getPaymentReport(companyId: string): Promise<any> {
+  async getPaymentReport(companyId: string, range?: string): Promise<any> {
+    // Calculate date filter based on range
+    const now = new Date();
+    let startDate: Date;
+    
+    switch (range) {
+      case 'daily':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case 'weekly':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'monthly':
+      default:
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+    }
+
     const payments = await this.prisma.paymentIntent.findMany({
       where: {
         parent: { companyId },
+        createdAt: {
+          gte: startDate,
+        },
       },
       include: {
         parent: {
@@ -602,7 +642,24 @@ export class AdminService {
     }));
   }
 
-  async getDriverPerformanceReport(companyId: string): Promise<any> {
+  async getDriverPerformanceReport(companyId: string, range?: string): Promise<any> {
+    // Calculate date filter based on range
+    const now = new Date();
+    let startDate: Date;
+    
+    switch (range) {
+      case 'daily':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case 'weekly':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'monthly':
+      default:
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+    }
+
     const drivers = await this.prisma.driver.findMany({
       where: {
         user: { companyId },
@@ -617,6 +674,11 @@ export class AdminService {
           },
         },
         trips: {
+          where: {
+            createdAt: {
+              gte: startDate,
+            },
+          },
           select: {
             id: true,
             status: true,

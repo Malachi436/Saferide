@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { use } from 'react';
 
 type ReportType = 'attendance' | 'payments' | 'driver-performance';
+type DateRange = 'daily' | 'weekly' | 'monthly';
 
 export default function ReportsPage({
   params,
@@ -15,6 +16,7 @@ export default function ReportsPage({
   const { companyId } = use(params);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange>('weekly');
 
   const downloadCSV = (data: any[], filename: string) => {
     if (!data || data.length === 0) {
@@ -58,10 +60,11 @@ export default function ReportsPage({
       setLoading(true);
       setError('');
 
-      const endpoint = `/admin/company/${companyId}/reports/${type}`;
-      const data = await apiClient.get(endpoint);
+      const endpoint = `/admin/company/${companyId}/reports/${type}?range=${dateRange}`;
+      const response = await apiClient.get(endpoint);
+      const data = Array.isArray(response) ? response : [];
 
-      if (!data || data.length === 0) {
+      if (data.length === 0) {
         alert('No data available for this report');
         return;
       }
@@ -73,7 +76,7 @@ export default function ReportsPage({
         'driver-performance': 'driver_performance_report',
       };
 
-      downloadCSV(data, filenames[type]);
+      downloadCSV(data, `${filenames[type]}_${dateRange}`);
 
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to generate report');
@@ -131,14 +134,66 @@ export default function ReportsPage({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-3">
             <span className="text-2xl">ℹ️</span>
-            <div>
+            <div className="flex-1">
               <h3 className="font-semibold text-blue-900">About Reports</h3>
               <p className="text-blue-700 text-sm mt-1">
                 Click on any report card below to generate and download a CSV file. 
-                Reports include the most recent 1,000 records by default.
+                Select a date range to filter the data period (maximum 4 weeks).
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Date Range Selector */}
+        <div className="bg-white border border-slate-200 rounded-lg p-6 mb-6">
+          <h3 className="font-bold text-slate-900 mb-4">Select Date Range</h3>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setDateRange('daily')}
+              className={`px-6 py-3 rounded-lg font-semibold transition ${
+                dateRange === 'daily'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <div className="text-center">
+                <div className="text-lg">📅</div>
+                <div className="mt-1">Daily</div>
+                <div className="text-xs opacity-75">Last 24 hours</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setDateRange('weekly')}
+              className={`px-6 py-3 rounded-lg font-semibold transition ${
+                dateRange === 'weekly'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <div className="text-center">
+                <div className="text-lg">📆</div>
+                <div className="mt-1">Weekly</div>
+                <div className="text-xs opacity-75">Last 7 days</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setDateRange('monthly')}
+              className={`px-6 py-3 rounded-lg font-semibold transition ${
+                dateRange === 'monthly'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <div className="text-center">
+                <div className="text-lg">🗓️</div>
+                <div className="mt-1">Monthly</div>
+                <div className="text-xs opacity-75">Last 30 days</div>
+              </div>
+            </button>
+          </div>
+          <p className="text-sm text-slate-500 mt-3">
+            <strong>Selected:</strong> {dateRange === 'daily' ? 'Last 24 hours' : dateRange === 'weekly' ? 'Last 7 days' : 'Last 30 days (4 weeks)'}
+          </p>
         </div>
 
         {/* Report Cards */}

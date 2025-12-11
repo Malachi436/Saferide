@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Delete, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Delete, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { Roles } from '../roles/roles.decorator';
@@ -124,19 +124,19 @@ export class AdminController {
 
   @Get('company/:companyId/reports/attendance')
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getAttendanceReport(@Param('companyId') companyId: string) {
-    return this.adminService.getAttendanceReport(companyId);
+  async getAttendanceReport(@Param('companyId') companyId: string, @Query('range') range?: string) {
+    return this.adminService.getAttendanceReport(companyId, range);
   }
 
   @Get('company/:companyId/reports/payments')
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getPaymentReport(@Param('companyId') companyId: string) {
-    return this.adminService.getPaymentReport(companyId);
+  async getPaymentReport(@Param('companyId') companyId: string, @Query('range') range?: string) {
+    return this.adminService.getPaymentReport(companyId, range);
   }
 
   @Get('company/:companyId/reports/driver-performance')
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getDriverPerformanceReport(@Param('companyId') companyId: string) {
-    return this.adminService.getDriverPerformanceReport(companyId);
+  async getDriverPerformanceReport(@Param('companyId') companyId: string, @Query('range') range?: string) {
+    return this.adminService.getDriverPerformanceReport(companyId, range);
   }
 }

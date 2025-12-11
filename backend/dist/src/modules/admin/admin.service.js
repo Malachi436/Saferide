@@ -485,10 +485,27 @@ let AdminService = class AdminService {
             },
         });
     }
-    async getAttendanceReport(companyId) {
+    async getAttendanceReport(companyId, range) {
+        const now = new Date();
+        let startDate;
+        switch (range) {
+            case 'daily':
+                startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                break;
+            case 'weekly':
+                startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                break;
+            case 'monthly':
+            default:
+                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                break;
+        }
         const attendances = await this.prisma.childAttendance.findMany({
             where: {
                 trip: { bus: { driver: { user: { companyId } } } },
+                timestamp: {
+                    gte: startDate,
+                },
             },
             include: {
                 child: {
@@ -549,10 +566,27 @@ let AdminService = class AdminService {
             recordedBy: att.recordedBy,
         }));
     }
-    async getPaymentReport(companyId) {
+    async getPaymentReport(companyId, range) {
+        const now = new Date();
+        let startDate;
+        switch (range) {
+            case 'daily':
+                startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                break;
+            case 'weekly':
+                startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                break;
+            case 'monthly':
+            default:
+                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                break;
+        }
         const payments = await this.prisma.paymentIntent.findMany({
             where: {
                 parent: { companyId },
+                createdAt: {
+                    gte: startDate,
+                },
             },
             include: {
                 parent: {
@@ -581,7 +615,21 @@ let AdminService = class AdminService {
             paymentId: payment.id,
         }));
     }
-    async getDriverPerformanceReport(companyId) {
+    async getDriverPerformanceReport(companyId, range) {
+        const now = new Date();
+        let startDate;
+        switch (range) {
+            case 'daily':
+                startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                break;
+            case 'weekly':
+                startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                break;
+            case 'monthly':
+            default:
+                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                break;
+        }
         const drivers = await this.prisma.driver.findMany({
             where: {
                 user: { companyId },
@@ -596,6 +644,11 @@ let AdminService = class AdminService {
                     },
                 },
                 trips: {
+                    where: {
+                        createdAt: {
+                            gte: startDate,
+                        },
+                    },
                     select: {
                         id: true,
                         status: true,

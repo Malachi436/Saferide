@@ -20,7 +20,7 @@ export declare class AdminController {
     getCompanyAnalytics(companyId: string): Promise<any>;
     getCompanyTrips(companyId: string): Promise<any>;
     getCompanyActiveTrips(companyId: string): Promise<any>;
-    getAttendanceReport(companyId: string): Promise<any>;
-    getPaymentReport(companyId: string): Promise<any>;
-    getDriverPerformanceReport(companyId: string): Promise<any>;
+    getAttendanceReport(companyId: string, range?: string): Promise<any>;
+    getPaymentReport(companyId: string, range?: string): Promise<any>;
+    getDriverPerformanceReport(companyId: string, range?: string): Promise<any>;
 }

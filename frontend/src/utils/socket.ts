@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 // Socket URL - Backend runs on port 3000
-const SOCKET_URL = 'http://192.168.100.2:3000';
+const SOCKET_URL = 'http://192.168.0.181:3000';
 
 class SocketService {
   private socket: Socket | null = null;

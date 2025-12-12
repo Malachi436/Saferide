@@ -158,7 +158,7 @@ model Driver {
 
 model Child {
   id                String            @id @default(uuid())
-  uniqueCode        String            @unique // For parent registration with existing bus systems
+  uniqueCode        String?           @unique // For parent registration with existing bus systems
   firstName         String
   lastName          String
   dateOfBirth       DateTime

@@ -74,11 +74,16 @@ jobs:
     name: Deploy Backend
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     
     steps:
       - name: Trigger Render Deploy
         run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            echo "⚠️ RENDER_DEPLOY_HOOK not configured. Skipping deployment."
+            echo "ℹ️ Configure Render first, then add RENDER_DEPLOY_HOOK to GitHub secrets."
+            exit 0
+          fi
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
@@ -88,7 +93,7 @@ jobs:
     name: Deploy Admin Dashboard
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     
     steps:
       - name: Checkout code
@@ -101,8 +106,17 @@ jobs:
           cache: 'npm'
           cache-dependency-path: admin-web/package-lock.json
 
+      - name: Check Vercel Configuration
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "⚠️ Vercel secrets not configured. Skipping deployment."
+            echo "ℹ️ Configure Vercel first, then add secrets to GitHub."
+            exit 0
+          fi
+
       - name: Install Vercel CLI
         run: npm install -g vercel
+        if: secrets.VERCEL_TOKEN != ''
 
       - name: Deploy to Vercel
         run: |
@@ -113,6 +127,7 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        if: secrets.VERCEL_TOKEN != ''
 
   # Build Mobile App (manual trigger recommended for app store builds)
   build-mobile:
@@ -150,16 +165,22 @@ jobs:
   # Notify on completion
   notify:
     name: Notify Deployment Status
-    needs: [deploy-backend, deploy-admin]
+    needs: [test, deploy-backend, deploy-admin]
     runs-on: ubuntu-latest
     if: always()
     
     steps:
       - name: Check deployment status
         run: |
-          if [ "${{ needs.deploy-backend.result }}" == "success" ] && [ "${{ needs.deploy-admin.result }}" == "success" ]; then
-            echo "All deployments successful!"
+          echo "📊 Deployment Status Summary:"
+          echo "✅ Tests: ${{ needs.test.result }}"
+          echo "📦 Backend Deploy: ${{ needs.deploy-backend.result }}"
+          echo "🌐 Admin Deploy: ${{ needs.deploy-admin.result }}"
+          
+          if [ "${{ needs.test.result }}" == "success" ]; then
+            echo "✅ All checks passed! Code is ready for deployment."
+            echo "ℹ️ To deploy: Configure Render & Vercel, then run workflow manually."
           else
-            echo "Some deployments failed"
+            echo "❌ Tests failed. Please fix issues before deploying."
             exit 1
           fi

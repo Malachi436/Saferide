@@ -45,12 +45,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 const bcrypt = __importStar(require("bcrypt"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 let AdminService = class AdminService {
-    constructor(prisma) {
+    constructor(prisma, notificationsService) {
         this.prisma = prisma;
+        this.notificationsService = notificationsService;
     }
     async getPlatformStats() {
         const [totalCompanies, totalSchools, totalUsers, totalDrivers, totalChildren, totalBuses, totalRoutes, totalTrips,] = await Promise.all([
@@ -712,10 +714,88 @@ let AdminService = class AdminService {
             };
         });
     }
+    async updateCompanyFare(companyId, newFare, adminId, reason) {
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+        });
+        if (!company) {
+            throw new common_1.NotFoundException('Company not found');
+        }
+        const oldFare = company.baseFare;
+        const updatedCompany = await this.prisma.company.update({
+            where: { id: companyId },
+            data: { baseFare: newFare },
+        });
+        await this.prisma.fareHistory.create({
+            data: {
+                companyId,
+                oldFare,
+                newFare,
+                changedBy: adminId,
+                reason,
+            },
+        });
+        const parents = await this.prisma.user.findMany({
+            where: {
+                role: 'PARENT',
+                parentChildren: {
+                    some: {
+                        school: {
+                            companyId,
+                        },
+                    },
+                },
+            },
+        });
+        for (const parent of parents) {
+            await this.notificationsService.create({
+                userId: parent.id,
+                title: 'Fare Update',
+                message: `The bus fare has been updated from UGX ${oldFare.toLocaleString()} to UGX ${newFare.toLocaleString()}. ${reason || ''}`,
+                type: 'PAYMENT',
+                metadata: {
+                    oldFare,
+                    newFare,
+                    change: newFare - oldFare,
+                    percentageChange: ((newFare - oldFare) / oldFare * 100).toFixed(2),
+                },
+            });
+        }
+        return {
+            company: updatedCompany,
+            oldFare,
+            newFare,
+            change: newFare - oldFare,
+            parentsNotified: parents.length,
+        };
+    }
+    async getCompanyFare(companyId) {
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+            select: {
+                id: true,
+                name: true,
+                baseFare: true,
+                currency: true,
+            },
+        });
+        if (!company) {
+            throw new common_1.NotFoundException('Company not found');
+        }
+        return company;
+    }
+    async getFareHistory(companyId) {
+        return this.prisma.fareHistory.findMany({
+            where: { companyId },
+            orderBy: { createdAt: 'desc' },
+            take: 50,
+        });
+    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        notifications_service_1.NotificationsService])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

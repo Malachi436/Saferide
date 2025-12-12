@@ -29,4 +29,13 @@ export class TripExceptionsController {
   async getChildExceptions(@Param('childId') childId: string) {
     return this.tripExceptionsService.getChildExceptions(childId);
   }
+
+  @Post('/unskip')
+  async unskipTrip(
+    @Body() body: { childId: string; tripId: string; reason?: string },
+    @Req() req: any,
+  ) {
+    const parentId = req.user.userId;
+    return this.tripExceptionsService.unskipTrip(body.childId, body.tripId, parentId, body.reason);
+  }
 }

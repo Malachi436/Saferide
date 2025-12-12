@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const trip_exceptions_service_1 = require("./trip-exceptions.service");
 const trip_exceptions_controller_1 = require("./trip-exceptions.controller");
 const prisma_module_1 = require("../../prisma/prisma.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 let TripExceptionsModule = class TripExceptionsModule {
 };
 exports.TripExceptionsModule = TripExceptionsModule;
 exports.TripExceptionsModule = TripExceptionsModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
+        imports: [prisma_module_1.PrismaModule, notifications_module_1.NotificationsModule],
         controllers: [trip_exceptions_controller_1.TripExceptionsController],
         providers: [trip_exceptions_service_1.TripExceptionsService],
         exports: [trip_exceptions_service_1.TripExceptionsService],

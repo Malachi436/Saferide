@@ -16,10 +16,12 @@ exports.TripExceptionsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const realtime_gateway_1 = require("../realtime/realtime.gateway");
+const notifications_service_1 = require("../notifications/notifications.service");
 let TripExceptionsService = class TripExceptionsService {
-    constructor(prisma, realtimeGateway) {
+    constructor(prisma, realtimeGateway, notificationsService) {
         this.prisma = prisma;
         this.realtimeGateway = realtimeGateway;
+        this.notificationsService = notificationsService;
     }
     async skipTrip(childId, tripId, reason) {
         const exception = await this.prisma.tripException.upsert({
@@ -98,12 +100,121 @@ let TripExceptionsService = class TripExceptionsService {
             },
         });
     }
+    async unskipTrip(childId, tripId, parentId, reason) {
+        const trip = await this.prisma.trip.findUnique({
+            where: { id: tripId },
+            include: {
+                driver: {
+                    include: {
+                        user: true,
+                    },
+                },
+                bus: true,
+            },
+        });
+        if (!trip) {
+            throw new common_1.NotFoundException('Trip not found');
+        }
+        if (trip.status === 'COMPLETED') {
+            throw new common_1.BadRequestException('Cannot unskip a completed trip');
+        }
+        const exception = await this.prisma.tripException.findUnique({
+            where: { childId_tripId: { childId, tripId } },
+            include: {
+                child: {
+                    include: {
+                        parent: true,
+                    },
+                },
+            },
+        });
+        if (!exception || exception.status !== 'ACTIVE') {
+            throw new common_1.NotFoundException('No active skip found for this child and trip');
+        }
+        const updatedExcep = await this.prisma.tripException.update({
+            where: { childId_tripId: { childId, tripId } },
+            data: {
+                status: 'CANCELLED',
+                reason: `UNSKIPPED: ${reason || 'Emergency pickup requested'}`,
+            },
+        });
+        const existingAttendance = await this.prisma.childAttendance.findUnique({
+            where: { childId_tripId: { childId, tripId } },
+        });
+        if (!existingAttendance) {
+            await this.prisma.childAttendance.create({
+                data: {
+                    childId,
+                    tripId,
+                    status: 'PENDING',
+                    timestamp: new Date(),
+                    recordedBy: parentId,
+                },
+            });
+        }
+        else if (existingAttendance.status === 'MISSED') {
+            await this.prisma.childAttendance.update({
+                where: { id: existingAttendance.id },
+                data: {
+                    status: 'PENDING',
+                    timestamp: new Date(),
+                },
+            });
+        }
+        if (this.notificationsService && trip.driver) {
+            const notification = await this.notificationsService.create({
+                userId: trip.driver.userId,
+                title: '🚨 Emergency Pickup Request',
+                message: `${exception.child.firstName} ${exception.child.lastName} needs to be picked up urgently. Parent has un-skipped this trip. ${reason || ''}`,
+                type: 'UNSKIP_REQUEST',
+                requiresAck: true,
+                relatedEntityType: 'TRIP_EXCEPTION',
+                relatedEntityId: exception.id,
+                metadata: {
+                    childId: exception.child.id,
+                    childName: `${exception.child.firstName} ${exception.child.lastName}`,
+                    parentName: `${exception.child.parent.firstName} ${exception.child.parent.lastName}`,
+                    parentPhone: exception.child.parent.phone,
+                    tripId,
+                    busId: trip.busId,
+                    plateNumber: trip.bus.plateNumber,
+                    pickupLatitude: exception.child.pickupLatitude || exception.child.homeLatitude,
+                    pickupLongitude: exception.child.pickupLongitude || exception.child.homeLongitude,
+                    pickupAddress: exception.child.homeAddress,
+                    urgent: true,
+                },
+            });
+            if (this.realtimeGateway) {
+                await this.realtimeGateway.server.to(`trip:${tripId}`).emit('unskip_request', {
+                    notificationId: notification.id,
+                    childId: exception.child.id,
+                    childName: `${exception.child.firstName} ${exception.child.lastName}`,
+                    pickupLocation: {
+                        latitude: exception.child.pickupLatitude || exception.child.homeLatitude,
+                        longitude: exception.child.pickupLongitude || exception.child.homeLongitude,
+                        address: exception.child.homeAddress,
+                    },
+                    reason,
+                    timestamp: new Date(),
+                    urgent: true,
+                });
+            }
+        }
+        return {
+            success: true,
+            message: 'Child successfully unskipped. Driver has been notified.',
+            exception: updatedExcep,
+            child: exception.child,
+        };
+    }
 };
 exports.TripExceptionsService = TripExceptionsService;
 exports.TripExceptionsService = TripExceptionsService = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, common_1.Optional)()),
+    __param(2, (0, common_1.Optional)()),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        realtime_gateway_1.RealtimeGateway])
+        realtime_gateway_1.RealtimeGateway,
+        notifications_service_1.NotificationsService])
 ], TripExceptionsService);
 //# sourceMappingURL=trip-exceptions.service.js.map

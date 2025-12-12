@@ -32,6 +32,10 @@ let TripExceptionsController = class TripExceptionsController {
     async getChildExceptions(childId) {
         return this.tripExceptionsService.getChildExceptions(childId);
     }
+    async unskipTrip(body, req) {
+        const parentId = req.user.userId;
+        return this.tripExceptionsService.unskipTrip(body.childId, body.tripId, parentId, body.reason);
+    }
 };
 exports.TripExceptionsController = TripExceptionsController;
 __decorate([
@@ -64,6 +68,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], TripExceptionsController.prototype, "getChildExceptions", null);
+__decorate([
+    (0, common_1.Post)('/unskip'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], TripExceptionsController.prototype, "unskipTrip", null);
 exports.TripExceptionsController = TripExceptionsController = __decorate([
     (0, common_1.Controller)('trip-exceptions'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

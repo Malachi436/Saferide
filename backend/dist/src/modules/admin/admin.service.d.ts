@@ -1,7 +1,9 @@
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 export declare class AdminService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private notificationsService;
+    constructor(prisma: PrismaService, notificationsService: NotificationsService);
     getPlatformStats(): Promise<any>;
     getCompanyStats(companyId: string): Promise<any>;
     createCompany(data: any): Promise<any>;
@@ -23,4 +25,36 @@ export declare class AdminService {
     getAttendanceReport(companyId: string, range?: string): Promise<any>;
     getPaymentReport(companyId: string, range?: string): Promise<any>;
     getDriverPerformanceReport(companyId: string, range?: string): Promise<any>;
+    updateCompanyFare(companyId: string, newFare: number, adminId: string, reason?: string): Promise<{
+        company: {
+            id: string;
+            name: string;
+            email: string;
+            phone: string | null;
+            address: string | null;
+            baseFare: number;
+            currency: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        oldFare: number;
+        newFare: number;
+        change: number;
+        parentsNotified: number;
+    }>;
+    getCompanyFare(companyId: string): Promise<{
+        id: string;
+        name: string;
+        baseFare: number;
+        currency: string;
+    }>;
+    getFareHistory(companyId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        companyId: string;
+        reason: string | null;
+        oldFare: number;
+        newFare: number;
+        changedBy: string;
+    }[]>;
 }

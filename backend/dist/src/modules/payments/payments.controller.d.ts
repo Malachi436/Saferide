@@ -9,39 +9,39 @@ export declare class PaymentsController {
     constructor(paymentsService: PaymentsService);
     createPaymentIntent(createPaymentIntentDto: CreatePaymentIntentDto): Promise<{
         id: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
         parentId: string;
         status: string;
-        amount: number;
-        currency: string;
-        hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        amount: number;
+        hubtleRef: string | null;
     }>;
     processWebhook(signature: string, payload: any): Promise<{
         received: boolean;
     }>;
     getPaymentHistory(parentId: string): Promise<{
         id: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
         parentId: string;
         status: string;
-        amount: number;
-        currency: string;
-        hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        amount: number;
+        hubtleRef: string | null;
     }[]>;
     getPaymentById(id: string): Promise<{
         id: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
         parentId: string;
         status: string;
-        amount: number;
-        currency: string;
-        hubtleRef: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        amount: number;
+        hubtleRef: string | null;
     }>;
 }
 export {};

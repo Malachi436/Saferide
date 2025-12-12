@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Delete, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Delete, Put, Query, UploadedFile, UseInterceptors, Req, Patch } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UpdateFareDto } from './dto/fare-management.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -138,5 +139,34 @@ export class AdminController {
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
   async getDriverPerformanceReport(@Param('companyId') companyId: string, @Query('range') range?: string) {
     return this.adminService.getDriverPerformanceReport(companyId, range);
+  }
+
+  // Fare Management
+  @Get('company/:companyId/fare')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getCompanyFare(@Param('companyId') companyId: string) {
+    return this.adminService.getCompanyFare(companyId);
+  }
+
+  @Patch('company/:companyId/fare')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async updateCompanyFare(
+    @Param('companyId') companyId: string,
+    @Body() updateFareDto: UpdateFareDto,
+    @Req() req: any,
+  ) {
+    const adminId = req.user.userId;
+    return this.adminService.updateCompanyFare(
+      companyId,
+      updateFareDto.newFare,
+      adminId,
+      updateFareDto.reason,
+    );
+  }
+
+  @Get('company/:companyId/fare/history')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  async getFareHistory(@Param('companyId') companyId: string) {
+    return this.adminService.getFareHistory(companyId);
   }
 }

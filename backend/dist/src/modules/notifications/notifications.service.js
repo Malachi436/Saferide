@@ -67,6 +67,61 @@ let NotificationsService = class NotificationsService {
     async sendNotificationToUser(userId, title, message, type = client_1.NotificationType.INFO) {
         return this.createNotification(userId, title, message, type);
     }
+    async create(data) {
+        const notification = await this.prisma.notification.create({
+            data: {
+                userId: data.userId,
+                title: data.title,
+                message: data.message,
+                type: data.type,
+                requiresAck: data.requiresAck || false,
+                relatedEntityType: data.relatedEntityType,
+                relatedEntityId: data.relatedEntityId,
+                metadata: data.metadata,
+            },
+        });
+        try {
+            await this.outboundQueue.add('send-notification', {
+                notificationId: notification.id,
+                userId: data.userId,
+                title: data.title,
+                message: data.message,
+                type: data.type,
+                requiresAck: data.requiresAck,
+                metadata: data.metadata,
+            });
+        }
+        catch (error) {
+            console.warn('Failed to add notification to queue:', error);
+        }
+        return notification;
+    }
+    async acknowledgeNotification(id, userId) {
+        const notification = await this.prisma.notification.findUnique({
+            where: { id },
+        });
+        if (!notification || notification.userId !== userId) {
+            throw new Error('Notification not found or unauthorized');
+        }
+        return this.prisma.notification.update({
+            where: { id },
+            data: {
+                acknowledgedAt: new Date(),
+                isRead: true,
+                readAt: new Date(),
+            },
+        });
+    }
+    async getUnacknowledgedNotifications(userId) {
+        return this.prisma.notification.findMany({
+            where: {
+                userId,
+                requiresAck: true,
+                acknowledgedAt: null,
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
 };
 exports.NotificationsService = NotificationsService;
 exports.NotificationsService = NotificationsService = __decorate([

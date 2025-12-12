@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async getPlatformStats(): Promise<any> {
     const [
@@ -747,6 +751,99 @@ export class AdminService {
         onTimeTrips,
         onTimeRate: onTimeRate.toFixed(2),
       };
+    });
+  }
+
+  // Fare Management
+  async updateCompanyFare(companyId: string, newFare: number, adminId: string, reason?: string) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    const oldFare = company.baseFare;
+
+    // Update company fare
+    const updatedCompany = await this.prisma.company.update({
+      where: { id: companyId },
+      data: { baseFare: newFare },
+    });
+
+    // Record fare history
+    await this.prisma.fareHistory.create({
+      data: {
+        companyId,
+        oldFare,
+        newFare,
+        changedBy: adminId,
+        reason,
+      },
+    });
+
+    // Notify all parents in this company
+    const parents = await this.prisma.user.findMany({
+      where: {
+        role: 'PARENT',
+        parentChildren: {
+          some: {
+            school: {
+              companyId,
+            },
+          },
+        },
+      },
+    });
+
+    for (const parent of parents) {
+      await this.notificationsService.create({
+        userId: parent.id,
+        title: 'Fare Update',
+        message: `The bus fare has been updated from UGX ${oldFare.toLocaleString()} to UGX ${newFare.toLocaleString()}. ${reason || ''}`,
+        type: 'PAYMENT',
+        metadata: {
+          oldFare,
+          newFare,
+          change: newFare - oldFare,
+          percentageChange: ((newFare - oldFare) / oldFare * 100).toFixed(2),
+        },
+      });
+    }
+
+    return {
+      company: updatedCompany,
+      oldFare,
+      newFare,
+      change: newFare - oldFare,
+      parentsNotified: parents.length,
+    };
+  }
+
+  async getCompanyFare(companyId: string) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: {
+        id: true,
+        name: true,
+        baseFare: true,
+        currency: true,
+      },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    return company;
+  }
+
+  async getFareHistory(companyId: string) {
+    return this.prisma.fareHistory.findMany({
+      where: { companyId },
+      orderBy: { createdAt: 'desc' },
+      take: 50, // Last 50 changes
     });
   }
 }

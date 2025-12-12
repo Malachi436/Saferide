@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, UseGuards, Req } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
@@ -44,5 +44,18 @@ export class NotificationsController {
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT', 'DRIVER')
   async markAsRead(@Param('id') id: string) {
     return this.notificationsService.markAsRead(id);
+  }
+
+  @Patch(':id/acknowledge')
+  @Roles('DRIVER')
+  async acknowledgeNotification(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user.userId;
+    return this.notificationsService.acknowledgeNotification(id, userId);
+  }
+
+  @Get('user/:userId/unacknowledged')
+  @Roles('DRIVER')
+  async getUnacknowledgedNotifications(@Param('userId') userId: string) {
+    return this.notificationsService.getUnacknowledgedNotifications(userId);
   }
 }

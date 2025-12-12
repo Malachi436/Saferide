@@ -10,4 +10,16 @@ export declare class NotificationsService {
     getUserNotifications(userId: string): Promise<Notification[]>;
     getUnreadCount(userId: string): Promise<number>;
     sendNotificationToUser(userId: string, title: string, message: string, type?: NotificationType): Promise<Notification>;
+    create(data: {
+        userId: string;
+        title: string;
+        message: string;
+        type: NotificationType;
+        requiresAck?: boolean;
+        relatedEntityType?: string;
+        relatedEntityId?: string;
+        metadata?: any;
+    }): Promise<Notification>;
+    acknowledgeNotification(id: string, userId: string): Promise<Notification>;
+    getUnacknowledgedNotifications(userId: string): Promise<Notification[]>;
 }

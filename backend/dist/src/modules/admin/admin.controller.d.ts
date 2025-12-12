@@ -1,4 +1,5 @@
 import { AdminService } from './admin.service';
+import { UpdateFareDto } from './dto/fare-management.dto';
 export declare class AdminController {
     private readonly adminService;
     constructor(adminService: AdminService);
@@ -23,4 +24,36 @@ export declare class AdminController {
     getAttendanceReport(companyId: string, range?: string): Promise<any>;
     getPaymentReport(companyId: string, range?: string): Promise<any>;
     getDriverPerformanceReport(companyId: string, range?: string): Promise<any>;
+    getCompanyFare(companyId: string): Promise<{
+        id: string;
+        name: string;
+        baseFare: number;
+        currency: string;
+    }>;
+    updateCompanyFare(companyId: string, updateFareDto: UpdateFareDto, req: any): Promise<{
+        company: {
+            id: string;
+            name: string;
+            email: string;
+            phone: string | null;
+            address: string | null;
+            baseFare: number;
+            currency: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        oldFare: number;
+        newFare: number;
+        change: number;
+        parentsNotified: number;
+    }>;
+    getFareHistory(companyId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        companyId: string;
+        reason: string | null;
+        oldFare: number;
+        newFare: number;
+        changedBy: string;
+    }[]>;
 }

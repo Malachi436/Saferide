@@ -36,6 +36,13 @@ let NotificationsController = class NotificationsController {
     async markAsRead(id) {
         return this.notificationsService.markAsRead(id);
     }
+    async acknowledgeNotification(id, req) {
+        const userId = req.user.userId;
+        return this.notificationsService.acknowledgeNotification(id, userId);
+    }
+    async getUnacknowledgedNotifications(userId) {
+        return this.notificationsService.getUnacknowledgedNotifications(userId);
+    }
 };
 exports.NotificationsController = NotificationsController;
 __decorate([
@@ -70,6 +77,23 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], NotificationsController.prototype, "markAsRead", null);
+__decorate([
+    (0, common_1.Patch)(':id/acknowledge'),
+    (0, roles_decorator_1.Roles)('DRIVER'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], NotificationsController.prototype, "acknowledgeNotification", null);
+__decorate([
+    (0, common_1.Get)('user/:userId/unacknowledged'),
+    (0, roles_decorator_1.Roles)('DRIVER'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], NotificationsController.prototype, "getUnacknowledgedNotifications", null);
 exports.NotificationsController = NotificationsController = __decorate([
     (0, common_1.Controller)('notifications'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

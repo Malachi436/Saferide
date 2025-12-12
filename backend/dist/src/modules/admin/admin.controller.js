@@ -19,6 +19,7 @@ const admin_service_1 = require("./admin.service");
 const roles_decorator_1 = require("../roles/roles.decorator");
 const roles_guard_1 = require("../roles/roles.guard");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const fare_management_dto_1 = require("./dto/fare-management.dto");
 let AdminController = class AdminController {
     constructor(adminService) {
         this.adminService = adminService;
@@ -85,6 +86,16 @@ let AdminController = class AdminController {
     }
     async getDriverPerformanceReport(companyId, range) {
         return this.adminService.getDriverPerformanceReport(companyId, range);
+    }
+    async getCompanyFare(companyId) {
+        return this.adminService.getCompanyFare(companyId);
+    }
+    async updateCompanyFare(companyId, updateFareDto, req) {
+        const adminId = req.user.userId;
+        return this.adminService.updateCompanyFare(companyId, updateFareDto.newFare, adminId, updateFareDto.reason);
+    }
+    async getFareHistory(companyId) {
+        return this.adminService.getFareHistory(companyId);
     }
 };
 exports.AdminController = AdminController;
@@ -261,6 +272,32 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getDriverPerformanceReport", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/fare'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCompanyFare", null);
+__decorate([
+    (0, common_1.Patch)('company/:companyId/fare'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, fare_management_dto_1.UpdateFareDto, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "updateCompanyFare", null);
+__decorate([
+    (0, common_1.Get)('company/:companyId/fare/history'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    __param(0, (0, common_1.Param)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getFareHistory", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

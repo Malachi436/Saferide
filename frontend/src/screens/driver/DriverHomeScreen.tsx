@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Switch, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Switch, Alert, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -33,6 +33,7 @@ export default function DriverHomeScreen() {
   const [isGPSTracking, setIsGPSTracking] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchTodayTrip = async () => {
     try {
@@ -82,6 +83,21 @@ export default function DriverHomeScreen() {
   // Fetch unread notifications on mount and focus
   useEffect(() => {
     fetchUnreadNotifications();
+  }, [user?.id]);
+
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchTodayTrip(),
+        fetchUnreadNotifications(),
+      ]);
+    } catch (error) {
+      console.error('[DriverHome] Refresh error:', error);
+    } finally {
+      setRefreshing(false);
+    }
   }, [user?.id]);
 
   // Connect to WebSocket when component mounts
@@ -309,6 +325,14 @@ export default function DriverHomeScreen() {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.neutral.pureWhite}
+              colors={[colors.primary.teal]}
+            />
+          }
         >
           {loading && (
             <View style={styles.loadingContainer}>
@@ -339,6 +363,28 @@ export default function DriverHomeScreen() {
                     <Text style={styles.tripTitle}>Today&apos;s Trip</Text>
                   </View>
                   <Text style={styles.routeName}>{trip.route?.name || 'No Route Assigned'}</Text>
+                  {trip.route?.shift && (
+                    <View style={[
+                      styles.shiftBadge,
+                      trip.route.shift === 'MORNING' 
+                        ? styles.morningBadge 
+                        : styles.eveningBadge
+                    ]}>
+                      <Ionicons 
+                        name={trip.route.shift === 'MORNING' ? 'sunny' : 'moon'} 
+                        size={14} 
+                        color={trip.route.shift === 'MORNING' ? '#F59E0B' : '#6366F1'} 
+                      />
+                      <Text style={[
+                        styles.shiftText,
+                        trip.route.shift === 'MORNING' 
+                          ? styles.morningText 
+                          : styles.eveningText
+                      ]}>
+                        {trip.route.shift === 'MORNING' ? 'Morning Shift' : 'Evening Shift'}
+                      </Text>
+                    </View>
+                  )}
                   <View style={styles.tripStats}>
                     <View style={styles.statItem}>
                       <Text style={styles.statValue}>{childrenOnTrip.length}</Text>
@@ -603,7 +649,33 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     color: colors.neutral.textPrimary,
+    marginBottom: 8,
+  },
+  shiftBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
     marginBottom: 16,
+    alignSelf: "flex-start",
+  },
+  morningBadge: {
+    backgroundColor: "#FEF3C7",
+  },
+  eveningBadge: {
+    backgroundColor: "#E0E7FF",
+  },
+  shiftText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  morningText: {
+    color: "#F59E0B",
+  },
+  eveningText: {
+    color: "#6366F1",
   },
   tripStats: {
     flexDirection: "row",

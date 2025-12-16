@@ -187,6 +187,9 @@ let DriversService = class DriversService {
                         gte: today,
                         lt: tomorrow,
                     },
+                    status: {
+                        notIn: ['COMPLETED'],
+                    },
                 },
                 include: {
                     bus: {

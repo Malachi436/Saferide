@@ -143,7 +143,7 @@ export class DriversService {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // First, try to find any IN_PROGRESS trip for this driver (for testing/active trips)
+    // Priority 1: Find any IN_PROGRESS trip for this driver (active trip)
     let trip = await this.prisma.trip.findFirst({
       where: {
         driverId,
@@ -168,7 +168,7 @@ export class DriversService {
       },
     });
 
-    // If no IN_PROGRESS trip, look for today's scheduled trip
+    // Priority 2: If no IN_PROGRESS trip, look for today's SCHEDULED trips (not COMPLETED)
     if (!trip) {
       trip = await this.prisma.trip.findFirst({
         where: {
@@ -176,6 +176,9 @@ export class DriversService {
           startTime: {
             gte: today,
             lt: tomorrow,
+          },
+          status: {
+            notIn: ['COMPLETED'], // Exclude completed trips to show next available trip
           },
         },
         include: {

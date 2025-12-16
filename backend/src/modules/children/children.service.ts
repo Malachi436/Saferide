@@ -100,10 +100,77 @@ export class ChildrenService {
   }
 
   async update(id: string, data: any): Promise<Child> {
-    return this.prisma.child.update({
+    const previousChild = await this.prisma.child.findUnique({ where: { id } });
+    
+    const updatedChild = await this.prisma.child.update({
       where: { id },
       data,
     });
+
+    // If routeId was updated, add child to today's scheduled trips for this route
+    if (data.routeId && data.routeId !== previousChild?.routeId) {
+      await this.addChildToTodayTrips(id, data.routeId);
+    }
+
+    return updatedChild;
+  }
+
+  /**
+   * Add a child to all today's scheduled trips for a specific route
+   */
+  private async addChildToTodayTrips(childId: string, routeId: string) {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      // Find all trips for this route scheduled for today
+      const todayTrips = await this.prisma.trip.findMany({
+        where: {
+          routeId,
+          startTime: {
+            gte: today,
+            lt: tomorrow,
+          },
+          status: {
+            in: ['SCHEDULED', 'IN_PROGRESS'],
+          },
+        },
+      });
+
+      // Create attendance records for each trip if they don't exist
+      for (const trip of todayTrips) {
+        const existingAttendance = await this.prisma.childAttendance.findUnique({
+          where: {
+            childId_tripId: {
+              childId,
+              tripId: trip.id,
+            },
+          },
+        });
+
+        if (!existingAttendance) {
+          await this.prisma.childAttendance.create({
+            data: {
+              childId,
+              tripId: trip.id,
+              status: 'SCHEDULED',
+              recordedBy: 'system',
+            },
+          });
+
+          console.log(`Added child ${childId} to trip ${trip.id}`);
+        }
+      }
+
+      if (todayTrips.length > 0) {
+        console.log(`Successfully added child ${childId} to ${todayTrips.length} trip(s) for today`);
+      }
+    } catch (error) {
+      console.error(`Error adding child to today's trips:`, error);
+      // Don't throw - allow the child update to succeed even if trip assignment fails
+    }
   }
 
   async findAll(): Promise<Child[]> {

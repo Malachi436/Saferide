@@ -88,10 +88,62 @@ let ChildrenService = class ChildrenService {
         return code;
     }
     async update(id, data) {
-        return this.prisma.child.update({
+        const previousChild = await this.prisma.child.findUnique({ where: { id } });
+        const updatedChild = await this.prisma.child.update({
             where: { id },
             data,
         });
+        if (data.routeId && data.routeId !== previousChild?.routeId) {
+            await this.addChildToTodayTrips(id, data.routeId);
+        }
+        return updatedChild;
+    }
+    async addChildToTodayTrips(childId, routeId) {
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const todayTrips = await this.prisma.trip.findMany({
+                where: {
+                    routeId,
+                    startTime: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                    status: {
+                        in: ['SCHEDULED', 'IN_PROGRESS'],
+                    },
+                },
+            });
+            for (const trip of todayTrips) {
+                const existingAttendance = await this.prisma.childAttendance.findUnique({
+                    where: {
+                        childId_tripId: {
+                            childId,
+                            tripId: trip.id,
+                        },
+                    },
+                });
+                if (!existingAttendance) {
+                    await this.prisma.childAttendance.create({
+                        data: {
+                            childId,
+                            tripId: trip.id,
+                            status: 'SCHEDULED',
+                            recordedBy: 'system',
+                        },
+                    });
+                    console.log(`Added child ${childId} to trip ${trip.id}`);
+                }
+            }
+            if (todayTrips.length > 0) {
+                console.log(`Successfully added child ${childId} to ${todayTrips.length} trip(s) for today`);
+            }
+        }
+        catch (error) {
+            console.error(`Error adding child to today's trips:`, error);
+        }
     }
     async findAll() {
         return this.prisma.child.findMany();

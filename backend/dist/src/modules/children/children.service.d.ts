@@ -17,6 +17,7 @@ export declare class ChildrenService {
     }>;
     private generateCodeSync;
     update(id: string, data: any): Promise<Child>;
+    private addChildToTodayTrips;
     findAll(): Promise<Child[]>;
     remove(id: string): Promise<Child>;
     generateUniqueCode(): Promise<string>;

@@ -52,6 +52,7 @@ export declare class ScheduledRoutesController {
                 address: string | null;
                 createdAt: Date;
                 updatedAt: Date;
+                schoolCode: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 companyId: string;
@@ -130,6 +131,7 @@ export declare class ScheduledRoutesController {
                 address: string | null;
                 createdAt: Date;
                 updatedAt: Date;
+                schoolCode: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 companyId: string;
@@ -208,6 +210,7 @@ export declare class ScheduledRoutesController {
                 address: string | null;
                 createdAt: Date;
                 updatedAt: Date;
+                schoolCode: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 companyId: string;
@@ -286,6 +289,7 @@ export declare class ScheduledRoutesController {
                 address: string | null;
                 createdAt: Date;
                 updatedAt: Date;
+                schoolCode: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 companyId: string;
@@ -364,6 +368,7 @@ export declare class ScheduledRoutesController {
                 address: string | null;
                 createdAt: Date;
                 updatedAt: Date;
+                schoolCode: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 companyId: string;
@@ -442,6 +447,7 @@ export declare class ScheduledRoutesController {
                 address: string | null;
                 createdAt: Date;
                 updatedAt: Date;
+                schoolCode: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 companyId: string;
@@ -520,6 +526,7 @@ export declare class ScheduledRoutesController {
                 address: string | null;
                 createdAt: Date;
                 updatedAt: Date;
+                schoolCode: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 companyId: string;
@@ -598,6 +605,7 @@ export declare class ScheduledRoutesController {
                 address: string | null;
                 createdAt: Date;
                 updatedAt: Date;
+                schoolCode: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 companyId: string;

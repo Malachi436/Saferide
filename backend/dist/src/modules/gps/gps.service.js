@@ -64,6 +64,23 @@ let GpsService = class GpsService {
             take: limit,
         });
     }
+    async getLocationHistory(busId, startTime, endTime, limit = 100) {
+        return this.prisma.busLocation.findMany({
+            where: {
+                busId,
+                ...(startTime || endTime
+                    ? {
+                        timestamp: {
+                            ...(startTime && { gte: startTime }),
+                            ...(endTime && { lte: endTime }),
+                        },
+                    }
+                    : {}),
+            },
+            orderBy: { timestamp: 'desc' },
+            take: limit,
+        });
+    }
 };
 exports.GpsService = GpsService;
 exports.GpsService = GpsService = __decorate([

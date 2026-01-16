@@ -163,7 +163,7 @@ export default function LinkChildScreen() {
               </View>
 
               <View style={styles.infoBox}>
-                <Ionicons name="information-circle" size={20} color={colors.primary.blue} />
+                <Ionicons name="information-circle" size={20} color={colors.primary.yellow} />
                 <Text style={styles.infoText}>
                   Contact your school admin if you don't have a code.
                 </Text>

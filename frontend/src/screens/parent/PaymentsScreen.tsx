@@ -43,7 +43,7 @@ const PAYMENT_PLANS: PaymentPlan[] = [
     description: "Pay per trip, daily",
     features: ["Pay as you go", "Real-time tracking", "SMS notifications"],
     icon: "calendar",
-    iconColor: colors.primary.blue,
+    iconColor: colors.primary.yellow,
   },
   {
     id: "weekly",
@@ -57,7 +57,7 @@ const PAYMENT_PLANS: PaymentPlan[] = [
       "SMS notifications",
     ],
     icon: "calendar-outline",
-    iconColor: colors.accent.sunsetOrange,
+    iconColor: colors.accent.safetyOrange,
     isPopular: true,
   },
   {
@@ -72,7 +72,7 @@ const PAYMENT_PLANS: PaymentPlan[] = [
       "SMS notifications",
     ],
     icon: "calendar",
-    iconColor: colors.accent.successGreen,
+    iconColor: colors.status.success,
   },
 ];
 
@@ -100,7 +100,7 @@ export default function PaymentsScreen({ navigation }: Props) {
                   <Ionicons
                     name="checkmark-circle"
                     size={40}
-                    color={colors.accent.successGreen}
+                    color={colors.status.success}
                   />
                 </View>
                 <View style={styles.activeInfo}>
@@ -189,7 +189,7 @@ export default function PaymentsScreen({ navigation }: Props) {
                       <Ionicons
                         name="checkmark-circle"
                         size={18}
-                        color={colors.primary.blue}
+                        color={colors.primary.yellow}
                       />
                       <Text style={styles.featureText}>{feature}</Text>
                     </View>

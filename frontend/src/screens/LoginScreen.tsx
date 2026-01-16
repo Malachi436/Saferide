@@ -1,9 +1,18 @@
+/**
+ * LoginScreen - SafeRide UI
+ * Matches the yellow gradient design with glass morphism cards
+ */
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../stores/authStore';
 import { LargeCTAButton, LiquidCard } from '../components';
 import { UserRole } from '../types';
+import { colors } from '../theme';
 
 export const LoginScreen = () => {
   const navigation = useNavigation();
@@ -14,162 +23,175 @@ export const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      await login({ email, password, role });
+      await login({ email, password });
     } catch (error) {
       console.error('Login failed:', error);
     }
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Welcome to ROSAgo</Text>
-        <Text style={styles.subtitle}>School Transport Management</Text>
-      </View>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[colors.primary.yellow, colors.primary.darkYellow, colors.accent.safetyOrange]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
 
-      <LiquidCard className="mt-8">
-        <View style={styles.roleSelector}>
-          <Text style={styles.label}>I am a:</Text>
-          <View style={styles.roleButtons}>
-            <View
-              style={[
-                styles.roleButton,
-                role === 'parent' && styles.roleButtonActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.roleButtonText,
-                  role === 'parent' && styles.roleButtonTextActive,
-                ]}
-                onPress={() => setRole('parent')}
-              >
-                Parent
-              </Text>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.logoContainer}>
+              <Text style={styles.logoText}>Saferide</Text>
             </View>
-            <View
-              style={[
-                styles.roleButton,
-                role === 'driver' && styles.roleButtonActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.roleButtonText,
-                  role === 'driver' && styles.roleButtonTextActive,
-                ]}
-                onPress={() => setRole('driver')}
-              >
-                Driver
-              </Text>
+            <Text style={styles.subtitle}>Premium School Transport</Text>
+          </View>
+
+          {/* Login Card */}
+          <View style={styles.loginSection}>
+            <LiquidCard intensity="heavy">
+              <View style={styles.formContainer}>
+                <Text style={styles.formTitle}>Login</Text>
+
+                {/* Email Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Email or Phone</Text>
+                  <View style={styles.inputWrapper}>
+                    <Ionicons
+                      name="mail"
+                      size={20}
+                      color={colors.neutral.textSecondary}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={email}
+                      onChangeText={setEmail}
+                      placeholder="your.email@example.com"
+                      placeholderTextColor={colors.neutral.textSecondary + "80"}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  </View>
+                </View>
+
+                {/* Password Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Password</Text>
+                  <View style={styles.inputWrapper}>
+                    <Ionicons
+                      name="lock-closed"
+                      size={20}
+                      color={colors.neutral.textSecondary}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={password}
+                      onChangeText={setPassword}
+                      placeholder="Enter your password"
+                      placeholderTextColor={colors.neutral.textSecondary + "80"}
+                      secureTextEntry
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  </View>
+                </View>
+
+                {/* Login Button */}
+                <LargeCTAButton
+                  title={isLoading ? "Logging in..." : "LOGIN"}
+                  onPress={handleLogin}
+                  variant="primary"
+                  disabled={isLoading}
+                  loading={isLoading}
+                  style={styles.loginButton}
+                />
+              </View>
+            </LiquidCard>
+          </View>
+
+          {/* Sign Up Section - Only show for parents */}
+          {role === 'parent' && (
+            <View style={styles.signupSection}>
+              <LiquidCard intensity="medium">
+                <View style={styles.signupContainer}>
+                  <Text style={styles.signupTitle}>New Parent?</Text>
+                  <Text style={styles.signupSubtitle}>
+                    Create an account to track your children and manage transportation
+                  </Text>
+                  <LargeCTAButton
+                    title="CREATE PARENT"
+                    onPress={() => navigation.navigate('ParentSignUp' as never)}
+                    variant="success"
+                    style={styles.signupButton}
+                  />
+                </View>
+              </LiquidCard>
             </View>
-          </View>
-        </View>
+          )}
 
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="your.email@example.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+          {/* Info Box */}
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle" size={20} color={colors.neutral.warmCream} />
+            <Text style={styles.infoText}>
+              Driver accounts are created by your company admin. Contact your administrator for login credentials.
+            </Text>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-          </View>
-
-          <LargeCTAButton
-            title="Sign In"
-            onPress={handleLogin}
-            loading={isLoading}
-            className="mt-4"
-          />
-        </View>
-      </LiquidCard>
-
-      {role === 'parent' && (
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
-          <Text
-            style={styles.footerLink}
-            onPress={() => navigation.navigate('ParentSignUp' as never)}
-          >
-            Sign Up
-          </Text>
-        </View>
-      )}
-    </ScrollView>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDFDFD',
   },
-  content: {
+  safeArea: {
+    flex: 1,
+  },
+  scrollContent: {
     padding: 24,
+    paddingTop: 40,
   },
   header: {
     alignItems: 'center',
-    marginTop: 60,
+    marginBottom: 48,
   },
-  title: {
-    fontSize: 32,
+  logoContainer: {
+    marginBottom: 12,
+  },
+  logoText: {
+    fontSize: 48,
     fontWeight: '700',
-    color: '#111827',
-    marginBottom: 8,
+    color: colors.neutral.pureWhite,
+    letterSpacing: -1,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: colors.neutral.warmCream,
+    fontWeight: '500',
   },
-  roleSelector: {
-    marginBottom: 24,
+  loginSection: {
+    marginBottom: 20,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 12,
+  formContainer: {
+    padding: 4,
+    gap: 20,
   },
-  roleButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  roleButton: {
-    flex: 1,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  roleButtonActive: {
-    backgroundColor: '#3B82F6',
-  },
-  roleButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  roleButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  form: {
-    gap: 16,
+  formTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.neutral.textPrimary,
+    marginBottom: 8,
   },
   inputGroup: {
     gap: 8,
@@ -177,31 +199,65 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.neutral.textPrimary,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.neutral.pureWhite,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: colors.neutral.textSecondary + '30',
+    overflow: 'hidden',
+  },
+  inputIcon: {
+    marginLeft: 12,
   },
   input: {
-    height: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    paddingHorizontal: 16,
-    fontSize: 16,
-    backgroundColor: '#FFFFFF',
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: colors.neutral.textPrimary,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  loginButton: {
+    marginTop: 8,
+  },
+  signupSection: {
+    marginBottom: 20,
+  },
+  signupContainer: {
+    padding: 4,
     alignItems: 'center',
-    marginTop: 24,
-    gap: 6,
   },
-  footerText: {
-    fontSize: 14,
-    color: '#6B7280',
+  signupTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.neutral.textPrimary,
+    marginBottom: 8,
   },
-  footerLink: {
+  signupSubtitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
+    color: colors.neutral.textSecondary,
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  signupButton: {
+    width: '100%',
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 12,
+    gap: 12,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    color: colors.neutral.warmCream,
+    lineHeight: 18,
   },
 });

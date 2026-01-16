@@ -4,7 +4,9 @@ import { Platform } from 'react-native';
 import { socketService } from './socket';
 
 // API configuration - Backend NestJS server
-// DO NOT include /_expo/loading - that's the Expo dev server
+// Use your computer's local network IP (check with ipconfig on Windows)
+// For physical device testing: Use WiFi IP (e.g., 172.20.10.3)
+// For emulator/simulator: Use localhost or 10.0.2.2 (Android) or localhost (iOS)
 const API_BASE_URL = 'http://172.20.10.3:3000';
 
 interface ApiRequestConfig {

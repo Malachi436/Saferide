@@ -143,6 +143,9 @@ export class DriversService {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    console.log('[getTodayTrip] Looking for trips for driverId:', driverId);
+    console.log('[getTodayTrip] Date range:', today, 'to', tomorrow);
+
     // Priority 1: Find any IN_PROGRESS trip for this driver (active trip)
     let trip = await this.prisma.trip.findFirst({
       where: {
@@ -168,17 +171,31 @@ export class DriversService {
       },
     });
 
-    // Priority 2: If no IN_PROGRESS trip, look for today's SCHEDULED trips (not COMPLETED)
+    console.log('[getTodayTrip] IN_PROGRESS trip found:', trip?.id || 'none');
+
+    // Priority 2: If no IN_PROGRESS trip, look for today's trips by createdAt OR startTime
     if (!trip) {
       trip = await this.prisma.trip.findFirst({
         where: {
           driverId,
-          startTime: {
-            gte: today,
-            lt: tomorrow,
-          },
+          OR: [
+            {
+              // Match trips created today
+              createdAt: {
+                gte: today,
+                lt: tomorrow,
+              },
+            },
+            {
+              // Match trips with startTime today
+              startTime: {
+                gte: today,
+                lt: tomorrow,
+              },
+            },
+          ],
           status: {
-            notIn: ['COMPLETED'], // Exclude completed trips to show next available trip
+            notIn: ['COMPLETED'], // Exclude completed trips
           },
         },
         include: {
@@ -199,10 +216,17 @@ export class DriversService {
           },
         },
       });
+
+      console.log('[getTodayTrip] Today\'s SCHEDULED trip found:', trip?.id || 'none');
     }
 
     // If no trip found, return null
-    if (!trip) return null;
+    if (!trip) {
+      console.log('[getTodayTrip] No trip found for driver');
+      return null;
+    }
+
+    console.log('[getTodayTrip] Trip found:', trip.id, 'with', trip.attendances?.length || 0, 'attendances');
 
     // Filter out children with pending parent pickup requests or trip exceptions
     if (trip.attendances && trip.attendances.length > 0) {
@@ -244,6 +268,8 @@ export class DriversService {
       trip.attendances = trip.attendances.filter(
         (attendance: any) => !exemptedChildIds.has(attendance.childId)
       );
+
+      console.log('[getTodayTrip] After filtering:', trip.attendances.length, 'attendances');
     }
 
     return trip;

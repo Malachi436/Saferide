@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseGuards, Query } from '@nestjs/common';
 import { GpsService } from './gps.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
@@ -37,7 +37,17 @@ export class GpsController {
 
   @Get('locations/:busId')
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
-  async getRecentLocations(@Param('busId') busId: string) {
-    return this.gpsService.getRecentLocations(busId);
+  async getRecentLocations(
+    @Param('busId') busId: string,
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.gpsService.getLocationHistory(
+      busId,
+      startTime ? new Date(startTime) : undefined,
+      endTime ? new Date(endTime) : undefined,
+      limit ? parseInt(limit) : 100,
+    );
   }
 }

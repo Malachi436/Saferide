@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TextInput, Alert, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TextInput, Alert, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
@@ -64,7 +64,7 @@ export default function LoginScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[colors.primary.blue, colors.primary.teal]}
+        colors={[colors.primary.yellow, colors.primary.darkYellow, colors.accent.safetyOrange]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -77,7 +77,11 @@ export default function LoginScreen({ navigation }: Props) {
         >
           <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
             <View style={styles.logoContainer}>
-              <Text style={styles.logoText}>ROSAgo</Text>
+              <Image
+                source={require('../../../assets/icon.jpeg')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.subtitle}>Premium School Transport</Text>
           </Animated.View>
@@ -173,7 +177,7 @@ export default function LoginScreen({ navigation }: Props) {
 
           {/* Info Box */}
           <Animated.View entering={FadeInDown.delay(400).duration(600)} style={styles.infoBox}>
-            <Ionicons name="information-circle" size={20} color={colors.neutral.creamWhite} />
+            <Ionicons name="information-circle" size={20} color={colors.neutral.warmCream} />
             <Text style={styles.infoText}>
               Driver accounts are created by your company admin. Contact your administrator for login credentials.
             </Text>
@@ -203,16 +207,16 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     marginBottom: 12,
+    width: 280,
+    height: 120,
   },
-  logoText: {
-    fontSize: 48,
-    fontWeight: "700",
-    color: colors.neutral.pureWhite,
-    letterSpacing: -1,
+  logoImage: {
+    width: '100%',
+    height: '100%',
   },
   subtitle: {
     fontSize: 16,
-    color: colors.neutral.creamWhite,
+    color: colors.neutral.warmCream,
     fontWeight: "500",
   },
   loginSection: {
@@ -263,7 +267,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   forgotPasswordText: {
-    color: colors.primary.blue,
+    color: colors.accent.safetyOrange,
     fontSize: 14,
     fontWeight: "500",
   },
@@ -301,7 +305,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 13,
-    color: colors.neutral.creamWhite,
+    color: colors.neutral.warmCream,
     lineHeight: 18,
   },
 });

@@ -102,7 +102,7 @@ export default function SettingsScreen({ navigation }: Props) {
                 onPress={() => navigation.navigate("EditProfile")}
                 style={styles.editButton}
               >
-                <Ionicons name="create-outline" size={20} color={colors.primary.blue} />
+                <Ionicons name="create-outline" size={20} color={colors.primary.yellow} />
               </Pressable>
             </View>
           </LiquidGlassCard>
@@ -118,8 +118,8 @@ export default function SettingsScreen({ navigation }: Props) {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.teal + "20" }]}>
-                    <Ionicons name="people" size={20} color={colors.primary.teal} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.safetyOrange + "20" }]}>
+                    <Ionicons name="people" size={20} color={colors.accent.safetyOrange} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Manage Children</Text>
@@ -138,8 +138,8 @@ export default function SettingsScreen({ navigation }: Props) {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.successGreen + "20" }]}>
-                    <Ionicons name="link" size={20} color={colors.accent.successGreen} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.status.success + "20" }]}>
+                    <Ionicons name="link" size={20} color={colors.status.success} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Link Child with Code</Text>
@@ -158,8 +158,8 @@ export default function SettingsScreen({ navigation }: Props) {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.blue + "20" }]}>
-                    <Ionicons name="navigate" size={20} color={colors.primary.blue} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.yellow + "20" }]}>
+                    <Ionicons name="navigate" size={20} color={colors.primary.yellow} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Change Pickup Location</Text>
@@ -181,8 +181,8 @@ export default function SettingsScreen({ navigation }: Props) {
             <View style={styles.settingsGroup}>
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.status.infoBlue + "20" }]}>
-                    <Ionicons name="notifications" size={20} color={colors.status.infoBlue} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.status.info + "20" }]}>
+                    <Ionicons name="notifications" size={20} color={colors.status.info} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Push Notifications</Text>
@@ -196,9 +196,9 @@ export default function SettingsScreen({ navigation }: Props) {
                   onValueChange={setNotifications}
                   trackColor={{
                     false: colors.neutral.textSecondary + "40",
-                    true: colors.accent.successGreen + "60",
+                    true: colors.status.success + "60",
                   }}
-                  thumbColor={notifications ? colors.accent.successGreen : colors.neutral.pureWhite}
+                  thumbColor={notifications ? colors.status.success : colors.neutral.pureWhite}
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
@@ -207,8 +207,8 @@ export default function SettingsScreen({ navigation }: Props) {
 
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.sunsetOrange + "20" }]}>
-                    <Ionicons name="log-in" size={20} color={colors.accent.sunsetOrange} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.safetyOrange + "20" }]}>
+                    <Ionicons name="log-in" size={20} color={colors.accent.safetyOrange} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Pickup Alerts</Text>
@@ -222,9 +222,9 @@ export default function SettingsScreen({ navigation }: Props) {
                   onValueChange={setPickupAlerts}
                   trackColor={{
                     false: colors.neutral.textSecondary + "40",
-                    true: colors.accent.successGreen + "60",
+                    true: colors.status.success + "60",
                   }}
-                  thumbColor={pickupAlerts ? colors.accent.successGreen : colors.neutral.pureWhite}
+                  thumbColor={pickupAlerts ? colors.status.success : colors.neutral.pureWhite}
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
@@ -233,8 +233,8 @@ export default function SettingsScreen({ navigation }: Props) {
 
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.successGreen + "20" }]}>
-                    <Ionicons name="log-out" size={20} color={colors.accent.successGreen} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.status.success + "20" }]}>
+                    <Ionicons name="log-out" size={20} color={colors.status.success} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Drop-off Alerts</Text>
@@ -248,9 +248,9 @@ export default function SettingsScreen({ navigation }: Props) {
                   onValueChange={setDropoffAlerts}
                   trackColor={{
                     false: colors.neutral.textSecondary + "40",
-                    true: colors.accent.successGreen + "60",
+                    true: colors.status.success + "60",
                   }}
-                  thumbColor={dropoffAlerts ? colors.accent.successGreen : colors.neutral.pureWhite}
+                  thumbColor={dropoffAlerts ? colors.status.success : colors.neutral.pureWhite}
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
@@ -259,8 +259,8 @@ export default function SettingsScreen({ navigation }: Props) {
 
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.status.warningYellow + "20" }]}>
-                    <Ionicons name="time" size={20} color={colors.status.warningYellow} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.status.warning + "20" }]}>
+                    <Ionicons name="time" size={20} color={colors.status.warning} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Delay Alerts</Text>
@@ -274,9 +274,9 @@ export default function SettingsScreen({ navigation }: Props) {
                   onValueChange={setDelayAlerts}
                   trackColor={{
                     false: colors.neutral.textSecondary + "40",
-                    true: colors.accent.successGreen + "60",
+                    true: colors.status.success + "60",
                   }}
-                  thumbColor={delayAlerts ? colors.accent.successGreen : colors.neutral.pureWhite}
+                  thumbColor={delayAlerts ? colors.status.success : colors.neutral.pureWhite}
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
@@ -294,8 +294,8 @@ export default function SettingsScreen({ navigation }: Props) {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.successGreen + "20" }]}>
-                    <Ionicons name="finger-print" size={20} color={colors.accent.successGreen} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.status.success + "20" }]}>
+                    <Ionicons name="finger-print" size={20} color={colors.status.success} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Biometric Login</Text>
@@ -314,8 +314,8 @@ export default function SettingsScreen({ navigation }: Props) {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.status.warningYellow + "20" }]}>
-                    <Ionicons name="key" size={20} color={colors.status.warningYellow} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.status.warning + "20" }]}>
+                    <Ionicons name="key" size={20} color={colors.status.warning} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Change Password</Text>
@@ -334,8 +334,8 @@ export default function SettingsScreen({ navigation }: Props) {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.blue + "20" }]}>
-                    <Ionicons name="shield-checkmark" size={20} color={colors.primary.blue} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.yellow + "20" }]}>
+                    <Ionicons name="shield-checkmark" size={20} color={colors.primary.yellow} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Privacy Settings</Text>
@@ -360,8 +360,8 @@ export default function SettingsScreen({ navigation }: Props) {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.blue + "20" }]}>
-                    <Ionicons name="help-circle" size={20} color={colors.primary.blue} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.yellow + "20" }]}>
+                    <Ionicons name="help-circle" size={20} color={colors.primary.yellow} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Help & Support</Text>
@@ -380,8 +380,8 @@ export default function SettingsScreen({ navigation }: Props) {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.teal + "20" }]}>
-                    <Ionicons name="document-text" size={20} color={colors.primary.teal} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.safetyOrange + "20" }]}>
+                    <Ionicons name="document-text" size={20} color={colors.accent.safetyOrange} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Terms & Privacy</Text>
@@ -397,8 +397,8 @@ export default function SettingsScreen({ navigation }: Props) {
 
               <Pressable style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.sunsetOrange + "20" }]}>
-                    <Ionicons name="star" size={20} color={colors.accent.sunsetOrange} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.safetyOrange + "20" }]}>
+                    <Ionicons name="star" size={20} color={colors.accent.safetyOrange} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Rate the App</Text>
@@ -418,7 +418,7 @@ export default function SettingsScreen({ navigation }: Props) {
           <Text style={styles.sectionTitle}>About</Text>
           <LiquidGlassCard intensity="light" className="mb-4">
             <View style={styles.aboutCard}>
-              <Text style={styles.aboutText}>ROSAgo Parent App</Text>
+              <Text style={styles.aboutText}>SafeRide Parent App</Text>
               <Text style={styles.versionText}>Version 1.0.0</Text>
             </View>
           </LiquidGlassCard>
@@ -429,7 +429,7 @@ export default function SettingsScreen({ navigation }: Props) {
           <Pressable onPress={handleClearCache} style={styles.clearCacheButton}>
             <LiquidGlassCard intensity="medium">
               <View style={styles.clearCacheContent}>
-                <Ionicons name="refresh" size={20} color={colors.status.warningYellow} />
+                <Ionicons name="refresh" size={20} color={colors.status.warning} />
                 <Text style={styles.clearCacheText}>Clear Cache & Re-login</Text>
               </View>
             </LiquidGlassCard>
@@ -441,7 +441,7 @@ export default function SettingsScreen({ navigation }: Props) {
           <Pressable onPress={handleLogout} style={styles.logoutButton}>
             <LiquidGlassCard intensity="medium">
               <View style={styles.logoutContent}>
-                <Ionicons name="log-out" size={20} color={colors.status.dangerRed} />
+                <Ionicons name="log-out" size={20} color={colors.status.danger} />
                 <Text style={styles.logoutText}>Log Out</Text>
               </View>
             </LiquidGlassCard>
@@ -455,7 +455,7 @@ export default function SettingsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   scrollView: {
     flex: 1,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
   clearCacheText: {
     fontSize: 16,
     fontWeight: "600",
-    color: colors.status.warningYellow,
+    color: colors.status.warning,
   },
   logoutButton: {
     marginBottom: 20,
@@ -604,6 +604,6 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 16,
     fontWeight: "600",
-    color: colors.status.dangerRed,
+    color: colors.status.danger,
   },
 });

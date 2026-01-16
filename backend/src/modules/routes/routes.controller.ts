@@ -44,7 +44,7 @@ export class RoutesController {
   }
 
   @Delete(':id')
-  @Roles('PLATFORM_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
   remove(@Param('id') id: string) {
     return this.routesService.remove(id);
   }

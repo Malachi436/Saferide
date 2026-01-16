@@ -14,7 +14,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Load token from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
-    const savedRefreshToken = localStorage.getItem('refreshToken');
     const savedUser = localStorage.getItem('user');
 
     if (savedToken && savedUser) {
@@ -22,9 +21,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
         apiClient.setToken(savedToken);
-        if (savedRefreshToken) {
-          apiClient.setRefreshToken(savedRefreshToken);
-        }
       } catch (error) {
         console.error('Failed to restore auth', error);
         localStorage.removeItem('token');
@@ -54,7 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(access_token);
       setUser(userData);
       apiClient.setToken(access_token);
-      apiClient.setRefreshToken(refresh_token);
 
       localStorage.setItem('token', access_token);
       localStorage.setItem('refreshToken', refresh_token);

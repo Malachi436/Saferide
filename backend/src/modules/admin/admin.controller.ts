@@ -88,7 +88,7 @@ export class AdminController {
   }
 
   @Get('companies/:companyId')
-  @Roles('PLATFORM_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
   async getCompanyById(@Param('companyId') companyId: string) {
     return this.adminService.getCompanyById(companyId);
   }

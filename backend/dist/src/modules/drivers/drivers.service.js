@@ -156,6 +156,8 @@ let DriversService = class DriversService {
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
+        console.log('[getTodayTrip] Looking for trips for driverId:', driverId);
+        console.log('[getTodayTrip] Date range:', today, 'to', tomorrow);
         let trip = await this.prisma.trip.findFirst({
             where: {
                 driverId,
@@ -179,14 +181,25 @@ let DriversService = class DriversService {
                 },
             },
         });
+        console.log('[getTodayTrip] IN_PROGRESS trip found:', trip?.id || 'none');
         if (!trip) {
             trip = await this.prisma.trip.findFirst({
                 where: {
                     driverId,
-                    startTime: {
-                        gte: today,
-                        lt: tomorrow,
-                    },
+                    OR: [
+                        {
+                            createdAt: {
+                                gte: today,
+                                lt: tomorrow,
+                            },
+                        },
+                        {
+                            startTime: {
+                                gte: today,
+                                lt: tomorrow,
+                            },
+                        },
+                    ],
                     status: {
                         notIn: ['COMPLETED'],
                     },
@@ -209,9 +222,13 @@ let DriversService = class DriversService {
                     },
                 },
             });
+            console.log('[getTodayTrip] Today\'s SCHEDULED trip found:', trip?.id || 'none');
         }
-        if (!trip)
+        if (!trip) {
+            console.log('[getTodayTrip] No trip found for driver');
             return null;
+        }
+        console.log('[getTodayTrip] Trip found:', trip.id, 'with', trip.attendances?.length || 0, 'attendances');
         if (trip.attendances && trip.attendances.length > 0) {
             const childIds = trip.attendances.map((a) => a.childId);
             const pickupRequests = await this.prisma.earlyPickupRequest.findMany({
@@ -238,6 +255,7 @@ let DriversService = class DriversService {
                 exemptedChildIds.add(exc.childId);
             });
             trip.attendances = trip.attendances.filter((attendance) => !exemptedChildIds.has(attendance.childId));
+            console.log('[getTodayTrip] After filtering:', trip.attendances.length, 'attendances');
         }
         return trip;
     }

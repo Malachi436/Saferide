@@ -81,7 +81,7 @@ export class AdminService {
   }
 
   async createCompany(data: any): Promise<any> {
-    const { name, email, phone, address, adminName, adminEmail, adminPassword } = data;
+    const { name, email, phone, address, adminName, adminEmail, adminPassword, schoolName, schoolCode } = data;
     
     const company = await this.prisma.company.create({
       data: {
@@ -101,6 +101,17 @@ export class AdminService {
           email: adminEmail,
           passwordHash,
           role: 'COMPANY_ADMIN',
+          companyId: company.id,
+        },
+      });
+    }
+
+    // If schoolName provided, create first school
+    if (schoolName) {
+      await this.prisma.school.create({
+        data: {
+          name: schoolName,
+          schoolCode: schoolCode || null,
           companyId: company.id,
         },
       });
@@ -156,9 +167,30 @@ export class AdminService {
             name: true,
           },
         },
+        bus: {
+          include: {
+            driver: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         stops: {
           orderBy: {
             order: 'asc',
+          },
+        },
+        _count: {
+          select: {
+            children: true,
           },
         },
       },
@@ -176,15 +208,19 @@ export class AdminService {
         firstName: true,
         lastName: true,
         grade: true,
+        dateOfBirth: true,
         parentId: true,
         parentPhone: true,
         schoolId: true,
         pickupType: true,
         pickupDescription: true,
+        pickupLatitude: true,
+        pickupLongitude: true,
         homeLatitude: true,
         homeLongitude: true,
         isClaimed: true,
         daysUntilPayment: true,
+        allergies: true,
         parent: {
           select: {
             id: true,

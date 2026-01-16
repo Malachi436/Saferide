@@ -6,7 +6,6 @@ export declare class TripAutomationService {
     generateDailyTrips(): Promise<void>;
     private createTripFromSchedule;
     private assignChildrenToTrip;
-    private shouldChildBeOnRoute;
     private getDayOfWeek;
     generateTripsManually(): Promise<{
         success: boolean;

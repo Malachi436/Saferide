@@ -30,8 +30,8 @@ let GpsController = class GpsController {
     async getCurrentLocation(busId) {
         return this.gpsService.getCurrentLocation(busId);
     }
-    async getRecentLocations(busId) {
-        return this.gpsService.getRecentLocations(busId);
+    async getRecentLocations(busId, startTime, endTime, limit) {
+        return this.gpsService.getLocationHistory(busId, startTime ? new Date(startTime) : undefined, endTime ? new Date(endTime) : undefined, limit ? parseInt(limit) : 100);
     }
 };
 exports.GpsController = GpsController;
@@ -55,8 +55,11 @@ __decorate([
     (0, common_1.Get)('locations/:busId'),
     (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('busId')),
+    __param(1, (0, common_1.Query)('startTime')),
+    __param(2, (0, common_1.Query)('endTime')),
+    __param(3, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], GpsController.prototype, "getRecentLocations", null);
 exports.GpsController = GpsController = __decorate([

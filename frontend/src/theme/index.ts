@@ -1,5 +1,5 @@
 /**
- * ROSAgo Theme
+ * SafeRide Theme
  * Central theme configuration
  */
 

@@ -10,9 +10,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
+import { GlowingOrb } from "../../components/ui/GlowingOrb";
 import { useAuthStore } from "../../stores/authStore";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
 
@@ -38,12 +40,25 @@ export default function DriverSettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[colors.primary.yellow, colors.primary.darkYellow, colors.accent.safetyOrange]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.headerGradient}
+      />
+
+      {/* Floating Glowing Orbs */}
+      <GlowingOrb size={150} color="rgba(255, 255, 255, 0.6)" delay={0} duration={11000} startX={-30} startY={20} />
+      <GlowingOrb size={120} color="rgba(255, 220, 100, 0.65)" delay={2000} duration={13000} startX={200} startY={50} />
+      <GlowingOrb size={100} color="rgba(255, 150, 80, 0.55)" delay={4500} duration={15000} startX={100} startY={80} />
+
+      <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         {/* Profile Section */}
         <Animated.View entering={FadeInDown.delay(100).springify()}>
           <LiquidGlassCard intensity="heavy" className="mb-4">
@@ -72,8 +87,8 @@ export default function DriverSettingsScreen() {
             <View style={styles.settingsGroup}>
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.blue + "20" }]}>
-                    <Ionicons name="location" size={20} color={colors.primary.blue} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.yellow + "20" }]}>
+                    <Ionicons name="location" size={20} color={colors.primary.yellow} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Location Sharing</Text>
@@ -87,9 +102,9 @@ export default function DriverSettingsScreen() {
                   onValueChange={setLocationSharing}
                   trackColor={{
                     false: colors.neutral.textSecondary + "40",
-                    true: colors.accent.successGreen + "60",
+                    true: colors.status.success + "60",
                   }}
-                  thumbColor={locationSharing ? colors.accent.successGreen : colors.neutral.pureWhite}
+                  thumbColor={locationSharing ? colors.status.success : colors.neutral.pureWhite}
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
@@ -98,8 +113,8 @@ export default function DriverSettingsScreen() {
 
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.sunsetOrange + "20" }]}>
-                    <Ionicons name="play-circle" size={20} color={colors.accent.sunsetOrange} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.accent.safetyOrange + "20" }]}>
+                    <Ionicons name="play-circle" size={20} color={colors.accent.safetyOrange} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Auto-Start Trip</Text>
@@ -113,9 +128,9 @@ export default function DriverSettingsScreen() {
                   onValueChange={setAutoStartTrip}
                   trackColor={{
                     false: colors.neutral.textSecondary + "40",
-                    true: colors.accent.successGreen + "60",
+                    true: colors.status.success + "60",
                   }}
-                  thumbColor={autoStartTrip ? colors.accent.successGreen : colors.neutral.pureWhite}
+                  thumbColor={autoStartTrip ? colors.status.success : colors.neutral.pureWhite}
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
@@ -130,8 +145,8 @@ export default function DriverSettingsScreen() {
             <View style={styles.settingsGroup}>
               <View style={styles.settingItem}>
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.status.infoBlue + "20" }]}>
-                    <Ionicons name="notifications" size={20} color={colors.status.infoBlue} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.status.info + "20" }]}>
+                    <Ionicons name="notifications" size={20} color={colors.status.info} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Push Notifications</Text>
@@ -145,9 +160,9 @@ export default function DriverSettingsScreen() {
                   onValueChange={setNotifications}
                   trackColor={{
                     false: colors.neutral.textSecondary + "40",
-                    true: colors.accent.successGreen + "60",
+                    true: colors.status.success + "60",
                   }}
-                  thumbColor={notifications ? colors.accent.successGreen : colors.neutral.pureWhite}
+                  thumbColor={notifications ? colors.status.success : colors.neutral.pureWhite}
                   ios_backgroundColor={colors.neutral.textSecondary + "40"}
                 />
               </View>
@@ -165,8 +180,8 @@ export default function DriverSettingsScreen() {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.status.warningYellow + "20" }]}>
-                    <Ionicons name="shield-checkmark" size={20} color={colors.status.warningYellow} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.status.warning + "20" }]}>
+                    <Ionicons name="shield-checkmark" size={20} color={colors.status.warning} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Privacy & Security</Text>
@@ -182,8 +197,8 @@ export default function DriverSettingsScreen() {
                 style={styles.settingItem}
               >
                 <View style={styles.settingLeft}>
-                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.blue + "20" }]}>
-                    <Ionicons name="help-circle" size={20} color={colors.primary.blue} />
+                  <View style={[styles.settingIcon, { backgroundColor: colors.primary.yellow + "20" }]}>
+                    <Ionicons name="help-circle" size={20} color={colors.primary.yellow} />
                   </View>
                   <View style={styles.settingText}>
                     <Text style={styles.settingTitle}>Help & Support</Text>
@@ -200,7 +215,7 @@ export default function DriverSettingsScreen() {
           <Text style={styles.sectionTitle}>About</Text>
           <LiquidGlassCard intensity="light" className="mb-4">
             <View style={styles.aboutCard}>
-              <Text style={styles.aboutText}>ROSAgo Driver App</Text>
+              <Text style={styles.aboutText}>SafeRide Driver App</Text>
               <Text style={styles.versionText}>Version 1.0.0</Text>
             </View>
           </LiquidGlassCard>
@@ -211,21 +226,32 @@ export default function DriverSettingsScreen() {
           <Pressable onPress={handleLogout} style={styles.logoutButton}>
             <LiquidGlassCard intensity="medium">
               <View style={styles.logoutContent}>
-                <Ionicons name="log-out" size={20} color={colors.status.dangerRed} />
+                <Ionicons name="log-out" size={20} color={colors.status.danger} />
                 <Text style={styles.logoutText}>Log Out</Text>
               </View>
             </LiquidGlassCard>
           </Pressable>
         </Animated.View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
+  },
+  headerGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 180,
+  },
+  safeArea: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
@@ -243,7 +269,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -345,6 +371,6 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 16,
     fontWeight: "600",
-    color: colors.status.dangerRed,
+    color: colors.status.danger,
   },
 });

@@ -8,4 +8,5 @@ export declare class GpsService {
     processHeartbeat(busId: string, latitude: number, longitude: number, speed: number, timestamp: Date): Promise<BusLocation>;
     getCurrentLocation(busId: string): Promise<any>;
     getRecentLocations(busId: string, limit?: number): Promise<BusLocation[]>;
+    getLocationHistory(busId: string, startTime?: Date, endTime?: Date, limit?: number): Promise<BusLocation[]>;
 }

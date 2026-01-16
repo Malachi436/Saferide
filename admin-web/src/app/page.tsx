@@ -22,11 +22,11 @@ export default function Home() {
           router.push('/platform/overview');
         } else if (role === 'COMPANY_ADMIN') {
           if (user.companyId) {
-            console.log('[Home Page] Redirecting to /company/' + user.companyId + '/overview');
-            router.push(`/company/${user.companyId}/overview`);
+            console.log('[Home Page] Redirecting to /school/' + user.companyId + '/overview');
+            router.push(`/school/${user.companyId}/overview`);
           } else {
-            console.error('[Home Page] Company admin has no companyId!');
-            alert('Error: Company admin account is missing company ID');
+            console.error('[Home Page] School admin has no companyId!');
+            alert('Error: School admin account is missing school ID');
           }
         } else {
           console.error('[Home Page] Unknown role:', role);

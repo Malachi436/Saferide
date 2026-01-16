@@ -53,7 +53,7 @@ export default function RouteMapScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary.blue} />
+          <ActivityIndicator size="large" color={colors.primary.yellow} />
           <Text style={styles.loadingText}>Loading route...</Text>
         </View>
       </SafeAreaView>
@@ -115,7 +115,7 @@ export default function RouteMapScreen() {
         {/* Route Polyline */}
         <Polyline
           coordinates={coordinates}
-          strokeColor={colors.primary.blue}
+          strokeColor={colors.primary.yellow}
           strokeWidth={4}
         />
 
@@ -243,7 +243,7 @@ export default function RouteMapScreen() {
                           <Ionicons
                             name="people"
                             size={14}
-                            color={colors.primary.blue}
+                            color={colors.primary.yellow}
                           />
                           <Text style={styles.childrenCountText}>
                             {childrenAtStop.length}
@@ -266,7 +266,7 @@ export default function RouteMapScreen() {
                       <Ionicons
                         name="navigate"
                         size={20}
-                        color={colors.primary.blue}
+                        color={colors.primary.yellow}
                       />
                     </Pressable>
                   </View>
@@ -283,7 +283,7 @@ export default function RouteMapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   map: {
     flex: 1,
@@ -296,17 +296,17 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
     borderColor: colors.neutral.pureWhite,
   },
   startMarker: {
-    backgroundColor: colors.accent.successGreen,
+    backgroundColor: colors.status.success,
   },
   endMarker: {
-    backgroundColor: colors.status.dangerRed,
+    backgroundColor: colors.status.danger,
   },
   markerText: {
     fontSize: 14,
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.accent.sunsetOrange,
+    backgroundColor: colors.accent.safetyOrange,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: colors.primary.teal,
+    backgroundColor: colors.accent.safetyOrange,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
@@ -398,20 +398,20 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     alignItems: "center",
     justifyContent: "center",
   },
   stopNumberStart: {
-    backgroundColor: colors.accent.successGreen,
+    backgroundColor: colors.status.success,
   },
   stopNumberEnd: {
-    backgroundColor: colors.status.dangerRed,
+    backgroundColor: colors.status.danger,
   },
   stopNumberText: {
     fontSize: 16,
     fontWeight: "700",
-    color: colors.primary.blue,
+    color: colors.primary.yellow,
   },
   stopNumberTextWhite: {
     color: colors.neutral.pureWhite,
@@ -441,19 +441,19 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     borderRadius: 10,
   },
   childrenCountText: {
     fontSize: 12,
     fontWeight: "600",
-    color: colors.primary.blue,
+    color: colors.primary.yellow,
   },
   navigateButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 24,
     paddingVertical: 10,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     borderRadius: 8,
   },
   retryButtonText: {

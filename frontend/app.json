@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "rosago",
-    "slug": "rosago",
+    "name": "SafeRide",
+    "slug": "saferide",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.jpeg",
     "userInterfaceStyle": "light",
-    "scheme": "rosago",
+    "scheme": "saferide",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -14,10 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rosago.app",
+      "bundleIdentifier": "com.saferide.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "ROSAgo needs your location to track the school bus in real-time and provide accurate pickup/drop-off updates.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "ROSAgo needs continuous access to your location to track the school bus even when the app is in the background.",
+        "NSLocationWhenInUseUsageDescription": "SafeRide needs your location to track the school bus in real-time and provide accurate pickup/drop-off updates.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "SafeRide needs continuous access to your location to track the school bus even when the app is in the background.",
         "UIBackgroundModes": ["location"]
       }
     },
@@ -26,7 +26,7 @@
         "foregroundImage": "./assets/adaptive-icon.jpeg",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.rosago.app",
+      "package": "com.saferide.app",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",

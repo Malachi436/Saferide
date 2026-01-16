@@ -175,7 +175,7 @@ function createSchoolMarkerElement(name: string): HTMLElement {
   return container;
 }
 
-function createPickupMarkerElement(childName?: string, isSelected?: boolean): HTMLElement {
+function createPickupMarkerElement(_childName?: string, isSelected?: boolean): HTMLElement {
   const container = document.createElement('div');
   container.className = 'rosago-pickup-marker';
   container.style.cssText = `

@@ -14,6 +14,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
+import { GlowingOrb } from "../../components/ui/GlowingOrb";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
 import { socketService } from "../../utils/socket";
@@ -129,11 +130,16 @@ export default function AttendanceScreen() {
     <View style={styles.container}>
       {/* Background gradient */}
       <LinearGradient
-        colors={[colors.primary.blue, colors.primary.teal]}
+        colors={[colors.primary.yellow, colors.primary.darkYellow, colors.accent.safetyOrange]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.headerGradient}
       />
+
+      {/* Floating Glowing Orbs */}
+      <GlowingOrb size={150} color="rgba(255, 255, 255, 0.6)" delay={0} duration={11000} startX={-30} startY={20} />
+      <GlowingOrb size={120} color="rgba(255, 220, 100, 0.65)" delay={2000} duration={13000} startX={200} startY={50} />
+      <GlowingOrb size={100} color="rgba(255, 150, 80, 0.55)" delay={4000} duration={14000} startX={100} startY={80} />
 
       <SafeAreaView edges={["top"]} style={styles.safeArea}>
         {/* Header */}
@@ -152,14 +158,14 @@ export default function AttendanceScreen() {
         >
           {loading && (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.primary.blue} />
+              <ActivityIndicator size="large" color={colors.primary.yellow} />
               <Text style={styles.loadingText}>Loading attendance...</Text>
             </View>
           )}
 
           {error && !loading && (
             <View style={styles.errorContainer}>
-              <Ionicons name="information-circle" size={48} color={colors.accent.sunsetOrange} />
+              <Ionicons name="information-circle" size={48} color={colors.accent.safetyOrange} />
               <Text style={styles.errorText}>{error}</Text>
               <Pressable style={styles.retryButton} onPress={fetchTodayTrip}>
                 <Text style={styles.retryButtonText}>Retry</Text>
@@ -202,10 +208,10 @@ export default function AttendanceScreen() {
                         <View
                           style={[
                             styles.iconCircle,
-                            { backgroundColor: colors.primary.blue + "20" },
+                            { backgroundColor: colors.primary.yellow + "20" },
                           ]}
                         >
-                          <Ionicons name="people" size={32} color={colors.primary.blue} />
+                          <Ionicons name="people" size={32} color={colors.primary.yellow} />
                         </View>
                         <Text style={styles.statValue}>{stats.total}</Text>
                         <Text style={styles.statLabel}>Total Children</Text>
@@ -225,13 +231,13 @@ export default function AttendanceScreen() {
                         <View
                           style={[
                             styles.iconCircle,
-                            { backgroundColor: colors.accent.sunsetOrange + "20" },
+                            { backgroundColor: colors.accent.safetyOrange + "20" },
                           ]}
                         >
                           <Ionicons
                             name="arrow-up-circle"
                             size={32}
-                            color={colors.accent.sunsetOrange}
+                            color={colors.accent.safetyOrange}
                           />
                         </View>
                         <Text style={styles.statValue}>{stats.pickedUp}</Text>
@@ -242,7 +248,7 @@ export default function AttendanceScreen() {
                               styles.progressFill,
                               {
                                 width: `${pickedUpPercentage}%`,
-                                backgroundColor: colors.accent.sunsetOrange,
+                                backgroundColor: colors.accent.safetyOrange,
                               },
                             ]}
                           />
@@ -263,13 +269,13 @@ export default function AttendanceScreen() {
                         <View
                           style={[
                             styles.iconCircle,
-                            { backgroundColor: colors.accent.successGreen + "20" },
+                            { backgroundColor: colors.status.success + "20" },
                           ]}
                         >
                           <Ionicons
                             name="checkmark-circle"
                             size={32}
-                            color={colors.accent.successGreen}
+                            color={colors.status.success}
                           />
                         </View>
                         <Text style={styles.statValue}>{stats.droppedOff}</Text>
@@ -280,7 +286,7 @@ export default function AttendanceScreen() {
                               styles.progressFill,
                               {
                                 width: `${droppedOffPercentage}%`,
-                                backgroundColor: colors.accent.successGreen,
+                                backgroundColor: colors.status.success,
                               },
                             ]}
                           />
@@ -306,11 +312,11 @@ export default function AttendanceScreen() {
                     let statusText = "Waiting";
 
                     if (status === "PICKED_UP" || status === "ON_WAY") {
-                      statusColor = colors.accent.sunsetOrange;
+                      statusColor = colors.accent.safetyOrange;
                       statusIcon = "arrow-up-circle";
                       statusText = "Picked Up";
                     } else if (status === "DROPPED") {
-                      statusColor = colors.accent.successGreen;
+                      statusColor = colors.status.success;
                       statusIcon = "checkmark-circle";
                       statusText = "Dropped Off";
                     }

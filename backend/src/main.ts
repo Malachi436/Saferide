@@ -14,13 +14,13 @@ async function bootstrap() {
   // Set up global logger
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   
-  // Enable CORS with specific origins
-  const corsOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',')
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173']; // Dev origins
+  // Enable CORS for mobile development
+  // Allow all origins in development for Expo mobile apps
   app.enableCors({
-    origin: corsOrigins,
+    origin: '*', // Allow all origins for development
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   // Add request logging middleware

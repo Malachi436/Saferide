@@ -119,15 +119,15 @@ export default function NotificationsScreen() {
   const getNotificationIcon = (displayType: DisplayNotificationType) => {
     switch (displayType) {
       case "pickup":
-        return { name: "log-in" as const, color: colors.accent.sunsetOrange };
+        return { name: "log-in" as const, color: colors.accent.safetyOrange };
       case "dropoff":
-        return { name: "log-out" as const, color: colors.accent.successGreen };
+        return { name: "log-out" as const, color: colors.status.success };
       case "delay":
-        return { name: "time" as const, color: colors.status.warningYellow };
+        return { name: "time" as const, color: colors.status.warning };
       case "payment":
-        return { name: "card" as const, color: colors.primary.teal };
+        return { name: "card" as const, color: colors.accent.safetyOrange };
       case "general":
-        return { name: "information-circle" as const, color: colors.primary.blue };
+        return { name: "information-circle" as const, color: colors.primary.yellow };
     }
   };
 
@@ -228,7 +228,7 @@ export default function NotificationsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.primary.blue}
+            tintColor={colors.primary.yellow}
           />
         }
       >
@@ -256,10 +256,10 @@ export default function NotificationsScreen() {
             const iconConfig = getNotificationIcon(notification.displayType);
             const isChildStatus = notification.displayType === 'pickup' || notification.displayType === 'dropoff';
             const statusColor = notification.displayType === 'pickup' 
-              ? colors.accent.sunsetOrange 
+              ? colors.accent.safetyOrange 
               : notification.displayType === 'dropoff' 
-                ? colors.accent.successGreen 
-                : colors.primary.blue;
+                ? colors.status.success 
+                : colors.primary.yellow;
             const statusLabel = notification.displayType === 'pickup' 
               ? 'Picked Up' 
               : notification.displayType === 'dropoff' 
@@ -372,7 +372,7 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   header: {
     flexDirection: "row",
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   markAllText: {
     fontSize: 14,
     fontWeight: "600",
-    color: colors.primary.blue,
+    color: colors.primary.yellow,
   },
   filterScroll: {
     maxHeight: 50,
@@ -421,8 +421,8 @@ const styles = StyleSheet.create({
     borderColor: colors.neutral.textSecondary + "20",
   },
   filterChipActive: {
-    backgroundColor: colors.primary.blue,
-    borderColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
+    borderColor: colors.primary.yellow,
   },
   filterChipText: {
     fontSize: 14,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
   },
   notificationIcon: {
     width: 48,
@@ -579,6 +579,6 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
   },
 });

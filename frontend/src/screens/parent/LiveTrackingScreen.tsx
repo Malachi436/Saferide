@@ -332,7 +332,7 @@ export default function LiveTrackingScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary.blue} />
+        <ActivityIndicator size="large" color={colors.primary.yellow} />
         <Text style={styles.loadingText}>Loading tracking data...</Text>
       </View>
     );
@@ -341,7 +341,7 @@ export default function LiveTrackingScreen() {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Ionicons name="warning" size={48} color={colors.accent.sunsetOrange} />
+        <Ionicons name="warning" size={48} color={colors.accent.safetyOrange} />
         <Text style={styles.errorText}>{error}</Text>
         <Pressable style={styles.retryButton} onPress={fetchData}>
           <Text style={styles.retryButtonText}>Retry</Text>
@@ -417,7 +417,7 @@ export default function LiveTrackingScreen() {
 
       {/* Connection Status Badge */}
       <View style={styles.connectionBadge}>
-        <View style={[styles.connectionDot, { backgroundColor: isConnected ? colors.accent.successGreen : colors.accent.sunsetOrange }]} />
+        <View style={[styles.connectionDot, { backgroundColor: isConnected ? colors.status.success : colors.accent.safetyOrange }]} />
         <Text style={styles.connectionText}>
           {isConnected ? 'Live' : 'Connecting...'}
         </Text>
@@ -491,8 +491,8 @@ export default function LiveTrackingScreen() {
                         styles.statusDot,
                         {
                           backgroundColor: busLocation 
-                            ? colors.accent.successGreen 
-                            : colors.status.warningYellow,
+                            ? colors.status.success 
+                            : colors.status.warning,
                         },
                       ]}
                     />
@@ -512,17 +512,17 @@ export default function LiveTrackingScreen() {
               {/* Distance and Bus Info Row */}
               <View style={styles.infoRow}>
                 <View style={styles.infoItem}>
-                  <Ionicons name="navigate" size={16} color={colors.primary.blue} />
+                  <Ionicons name="navigate" size={16} color={colors.primary.yellow} />
                   <Text style={styles.infoLabel}>Distance</Text>
                   <Text style={styles.infoValue}>{distanceText}</Text>
                 </View>
                 <View style={styles.infoItem}>
-                  <Ionicons name="bus" size={16} color={colors.primary.teal} />
+                  <Ionicons name="bus" size={16} color={colors.accent.safetyOrange} />
                   <Text style={styles.infoLabel}>Bus</Text>
                   <Text style={styles.infoValue}>{trip?.bus?.plateNumber || "--"}</Text>
                 </View>
                 <View style={styles.infoItem}>
-                  <Ionicons name="speedometer" size={16} color={colors.accent.sunsetOrange} />
+                  <Ionicons name="speedometer" size={16} color={colors.accent.safetyOrange} />
                   <Text style={styles.infoLabel}>Speed</Text>
                   <Text style={styles.infoValue}>
                     {busLocation?.speed ? `${Math.round(busLocation.speed)} km/h` : "--"}
@@ -578,13 +578,13 @@ export default function LiveTrackingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   loadingText: {
     marginTop: 12,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
     padding: 24,
   },
   errorText: {
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     marginTop: 16,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.accent.sunsetOrange,
+    backgroundColor: colors.accent.safetyOrange,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 8,
-    backgroundColor: colors.primary.teal,
+    backgroundColor: colors.accent.safetyOrange,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -723,17 +723,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
     gap: 8,
   },
   childChipActive: {
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
   },
   childChipAvatar: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
   childChipAvatarText: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.primary.blue,
+    color: colors.primary.yellow,
   },
   childChipAvatarTextActive: {
     color: colors.neutral.pureWhite,
@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
   etaValue: {
     fontSize: 24,
     fontWeight: "700",
-    color: colors.primary.blue,
+    color: colors.primary.yellow,
   },
   divider: {
     height: 1,
@@ -833,14 +833,14 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary.teal + "20",
+    backgroundColor: colors.accent.safetyOrange + "20",
     alignItems: "center",
     justifyContent: "center",
   },
   driverAvatarText: {
     fontSize: 18,
     fontWeight: "700",
-    color: colors.primary.teal,
+    color: colors.accent.safetyOrange,
   },
   driverInfo: {
     flex: 1,
@@ -864,7 +864,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     alignItems: "center",
     justifyContent: "center",
   },

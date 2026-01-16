@@ -59,11 +59,13 @@ export class ChildrenService {
       throw new NotFoundException('School not found or does not belong to this company');
     }
 
+    const schoolCode = school.schoolCode || 'ROS';
+
     // Create all children in a transaction
     const createdChildren = await this.prisma.$transaction(
       children.map((childData: any) => {
-        // Generate unique code for each child
-        const uniqueCode = this.generateCodeSync();
+        // Generate unique code for each child with school prefix
+        const uniqueCode = this.generateCodeSyncWithPrefix(schoolCode);
         
         return this.prisma.child.create({
           data: {
@@ -89,7 +91,17 @@ export class ChildrenService {
     };
   }
 
-  // Helper method to generate code synchronously
+  // Helper method to generate code synchronously with school prefix
+  private generateCodeSyncWithPrefix(schoolCode: string): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomPart = '';
+    for (let i = 0; i < 6; i++) {
+      randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `${schoolCode}-${randomPart}`;
+  }
+
+  // Helper method to generate code synchronously (deprecated - use generateCodeSyncWithPrefix)
   private generateCodeSync(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
@@ -184,14 +196,19 @@ export class ChildrenService {
   }
 
   // Generate unique code for child (e.g., ROSxxxx)
-  async generateUniqueCode(): Promise<string> {
-    const prefix = 'ROS';
+  async generateUniqueCode(schoolCode?: string): Promise<string> {
+    const prefix = schoolCode || 'ROS';
     let code: string;
     let exists = true;
 
     while (exists) {
-      const randomNum = Math.floor(1000 + Math.random() * 9000); // 4-digit number
-      code = `${prefix}${randomNum}`;
+      // Generate random alphanumeric code (6 characters)
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let randomPart = '';
+      for (let i = 0; i < 6; i++) {
+        randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      code = `${prefix}-${randomPart}`;
       
       const existing = await this.prisma.child.findUnique({
         where: { uniqueCode: code },
@@ -226,6 +243,8 @@ export class ChildrenService {
         homeLatitude: linkDto.homeLatitude,
         homeLongitude: linkDto.homeLongitude,
         homeAddress: linkDto.homeAddress,
+        allergies: linkDto.allergies,
+        medicalConditions: linkDto.medicalConditions,
       },
       include: {
         school: true,

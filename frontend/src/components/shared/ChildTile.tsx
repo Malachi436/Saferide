@@ -25,11 +25,11 @@ export function ChildTile({ child, onPress, showStatus = true, tripId, showActio
   const [earlyPickupPending, setEarlyPickupPending] = useState(false);
   const [tripSkipped, setTripSkipped] = useState(false);
   const statusConfig = {
-    waiting: { icon: "time-outline", color: colors.status.warningYellow, label: "Waiting" },
-    picked_up: { icon: "checkmark-circle", color: colors.accent.successGreen, label: "Picked Up" },
-    on_way: { icon: "car-outline", color: colors.status.infoBlue, label: "On the way" },
-    arrived: { icon: "location", color: colors.accent.plantainGreen, label: "Arrived" },
-    dropped_off: { icon: "checkmark-done-circle", color: colors.accent.successGreen, label: "Dropped Off" },
+    waiting: { icon: "time-outline", color: colors.status.warning, label: "Waiting" },
+    picked_up: { icon: "checkmark-circle", color: colors.status.success, label: "Picked Up" },
+    on_way: { icon: "car-outline", color: colors.status.info, label: "On the way" },
+    arrived: { icon: "location", color: colors.status.success, label: "Arrived" },
+    dropped_off: { icon: "checkmark-done-circle", color: colors.status.success, label: "Dropped Off" },
   };
 
   const status = child.status ? statusConfig[child.status as keyof typeof statusConfig] : undefined;
@@ -182,8 +182,8 @@ export function ChildTile({ child, onPress, showStatus = true, tripId, showActio
           <View style={styles.container}>
             {/* Avatar with Initials */}
             <View style={styles.avatarContainer}>
-              <View style={[styles.avatar, tripSkipped && { backgroundColor: colors.status.dangerRed + "20" }]}>
-                <Text style={[styles.avatarText, tripSkipped && { color: colors.status.dangerRed }]}>{initials}</Text>
+              <View style={[styles.avatar, tripSkipped && { backgroundColor: colors.status.danger + "20" }]}>
+                <Text style={[styles.avatarText, tripSkipped && { color: colors.status.danger }]}>{initials}</Text>
               </View>
             </View>
 
@@ -285,14 +285,14 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
     fontSize: 18,
     fontWeight: "700",
-    color: colors.primary.blue,
+    color: colors.primary.yellow,
   },
   infoContainer: {
     flex: 1,
@@ -324,13 +324,13 @@ const styles = StyleSheet.create({
   skippedBadge: {
     fontSize: 12,
     fontWeight: "600",
-    color: colors.status.dangerRed,
+    color: colors.status.danger,
     marginTop: 4,
   },
   earlyPickupBadge: {
     fontSize: 12,
     fontWeight: "600",
-    color: colors.accent.successGreen,
+    color: colors.status.success,
     marginTop: 4,
   },
   actionsContainer: {
@@ -352,13 +352,13 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   earlyPickupButton: {
-    backgroundColor: colors.accent.successGreen,
+    backgroundColor: colors.status.success,
   },
   skipButton: {
-    backgroundColor: colors.status.dangerRed,
+    backgroundColor: colors.status.danger,
   },
   unskipButton: {
-    backgroundColor: colors.accent.sunsetOrange,
+    backgroundColor: colors.accent.safetyOrange,
   },
   actionButtonText: {
     color: colors.neutral.pureWhite,

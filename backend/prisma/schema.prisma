@@ -102,20 +102,21 @@ model Company {
 }
 
 model School {
-  id        String   @id @default(uuid())
-  name      String
-  companyId String
-  company   Company  @relation(fields: [companyId], references: [id])
-  latitude  Float?
-  longitude Float?
-  address   String?
-  phone     String?  // Added for contact information
-  email     String?  // Added for contact information
-  users     User[]
-  children  Child[]
-  routes    Route[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  name       String
+  schoolCode String?  @unique // Platform admin sets this code (e.g., GFA)
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  latitude   Float?
+  longitude  Float?
+  address    String?
+  phone      String?  // Added for contact information
+  email      String?  // Added for contact information
+  users      User[]
+  children   Child[]
+  routes     Route[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([companyId])
 }
@@ -184,6 +185,7 @@ model Child {
   isClaimed         Boolean           @default(false) // Whether parent has claimed this child (changed from isLinked)
   daysUntilPayment  Int? // Payment tracking from legacy school system
   allergies         String? // Child allergies
+  medicalConditions String? // Known medical conditions
   specialInstructions String? // Special instructions for driver
   attendance        ChildAttendance[]
   tripExceptions    TripException[]

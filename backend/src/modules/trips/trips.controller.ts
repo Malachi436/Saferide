@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { TripsService } from './trips.service';
 import { TripAutomationService } from './trip-automation.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Controller('trips')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -11,6 +12,7 @@ export class TripsController {
   constructor(
     private readonly tripsService: TripsService,
     private readonly tripAutomationService: TripAutomationService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post()
@@ -33,7 +35,26 @@ export class TripsController {
 
   @Get('child/:childId')
   @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
-  findActiveByChild(@Param('childId') childId: string) {
+  async findActiveByChild(
+    @Param('childId') childId: string,
+    @Req() req,
+  ) {
+    // Security: Verify parent owns this child (if role is PARENT)
+    if (req.user.role === 'PARENT') {
+      const child = await this.prisma.child.findUnique({
+        where: { id: childId },
+        select: { parentId: true },
+      });
+
+      if (!child) {
+        throw new NotFoundException('Child not found');
+      }
+
+      if (child.parentId !== req.user.userId) {
+        throw new ForbiddenException('Access denied: Not your child');
+      }
+    }
+
     return this.tripsService.findActiveByChildId(childId);
   }
 

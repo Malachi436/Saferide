@@ -19,10 +19,12 @@ const trip_automation_service_1 = require("./trip-automation.service");
 const roles_decorator_1 = require("../roles/roles.decorator");
 const roles_guard_1 = require("../roles/roles.guard");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const prisma_service_1 = require("../../prisma/prisma.service");
 let TripsController = class TripsController {
-    constructor(tripsService, tripAutomationService) {
+    constructor(tripsService, tripAutomationService, prisma) {
         this.tripsService = tripsService;
         this.tripAutomationService = tripAutomationService;
+        this.prisma = prisma;
     }
     create(createTripDto) {
         return this.tripsService.create(createTripDto);
@@ -33,7 +35,19 @@ let TripsController = class TripsController {
     findOne(id) {
         return this.tripsService.findOne(id);
     }
-    findActiveByChild(childId) {
+    async findActiveByChild(childId, req) {
+        if (req.user.role === 'PARENT') {
+            const child = await this.prisma.child.findUnique({
+                where: { id: childId },
+                select: { parentId: true },
+            });
+            if (!child) {
+                throw new common_1.NotFoundException('Child not found');
+            }
+            if (child.parentId !== req.user.userId) {
+                throw new common_1.ForbiddenException('Access denied: Not your child');
+            }
+        }
         return this.tripsService.findActiveByChildId(childId);
     }
     findActiveByCompany(companyId) {
@@ -80,9 +94,10 @@ __decorate([
     (0, common_1.Get)('child/:childId'),
     (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('childId')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], TripsController.prototype, "findActiveByChild", null);
 __decorate([
     (0, common_1.Get)('company/:companyId/active'),
@@ -129,6 +144,7 @@ exports.TripsController = TripsController = __decorate([
     (0, common_1.Controller)('trips'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [trips_service_1.TripsService,
-        trip_automation_service_1.TripAutomationService])
+        trip_automation_service_1.TripAutomationService,
+        prisma_service_1.PrismaService])
 ], TripsController);
 //# sourceMappingURL=trips.controller.js.map

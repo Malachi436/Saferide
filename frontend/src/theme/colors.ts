@@ -1,43 +1,47 @@
 /**
- * ROSAgo Color Palette
- * Exact color specifications for the premium school-transport app
+ * SafeRide Color Palette - School Bus Theme
+ * Fun, vibrant colors inspired by classic school buses
  */
 
 export const colors = {
-  // Primary Colors
+  // School Bus Primary Colors
   primary: {
-    blue: "#2A7FF4",
-    teal: "#1BA7A1",
+    yellow: "#FFD400",
+    darkYellow: "#F5BE00",
+    black: "#1A1A1A",
   },
 
   // Accent Colors
   accent: {
-    sunsetOrange: "#FF8A3D",
-    successGreen: "#23C552",
-    plantainGreen: "#4BB543",
+    safetyOrange: "#FF6B35",
+    chrome: "#C0C0C0",
+    skyBlue: "#118AB2",
   },
 
   // Status Colors
   status: {
-    infoBlue: "#4DAAFF",
-    warningYellow: "#FFCC00",
-    dangerRed: "#E53935",
+    success: "#06D6A0",
+    warning: "#FFD400",
+    danger: "#E63946",
+    info: "#118AB2",
   },
 
   // Neutral Colors
   neutral: {
-    creamWhite: "#FAF7F2",
+    warmCream: "#FFF8E7",
     pureWhite: "#FFFFFF",
-    textPrimary: "#1D1D1F",
-    textSecondary: "#6E6E6E",
+    textPrimary: "#1A1A1A",
+    textSecondary: "#525252",
+    lightGray: "#F5F5F5",
+    gray: "#A3A3A3",
   },
 
-  // Liquid Glass overlay
+  // Fun Glass overlay with yellow tint
   glass: {
-    overlay: "rgba(255, 255, 255, 0.25)",
-    overlayLight: "rgba(255, 255, 255, 0.20)",
-    overlayMedium: "rgba(255, 255, 255, 0.30)",
-    overlayHeavy: "rgba(255, 255, 255, 0.35)",
+    overlay: "rgba(255, 212, 0, 0.15)",
+    overlayLight: "rgba(255, 212, 0, 0.10)",
+    overlayMedium: "rgba(255, 212, 0, 0.20)",
+    overlayHeavy: "rgba(255, 212, 0, 0.30)",
   },
 } as const;
 

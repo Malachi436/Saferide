@@ -52,10 +52,10 @@ export function LargeCTAButton({
   };
 
   const backgroundColor = {
-    primary: colors.primary.blue,
-    secondary: colors.primary.teal,
-    success: colors.accent.successGreen,
-    danger: colors.status.dangerRed,
+    primary: colors.primary.yellow,
+    secondary: colors.accent.safetyOrange,
+    success: colors.status.success,
+    danger: colors.status.danger,
   }[variant];
 
   return (

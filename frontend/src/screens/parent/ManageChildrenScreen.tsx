@@ -71,7 +71,7 @@ export default function ManageChildrenScreen({ navigation }: Props) {
             <LiquidGlassCard intensity="medium" className="mb-4">
               <View style={styles.addChildCard}>
                 <View style={styles.addIconCircle}>
-                  <Ionicons name="add" size={28} color={colors.primary.blue} />
+                  <Ionicons name="add" size={28} color={colors.primary.yellow} />
                 </View>
                 <View style={styles.addChildText}>
                   <Text style={styles.addChildTitle}>Add New Child</Text>
@@ -90,7 +90,7 @@ export default function ManageChildrenScreen({ navigation }: Props) {
 
         {isLoading && children.length === 0 ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.primary.blue} />
+            <ActivityIndicator size="large" color={colors.primary.yellow} />
             <Text style={styles.loadingText}>Loading children...</Text>
           </View>
         ) : children.length === 0 ? (
@@ -130,10 +130,10 @@ export default function ManageChildrenScreen({ navigation }: Props) {
                         style={styles.actionButton}
                         onPress={() => navigation.navigate("SetHomePickup", { childId: child.id })}
                       >
-                        <Ionicons name="location" size={18} color={colors.primary.blue} />
+                        <Ionicons name="location" size={18} color={colors.primary.yellow} />
                       </Pressable>
                       <Pressable style={styles.editButton}>
-                        <Ionicons name="create-outline" size={20} color={colors.primary.blue} />
+                        <Ionicons name="create-outline" size={20} color={colors.primary.yellow} />
                       </Pressable>
                     </View>
                   </View>
@@ -150,7 +150,7 @@ export default function ManageChildrenScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   scrollView: {
     flex: 1,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary.teal,
+    backgroundColor: colors.accent.safetyOrange,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.accent.sunsetOrange + "20",
+    backgroundColor: colors.accent.safetyOrange + "20",
     alignItems: "center",
     justifyContent: "center",
   },

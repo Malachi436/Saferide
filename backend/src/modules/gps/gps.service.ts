@@ -69,4 +69,27 @@ export class GpsService {
       take: limit,
     });
   }
+
+  async getLocationHistory(
+    busId: string,
+    startTime?: Date,
+    endTime?: Date,
+    limit: number = 100,
+  ): Promise<BusLocation[]> {
+    return this.prisma.busLocation.findMany({
+      where: {
+        busId,
+        ...(startTime || endTime
+          ? {
+              timestamp: {
+                ...(startTime && { gte: startTime }),
+                ...(endTime && { lte: endTime }),
+              },
+            }
+          : {}),
+      },
+      orderBy: { timestamp: 'desc' },
+      take: limit,
+    });
+  }
 }

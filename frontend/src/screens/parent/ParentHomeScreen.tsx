@@ -20,6 +20,7 @@ import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
 import { ChildTile } from "../../components/shared/ChildTile";
 import { DriverInfoBanner } from "../../components/shared/DriverInfoBanner";
 import { ETAChip } from "../../components/shared/ETAChip";
+import { GlowingOrb } from "../../components/ui/GlowingOrb";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
 import { socketService } from "../../utils/socket";
@@ -163,10 +164,44 @@ export default function ParentHomeScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[colors.primary.blue, colors.primary.teal]}
+        colors={[colors.primary.yellow, colors.primary.darkYellow, colors.accent.safetyOrange]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.headerGradient}
+      />
+
+      {/* Floating Glowing Orbs */}
+      <GlowingOrb
+        size={180}
+        color="rgba(255, 255, 255, 0.65)"
+        delay={0}
+        duration={10000}
+        startX={-40}
+        startY={10}
+      />
+      <GlowingOrb
+        size={130}
+        color="rgba(255, 220, 100, 0.7)"
+        delay={2000}
+        duration={12000}
+        startX={220}
+        startY={40}
+      />
+      <GlowingOrb
+        size={110}
+        color="rgba(255, 150, 80, 0.6)"
+        delay={4000}
+        duration={15000}
+        startX={120}
+        startY={70}
+      />
+      <GlowingOrb
+        size={90}
+        color="rgba(255, 200, 200, 0.55)"
+        delay={6000}
+        duration={13000}
+        startX={40}
+        startY={100}
       />
 
       <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -202,7 +237,7 @@ export default function ParentHomeScreen() {
             <LiquidGlassCard className="mb-4" intensity="heavy">
               <View style={styles.statusCard}>
                 <View style={styles.statusHeader}>
-                  <Ionicons name="bus" size={24} color={colors.status.infoBlue} />
+                  <Ionicons name="bus" size={24} color={colors.status.info} />
                   <Text style={styles.statusTitle}>Pickup Status</Text>
                 </View>
                 <View style={styles.statusContent}>
@@ -237,13 +272,13 @@ export default function ParentHomeScreen() {
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Your Children</Text>
                 <Pressable onPress={() => navigation.navigate("AddChild")}>
-                  <Ionicons name="add-circle" size={28} color={colors.primary.blue} />
+                  <Ionicons name="add-circle" size={28} color={colors.primary.yellow} />
                 </Pressable>
               </View>
               
               {isLoading && (
                 <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color={colors.primary.blue} />
+                  <ActivityIndicator size="large" color={colors.primary.yellow} />
                 </View>
               )}
               
@@ -262,7 +297,7 @@ export default function ParentHomeScreen() {
               {!isLoading && !error && children.length === 0 && (
                 <LiquidGlassCard intensity="medium">
                   <View style={styles.emptyChildrenCard}>
-                    <Ionicons name="person-add" size={48} color={colors.primary.blue} />
+                    <Ionicons name="person-add" size={48} color={colors.primary.yellow} />
                     <Text style={styles.emptyChildrenTitle}>No children added yet</Text>
                     <Text style={styles.emptyChildrenSubtitle}>
                       Link your child using the code provided by your school
@@ -307,7 +342,7 @@ export default function ParentHomeScreen() {
                 >
                   <LiquidGlassCard intensity="medium">
                     <View style={styles.actionContent}>
-                      <Ionicons name="location" size={32} color={colors.primary.blue} />
+                      <Ionicons name="location" size={32} color={colors.primary.yellow} />
                       <Text style={styles.actionText}>Live Tracking</Text>
                     </View>
                   </LiquidGlassCard>
@@ -316,7 +351,7 @@ export default function ParentHomeScreen() {
                 <Pressable onPress={() => navigation.navigate("Payments")} style={styles.actionCard}>
                   <LiquidGlassCard intensity="medium">
                     <View style={styles.actionContent}>
-                      <Ionicons name="card" size={32} color={colors.accent.successGreen} />
+                      <Ionicons name="card" size={32} color={colors.status.success} />
                       <Text style={styles.actionText}>Payments</Text>
                     </View>
                   </LiquidGlassCard>
@@ -328,7 +363,7 @@ export default function ParentHomeScreen() {
                 >
                   <LiquidGlassCard intensity="medium">
                     <View style={styles.actionContent}>
-                      <Ionicons name="receipt" size={32} color={colors.accent.sunsetOrange} />
+                      <Ionicons name="receipt" size={32} color={colors.accent.safetyOrange} />
                       <Text style={styles.actionText}>Receipts</Text>
                     </View>
                   </LiquidGlassCard>
@@ -375,7 +410,7 @@ export default function ParentHomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   headerGradient: {
     position: "absolute",
@@ -397,7 +432,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 14,
-    color: colors.neutral.creamWhite,
+    color: colors.neutral.warmCream,
     marginBottom: 4,
   },
   userName: {
@@ -430,7 +465,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 2,
     right: 2,
-    backgroundColor: colors.status.dangerRed,
+    backgroundColor: colors.status.danger,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -526,7 +561,7 @@ const styles = StyleSheet.create({
   },
   paymentDate: {
     fontSize: 13,
-    color: colors.status.warningYellow,
+    color: colors.status.warning,
     fontWeight: "600",
   },
   payButton: {
@@ -545,7 +580,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: colors.status.dangerRed,
+    color: colors.status.danger,
     textAlign: "center",
   },
   retryButton: {
@@ -578,7 +613,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,

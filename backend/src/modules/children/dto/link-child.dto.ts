@@ -16,6 +16,14 @@ export class LinkChildDto {
   @IsString()
   @IsOptional()
   homeAddress?: string;
+
+  @IsString()
+  @IsOptional()
+  allergies?: string;
+
+  @IsString()
+  @IsOptional()
+  medicalConditions?: string;
 }
 
 export class UpdateChildGradeDto {

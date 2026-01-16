@@ -57,7 +57,7 @@ function ParentTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: colors.primary.blue,
+        tabBarActiveTintColor: colors.primary.yellow,
         tabBarInactiveTintColor: colors.neutral.textSecondary,
         tabBarStyle: {
           backgroundColor: colors.neutral.pureWhite,

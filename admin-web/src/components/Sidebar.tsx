@@ -12,37 +12,33 @@ export function Sidebar() {
   if (!user) return null;
 
   const isPlatformAdmin = user.role?.toUpperCase() === 'PLATFORM_ADMIN';
-  const isCompanyAdmin = user.role?.toUpperCase() === 'COMPANY_ADMIN';
 
   const navItems = isPlatformAdmin
     ? [
         { label: 'Overview', href: '/platform/overview' },
-        { label: 'Companies', href: '/platform/companies' },
         { label: 'Schools', href: '/platform/schools' },
         { label: 'Analytics', href: '/platform/analytics' },
       ]
     : [
-        { label: 'Overview', href: `/company/${companyId}/overview` },
-        { label: 'Live Dashboard', href: `/company/${companyId}/live-dashboard` },
-        { label: 'Schools', href: `/company/${companyId}/schools` },
-        { label: '🆕 Routes', href: `/company/${companyId}/routes` },
-        { label: 'Scheduled Routes', href: `/company/${companyId}/scheduled-routes` },
-        { label: 'Trips', href: `/company/${companyId}/trips` },
-        { label: 'Children', href: `/company/${companyId}/children` },
-        { label: '🆕 Children Management', href: `/company/${companyId}/children-management` },
-        { label: 'Buses', href: `/company/${companyId}/buses` },
-        { label: 'Drivers', href: `/company/${companyId}/drivers` },
-        { label: '🆕 Payments & Plans', href: `/company/${companyId}/payments` },
-        { label: '🆕 Location Requests', href: `/company/${companyId}/location-requests` },
-        { label: 'Analytics', href: `/company/${companyId}/analytics` },
-        { label: 'Reports', href: `/company/${companyId}/reports` },
+        { label: 'Overview', href: `/school/${companyId}/overview` },
+        { label: 'Live Dashboard', href: `/school/${companyId}/live-dashboard` },
+        { label: 'Students', href: `/school/${companyId}/children` },
+        { label: 'Drivers', href: `/school/${companyId}/drivers` },
+        { label: 'Buses', href: `/school/${companyId}/buses` },
+        { label: 'Routes', href: `/school/${companyId}/routes` },
+        { label: 'Scheduled Routes', href: `/school/${companyId}/scheduled-routes` },
+        { label: 'Trips', href: `/school/${companyId}/trips` },
+        { label: 'Payments (Hubtel)', href: `/school/${companyId}/payments` },
+        { label: 'Reports', href: `/school/${companyId}/reports` },
       ];
 
   return (
-    <aside className="w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col">
-      <div className="p-6 border-b border-slate-700">
-        <h1 className="text-2xl font-bold">ROSAgo</h1>
-        <p className="text-slate-400 text-sm mt-1">Admin Dashboard</p>
+    <aside className="w-64 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col shadow-2xl">
+      <div className="p-6 border-b border-yellow-500/30">
+        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg inline-block mb-2">
+          <h1 className="text-2xl font-extrabold">SafeRide</h1>
+        </div>
+        <p className="text-yellow-400/80 text-sm font-semibold">Admin Dashboard</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -52,10 +48,10 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`block px-4 py-2 rounded-lg transition ${
+              className={`block px-4 py-2 rounded-lg transition font-semibold ${
                 isActive
-                  ? 'bg-blue-600 text-white font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800'
+                  ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
+                  : 'text-slate-300 hover:bg-slate-800/60 hover:text-yellow-400'
               }`}
             >
               {item.label}
@@ -72,7 +68,7 @@ export function Sidebar() {
         </div>
         <button
           onClick={logout}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition"
+          className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-2 rounded-lg transition shadow-md"
         >
           Sign Out
         </button>

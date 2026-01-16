@@ -15,6 +15,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
+import { GlowingOrb } from "../../components/ui/GlowingOrb";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
 import { socketService } from "../../utils/socket";
@@ -299,10 +300,44 @@ export default function DriverHomeScreen() {
     <View style={styles.container}>
       {/* Background gradient */}
       <LinearGradient
-        colors={[colors.primary.teal, colors.accent.successGreen]}
+        colors={[colors.primary.yellow, colors.primary.darkYellow, colors.accent.safetyOrange]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.headerGradient}
+      />
+
+      {/* Floating Glowing Orbs */}
+      <GlowingOrb
+        size={180}
+        color="rgba(255, 255, 255, 0.65)"
+        delay={0}
+        duration={10000}
+        startX={-40}
+        startY={10}
+      />
+      <GlowingOrb
+        size={130}
+        color="rgba(255, 220, 100, 0.7)"
+        delay={2000}
+        duration={12000}
+        startX={220}
+        startY={40}
+      />
+      <GlowingOrb
+        size={110}
+        color="rgba(255, 150, 80, 0.6)"
+        delay={4000}
+        duration={15000}
+        startX={120}
+        startY={70}
+      />
+      <GlowingOrb
+        size={90}
+        color="rgba(255, 200, 200, 0.55)"
+        delay={6000}
+        duration={13000}
+        startX={40}
+        startY={100}
       />
 
       <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -341,13 +376,13 @@ export default function DriverHomeScreen() {
               refreshing={refreshing}
               onRefresh={onRefresh}
               tintColor={colors.neutral.pureWhite}
-              colors={[colors.primary.teal]}
+              colors={[colors.primary.yellow]}
             />
           }
         >
           {loading && (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.primary.blue} />
+              <ActivityIndicator size="large" color={colors.primary.yellow} />
               <Text style={styles.loadingText}>Loading trip information...</Text>
             </View>
           )}
@@ -355,7 +390,7 @@ export default function DriverHomeScreen() {
           {error && !loading && (
             <LiquidGlassCard className="mb-4" intensity="medium">
               <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={24} color={colors.status.dangerRed} />
+                <Ionicons name="alert-circle" size={24} color={colors.status.danger} />
                 <Text style={styles.errorText}>{error}</Text>
                 <Pressable onPress={fetchTodayTrip} style={styles.retryButton}>
                   <Text style={styles.retryText}>Retry</Text>
@@ -370,7 +405,7 @@ export default function DriverHomeScreen() {
               <LiquidGlassCard className="mb-4" intensity="heavy">
                 <View style={styles.tripCard}>
                   <View style={styles.tripHeader}>
-                    <Ionicons name="calendar" size={24} color={colors.primary.blue} />
+                    <Ionicons name="calendar" size={24} color={colors.primary.yellow} />
                     <Text style={styles.tripTitle}>Today&apos;s Trip</Text>
                   </View>
                   <Text style={styles.routeName}>{trip.route?.name || 'No Route Assigned'}</Text>
@@ -420,13 +455,13 @@ export default function DriverHomeScreen() {
                       <Ionicons 
                         name={isGPSTracking ? "location" : "location-outline"} 
                         size={24} 
-                        color={isGPSTracking ? colors.accent.successGreen : colors.neutral.textSecondary} 
+                        color={isGPSTracking ? colors.status.success : colors.neutral.textSecondary} 
                       />
                       <View style={styles.gpsTextContainer}>
                         <Text style={styles.gpsTitle}>Live GPS Tracking</Text>
                         <Text style={[
                           styles.gpsStatus, 
-                          isGPSTracking && { color: colors.accent.successGreen }
+                          isGPSTracking && { color: colors.status.success }
                         ]}>
                           {isGPSTracking ? 'Tracking active' : 'Tap to start tracking'}
                         </Text>
@@ -436,8 +471,8 @@ export default function DriverHomeScreen() {
                     <Switch
                       value={isGPSTracking}
                       onValueChange={toggleGPSTracking}
-                      trackColor={{ false: '#E5E7EB', true: colors.accent.successGreen + '33' }}
-                      thumbColor={isGPSTracking ? colors.accent.successGreen : '#9CA3AF'}
+                      trackColor={{ false: '#E5E7EB', true: colors.status.success + '33' }}
+                      thumbColor={isGPSTracking ? colors.status.success : '#9CA3AF'}
                     />
                   </View>
                 </LiquidGlassCard>
@@ -464,7 +499,7 @@ export default function DriverHomeScreen() {
 
               {trip.status === "COMPLETED" && (
                 <View style={styles.completedBadge}>
-                  <Ionicons name="checkmark-circle" size={24} color={colors.accent.successGreen} />
+                  <Ionicons name="checkmark-circle" size={24} color={colors.status.success} />
                   <Text style={styles.completedText}>Trip Completed</Text>
                 </View>
               )}
@@ -487,7 +522,7 @@ export default function DriverHomeScreen() {
               <Pressable onPress={() => navigation.navigate("Attendance")} style={styles.actionCard}>
                 <LiquidGlassCard intensity="medium">
                   <View style={styles.actionContent}>
-                    <Ionicons name="people" size={32} color={colors.primary.blue} />
+                    <Ionicons name="people" size={32} color={colors.primary.yellow} />
                     <Text style={styles.actionText}>Attendance</Text>
                   </View>
                 </LiquidGlassCard>
@@ -496,7 +531,7 @@ export default function DriverHomeScreen() {
               <Pressable onPress={() => navigation.navigate("RouteMap")} style={styles.actionCard}>
                 <LiquidGlassCard intensity="medium">
                   <View style={styles.actionContent}>
-                    <Ionicons name="map" size={32} color={colors.accent.successGreen} />
+                    <Ionicons name="map" size={32} color={colors.status.success} />
                     <Text style={styles.actionText}>Route Map</Text>
                   </View>
                 </LiquidGlassCard>
@@ -508,7 +543,7 @@ export default function DriverHomeScreen() {
               >
                 <LiquidGlassCard intensity="medium">
                   <View style={styles.actionContent}>
-                    <Ionicons name="megaphone" size={32} color={colors.accent.sunsetOrange} />
+                    <Ionicons name="megaphone" size={32} color={colors.accent.safetyOrange} />
                     <Text style={styles.actionText}>Broadcast</Text>
                   </View>
                 </LiquidGlassCard>
@@ -520,7 +555,7 @@ export default function DriverHomeScreen() {
               >
                 <LiquidGlassCard intensity="medium">
                   <View style={styles.actionContent}>
-                    <Ionicons name="arrow-up-circle" size={32} color={colors.status.warningYellow} />
+                    <Ionicons name="arrow-up-circle" size={32} color={colors.status.warning} />
                     <Text style={styles.actionText}>Early Pickups</Text>
                   </View>
                 </LiquidGlassCard>
@@ -533,7 +568,7 @@ export default function DriverHomeScreen() {
                 <LiquidGlassCard intensity="medium">
                   <View style={styles.actionContent}>
                     <View>
-                      <Ionicons name="notifications" size={32} color={colors.accent.sunsetOrange} />
+                      <Ionicons name="notifications" size={32} color={colors.accent.safetyOrange} />
                       {unreadNotifications > 0 && (
                         <View style={styles.actionBadge}>
                           <Text style={styles.actionBadgeText}>{unreadNotifications}</Text>
@@ -567,7 +602,7 @@ export default function DriverHomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   headerGradient: {
     position: "absolute",
@@ -589,7 +624,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 14,
-    color: colors.neutral.creamWhite,
+    color: colors.neutral.warmCream,
     marginBottom: 4,
   },
   userName: {
@@ -614,7 +649,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 4,
     right: 4,
-    backgroundColor: colors.status.dangerRed,
+    backgroundColor: colors.status.danger,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -736,10 +771,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   attendanceButton: {
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
   },
   endTripButton: {
-    backgroundColor: colors.status.dangerRed,
+    backgroundColor: colors.status.danger,
   },
   tripActionText: {
     fontSize: 16,
@@ -753,16 +788,16 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 20,
     paddingHorizontal: 24,
-    backgroundColor: colors.accent.successGreen + "15",
+    backgroundColor: colors.status.success + "15",
     borderRadius: 12,
     marginBottom: 24,
     borderWidth: 2,
-    borderColor: colors.accent.successGreen,
+    borderColor: colors.status.success,
   },
   completedText: {
     fontSize: 18,
     fontWeight: "700",
-    color: colors.accent.successGreen,
+    color: colors.status.success,
   },
   section: {
     marginBottom: 24,
@@ -795,7 +830,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -4,
     right: -4,
-    backgroundColor: colors.status.dangerRed,
+    backgroundColor: colors.status.danger,
     borderRadius: 12,
     minWidth: 24,
     height: 24,
@@ -828,14 +863,14 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 12,
     fontSize: 16,
-    color: colors.status.dangerRed,
+    color: colors.status.danger,
     textAlign: "center",
   },
   retryButton: {
     marginTop: 12,
     paddingHorizontal: 24,
     paddingVertical: 8,
-    backgroundColor: colors.primary.blue,
+    backgroundColor: colors.primary.yellow,
     borderRadius: 8,
   },
   retryText: {
@@ -879,7 +914,7 @@ const styles = StyleSheet.create({
   },
   gpsErrorText: {
     fontSize: 12,
-    color: colors.status.dangerRed,
+    color: colors.status.danger,
     marginTop: 2,
   },
 });

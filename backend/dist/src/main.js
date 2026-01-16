@@ -10,12 +10,11 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.useWebSocketAdapter(new platform_socket_io_1.IoAdapter(app));
     app.useLogger(app.get(nest_winston_1.WINSTON_MODULE_NEST_PROVIDER));
-    const corsOrigins = process.env.CORS_ORIGINS
-        ? process.env.CORS_ORIGINS.split(',')
-        : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'];
     app.enableCors({
-        origin: corsOrigins,
+        origin: '*',
         credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     });
     app.use((req, res, next) => {
         console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);

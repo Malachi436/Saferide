@@ -1,11 +1,9 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.100.2:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 class ApiClient {
   private client: AxiosInstance;
-  private token: string | null = null;
-  private refreshToken: string | null = null;
   private isRefreshing = false;
   private failedQueue: any[] = [];
 
@@ -97,16 +95,10 @@ class ApiClient {
   }
 
   setToken(token: string) {
-    this.token = token;
     this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
 
-  setRefreshToken(refreshToken: string) {
-    this.refreshToken = refreshToken;
-  }
-
   clearToken() {
-    this.token = null;
     delete this.client.defaults.headers.common['Authorization'];
   }
 

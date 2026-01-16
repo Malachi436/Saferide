@@ -45,7 +45,7 @@ let RealtimeGateway = class RealtimeGateway {
         try {
             const token = client.handshake.auth.token;
             if (!token) {
-                client.disconnect();
+                console.log('[WebSocket] Client connected without token:', client.id);
                 return;
             }
             const payload = this.jwtService.verify(token, {
@@ -56,8 +56,8 @@ let RealtimeGateway = class RealtimeGateway {
             console.log(`Client connected: ${client.id}, User: ${payload.sub}`);
         }
         catch (error) {
-            console.error('WebSocket authentication error:', error);
-            client.disconnect();
+            console.error('WebSocket authentication error:', error.message);
+            console.log('[WebSocket] Client connected with invalid token:', client.id);
         }
     }
     handleDisconnect(client) {
@@ -95,7 +95,10 @@ let RealtimeGateway = class RealtimeGateway {
         this.server.emit('new_location_update', data);
     }
     async handleJoinBusRoom(client, data) {
+        console.log(`[Socket] Client ${client.id} joining bus room: ${data.busId}`);
         client.join(`bus:${data.busId}`);
+        const roomSize = this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0;
+        console.log(`[Socket] Bus room bus:${data.busId} now has ${roomSize} clients`);
         return { success: true };
     }
     async handleLeaveBusRoom(client, data) {

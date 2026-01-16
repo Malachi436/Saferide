@@ -62,7 +62,15 @@ let TripAutomationService = TripAutomationService_1 = class TripAutomationServic
         const [hours, minutes] = schedule.scheduledTime.split(':');
         const startTime = new Date(date);
         startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-        this.logger.log(`Creating trip for route ${schedule.route.name} at ${schedule.scheduledTime}`);
+        if (!schedule.driverId) {
+            this.logger.error(`Cannot create trip for route ${schedule.route.name}: No driver assigned to schedule`);
+            throw new Error(`Schedule ${schedule.id} has no driver assigned`);
+        }
+        if (!schedule.busId) {
+            this.logger.error(`Cannot create trip for route ${schedule.route.name}: No bus assigned to schedule`);
+            throw new Error(`Schedule ${schedule.id} has no bus assigned`);
+        }
+        this.logger.log(`Creating trip for route ${schedule.route.name} at ${schedule.scheduledTime} - Driver: ${schedule.driver.user.firstName} ${schedule.driver.user.lastName}, Bus: ${schedule.bus.plateNumber}`);
         const trip = await this.prisma.trip.create({
             data: {
                 busId: schedule.busId,
@@ -72,7 +80,7 @@ let TripAutomationService = TripAutomationService_1 = class TripAutomationServic
                 startTime,
             },
         });
-        this.logger.log(`Created trip ${trip.id} for route ${schedule.route.name}`);
+        this.logger.log(`✓ Created trip ${trip.id} for route ${schedule.route.name} - Driver: ${schedule.driverId}`);
         if (schedule.autoAssignChildren) {
             await this.assignChildrenToTrip(trip.id, schedule.routeId, schedule.route.schoolId);
         }
@@ -81,46 +89,43 @@ let TripAutomationService = TripAutomationService_1 = class TripAutomationServic
     async assignChildrenToTrip(tripId, routeId, schoolId) {
         try {
             const children = await this.prisma.child.findMany({
-                where: { schoolId },
+                where: {
+                    routeId: routeId,
+                    isClaimed: true,
+                },
             });
-            this.logger.log(`Found ${children.length} children at school for trip ${tripId}`);
-            const route = await this.prisma.route.findUnique({
-                where: { id: routeId },
-                include: { stops: true },
-            });
-            if (!route || route.stops.length === 0) {
-                this.logger.warn(`Route ${routeId} has no stops, skipping child assignment`);
+            this.logger.log(`Found ${children.length} children assigned to route ${routeId} for trip ${tripId}`);
+            if (children.length === 0) {
+                this.logger.warn(`No children assigned to route ${routeId}, skipping child assignment`);
                 return;
             }
-            const childrenToAssign = children.filter((child) => this.shouldChildBeOnRoute(child, route.stops));
-            this.logger.log(`Assigning ${childrenToAssign.length} children to trip ${tripId}`);
-            for (const child of childrenToAssign) {
-                await this.prisma.childAttendance.create({
-                    data: {
-                        childId: child.id,
-                        tripId,
-                        status: 'PICKED_UP',
-                        recordedBy: route.stops[0]?.id || 'system',
+            this.logger.log(`Assigning ${children.length} children to trip ${tripId}`);
+            for (const child of children) {
+                const existingAttendance = await this.prisma.childAttendance.findUnique({
+                    where: {
+                        childId_tripId: {
+                            childId: child.id,
+                            tripId,
+                        },
                     },
                 });
+                if (!existingAttendance) {
+                    await this.prisma.childAttendance.create({
+                        data: {
+                            childId: child.id,
+                            tripId,
+                            status: 'PENDING',
+                            recordedBy: 'SYSTEM',
+                        },
+                    });
+                }
             }
-            this.logger.log(`Successfully assigned children to trip ${tripId}`);
+            this.logger.log(`Successfully assigned ${children.length} children to trip ${tripId}`);
         }
         catch (error) {
             this.logger.error(`Error assigning children to trip ${tripId}: ${error.message}`);
             throw error;
         }
-    }
-    shouldChildBeOnRoute(child, stops) {
-        if (!child.pickupLatitude || !child.pickupLongitude) {
-            return false;
-        }
-        const DISTANCE_THRESHOLD = 0.05;
-        return stops.some((stop) => {
-            const latDiff = Math.abs(child.pickupLatitude - stop.latitude);
-            const lonDiff = Math.abs(child.pickupLongitude - stop.longitude);
-            return latDiff < DISTANCE_THRESHOLD && lonDiff < DISTANCE_THRESHOLD;
-        });
     }
     getDayOfWeek(date) {
         const days = [

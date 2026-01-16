@@ -26,6 +26,28 @@ let TripsService = class TripsService {
         });
     }
     async create(data) {
+        if (!data.driverId || !data.busId || !data.routeId) {
+            throw new Error('Trip must have driverId, busId, and routeId assigned');
+        }
+        const driver = await this.prisma.driver.findUnique({
+            where: { id: data.driverId },
+        });
+        if (!driver) {
+            throw new Error(`Driver with ID ${data.driverId} not found`);
+        }
+        const bus = await this.prisma.bus.findUnique({
+            where: { id: data.busId },
+        });
+        if (!bus) {
+            throw new Error(`Bus with ID ${data.busId} not found`);
+        }
+        const route = await this.prisma.route.findUnique({
+            where: { id: data.routeId },
+        });
+        if (!route) {
+            throw new Error(`Route with ID ${data.routeId} not found`);
+        }
+        console.log(`[TripsService] Creating trip: Driver=${driver.id}, Bus=${bus.id}, Route=${route.id}`);
         return this.prisma.trip.create({
             data,
             include: {
@@ -34,6 +56,15 @@ let TripsService = class TripsService {
         });
     }
     async update(id, data) {
+        if (data.driverId) {
+            const driver = await this.prisma.driver.findUnique({
+                where: { id: data.driverId },
+            });
+            if (!driver) {
+                throw new Error(`Driver with ID ${data.driverId} not found`);
+            }
+            console.log(`[TripsService] Updating trip ${id}: Reassigning to driver ${driver.id}`);
+        }
         return this.prisma.trip.update({
             where: { id },
             data,

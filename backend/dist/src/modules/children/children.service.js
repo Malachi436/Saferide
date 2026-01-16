@@ -56,8 +56,9 @@ let ChildrenService = class ChildrenService {
         if (!school) {
             throw new common_1.NotFoundException('School not found or does not belong to this company');
         }
+        const schoolCode = school.schoolCode || 'ROS';
         const createdChildren = await this.prisma.$transaction(children.map((childData) => {
-            const uniqueCode = this.generateCodeSync();
+            const uniqueCode = this.generateCodeSyncWithPrefix(schoolCode);
             return this.prisma.child.create({
                 data: {
                     firstName: childData.firstName,
@@ -78,6 +79,14 @@ let ChildrenService = class ChildrenService {
             created: createdChildren.length,
             children: createdChildren,
         };
+    }
+    generateCodeSyncWithPrefix(schoolCode) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let randomPart = '';
+        for (let i = 0; i < 6; i++) {
+            randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return `${schoolCode}-${randomPart}`;
     }
     generateCodeSync() {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -153,13 +162,17 @@ let ChildrenService = class ChildrenService {
             where: { id },
         });
     }
-    async generateUniqueCode() {
-        const prefix = 'ROS';
+    async generateUniqueCode(schoolCode) {
+        const prefix = schoolCode || 'ROS';
         let code;
         let exists = true;
         while (exists) {
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            code = `${prefix}${randomNum}`;
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let randomPart = '';
+            for (let i = 0; i < 6; i++) {
+                randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            code = `${prefix}-${randomPart}`;
             const existing = await this.prisma.child.findUnique({
                 where: { uniqueCode: code },
             });
@@ -185,6 +198,8 @@ let ChildrenService = class ChildrenService {
                 homeLatitude: linkDto.homeLatitude,
                 homeLongitude: linkDto.homeLongitude,
                 homeAddress: linkDto.homeAddress,
+                allergies: linkDto.allergies,
+                medicalConditions: linkDto.medicalConditions,
             },
             include: {
                 school: true,

@@ -204,7 +204,7 @@ __decorate([
 ], AdminController.prototype, "uploadDriverPhoto", null);
 __decorate([
     (0, common_1.Get)('companies/:companyId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
     __param(0, (0, common_1.Param)('companyId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

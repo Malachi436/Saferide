@@ -16,20 +16,31 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
+    // Clear any stale tokens first
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+    }
+
     try {
       await login(email, password);
       // Redirect handled by home page based on role
       router.push('/');
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.response?.data?.message || err.message || 'Login failed. Please try again.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-teal-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8">
-        <h1 className="text-3xl font-bold text-center mb-2 text-slate-900">ROSAgo</h1>
-        <p className="text-center text-slate-500 mb-8">Admin Dashboard</p>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-orange-500 flex items-center justify-center p-4">
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl max-w-md w-full p-8 border border-white/20">
+        <div className="text-center mb-8">
+          <div className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full mb-4">
+            <h1 className="text-3xl font-extrabold">SafeRide</h1>
+          </div>
+          <p className="text-slate-600 font-semibold">Admin Dashboard</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -47,7 +58,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="admin@rosago.com"
+              placeholder="admin@saferide.com"
               required
             />
           </div>
@@ -69,14 +80,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-semibold py-2 rounded-lg transition"
+            className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 disabled:from-slate-300 disabled:to-slate-400 text-white font-bold py-3 rounded-lg transition shadow-md"
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
 
           <Link 
             href="/forgot-password"
-            className="block text-center text-blue-600 hover:text-blue-700 text-sm"
+            className="block text-center text-orange-600 hover:text-orange-700 text-sm font-semibold"
           >
             Forgot Password?
           </Link>

@@ -46,10 +46,11 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   async handleConnection(client: Socket) {
     try {
-      // Authenticate user
+      // Authenticate user (optional - allow connection without auth)
       const token = client.handshake.auth.token;
       if (!token) {
-        client.disconnect();
+        console.log('[WebSocket] Client connected without token:', client.id);
+        // Allow connection but don't join any rooms
         return;
       }
 
@@ -65,8 +66,9 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       
       console.log(`Client connected: ${client.id}, User: ${payload.sub}`);
     } catch (error) {
-      console.error('WebSocket authentication error:', error);
-      client.disconnect();
+      console.error('WebSocket authentication error:', error.message);
+      // Don't disconnect on auth error - allow connection
+      console.log('[WebSocket] Client connected with invalid token:', client.id);
     }
   }
 
@@ -129,7 +131,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { busId: string },
   ) {
+    console.log(`[Socket] Client ${client.id} joining bus room: ${data.busId}`);
     client.join(`bus:${data.busId}`);
+    const roomSize = this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0;
+    console.log(`[Socket] Bus room bus:${data.busId} now has ${roomSize} clients`);
     return { success: true };
   }
 

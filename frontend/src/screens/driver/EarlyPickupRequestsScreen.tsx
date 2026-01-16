@@ -23,6 +23,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "../../theme";
 import { LiquidGlassCard } from "../../components/ui/LiquidGlassCard";
 import { LargeCTAButton } from "../../components/ui/LargeCTAButton";
+import { GlowingOrb } from "../../components/ui/GlowingOrb";
 import { useAuthStore } from "../../stores/authStore";
 import { apiClient } from "../../utils/api";
 import { DriverStackParamList } from "../../navigation/DriverNavigator";
@@ -148,11 +149,16 @@ export default function EarlyPickupRequestsScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[colors.primary.blue, colors.primary.teal]}
+        colors={[colors.primary.yellow, colors.primary.darkYellow, colors.accent.safetyOrange]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.headerGradient}
       />
+
+      {/* Floating Glowing Orbs */}
+      <GlowingOrb size={140} color="rgba(255, 255, 255, 0.6)" delay={0} duration={12000} startX={-25} startY={15} />
+      <GlowingOrb size={110} color="rgba(255, 220, 100, 0.65)" delay={2500} duration={14000} startX={190} startY={45} />
+      <GlowingOrb size={90} color="rgba(255, 150, 80, 0.55)" delay={5000} duration={16000} startX={90} startY={75} />
 
       <SafeAreaView edges={["top"]} style={styles.safeArea}>
         <View style={styles.header}>
@@ -170,13 +176,13 @@ export default function EarlyPickupRequestsScreen() {
         >
           {isLoading && (
             <View style={styles.centerContainer}>
-              <ActivityIndicator size="large" color={colors.primary.blue} />
+              <ActivityIndicator size="large" color={colors.primary.yellow} />
             </View>
           )}
 
           {error && !isLoading && (
             <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={48} color={colors.status.dangerRed} />
+              <Ionicons name="alert-circle" size={48} color={colors.status.danger} />
               <Text style={styles.errorText}>{error}</Text>
               <LargeCTAButton
                 title="Retry"
@@ -189,7 +195,7 @@ export default function EarlyPickupRequestsScreen() {
 
           {!isLoading && !error && requests.length === 0 && (
             <View style={styles.emptyContainer}>
-              <Ionicons name="checkmark-circle" size={48} color={colors.accent.successGreen} />
+              <Ionicons name="checkmark-circle" size={48} color={colors.status.success} />
               <Text style={styles.emptyTitle}>No Pending Requests</Text>
               <Text style={styles.emptyText}>
                 All early pickup requests have been handled
@@ -291,7 +297,7 @@ export default function EarlyPickupRequestsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.creamWhite,
+    backgroundColor: colors.neutral.warmCream,
   },
   headerGradient: {
     position: "absolute",
@@ -334,7 +340,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: colors.status.dangerRed,
+    color: colors.status.danger,
     marginTop: 12,
     textAlign: "center",
   },
@@ -369,7 +375,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.primary.blue + "20",
+    backgroundColor: colors.primary.yellow + "20",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -377,7 +383,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 16,
     fontWeight: "700",
-    color: colors.primary.blue,
+    color: colors.primary.yellow,
   },
   infoContent: {
     flex: 1,
@@ -394,7 +400,7 @@ const styles = StyleSheet.create({
   },
   reason: {
     fontSize: 12,
-    color: colors.status.warningYellow,
+    color: colors.status.warning,
     marginTop: 4,
     fontStyle: "italic",
   },
@@ -416,10 +422,10 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   approveButton: {
-    backgroundColor: colors.accent.successGreen,
+    backgroundColor: colors.status.success,
   },
   rejectButton: {
-    backgroundColor: colors.status.dangerRed,
+    backgroundColor: colors.status.danger,
   },
   actionButtonText: {
     color: colors.neutral.pureWhite,

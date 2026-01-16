@@ -8,91 +8,91 @@ export declare class TripsController {
     constructor(tripsService: TripsService, tripAutomationService: TripAutomationService, prisma: PrismaService);
     create(createTripDto: any): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         busId: string;
         routeId: string;
         driverId: string;
         status: import(".prisma/client").$Enums.TripStatus;
         startTime: Date | null;
         endTime: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findAll(): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         busId: string;
         routeId: string;
         driverId: string;
         status: import(".prisma/client").$Enums.TripStatus;
         startTime: Date | null;
         endTime: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         busId: string;
         routeId: string;
         driverId: string;
         status: import(".prisma/client").$Enums.TripStatus;
         startTime: Date | null;
         endTime: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findActiveByChild(childId: string, req: any): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         busId: string;
         routeId: string;
         driverId: string;
         status: import(".prisma/client").$Enums.TripStatus;
         startTime: Date | null;
         endTime: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findActiveByCompany(companyId: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         busId: string;
         routeId: string;
         driverId: string;
         status: import(".prisma/client").$Enums.TripStatus;
         startTime: Date | null;
         endTime: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     update(id: string, updateTripDto: any): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         busId: string;
         routeId: string;
         driverId: string;
         status: import(".prisma/client").$Enums.TripStatus;
         startTime: Date | null;
         endTime: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     transitionStatus(id: string, statusDto: any): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         busId: string;
         routeId: string;
         driverId: string;
         status: import(".prisma/client").$Enums.TripStatus;
         startTime: Date | null;
         endTime: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         busId: string;
         routeId: string;
         driverId: string;
         status: import(".prisma/client").$Enums.TripStatus;
         startTime: Date | null;
         endTime: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     generateTodayTrips(): Promise<{
         success: boolean;

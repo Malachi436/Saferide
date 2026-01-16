@@ -11,12 +11,12 @@ export declare class NotificationsController {
     constructor(notificationsService: NotificationsService);
     createNotification(createNotificationDto: CreateNotificationDto): Promise<{
         id: string;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        message: string;
         type: import(".prisma/client").$Enums.NotificationType;
         title: string;
+        message: string;
         isRead: boolean;
         requiresAck: boolean;
         acknowledgedAt: Date | null;
@@ -28,12 +28,12 @@ export declare class NotificationsController {
     }>;
     getUserNotifications(userId: string): Promise<{
         id: string;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        message: string;
         type: import(".prisma/client").$Enums.NotificationType;
         title: string;
+        message: string;
         isRead: boolean;
         requiresAck: boolean;
         acknowledgedAt: Date | null;
@@ -46,12 +46,12 @@ export declare class NotificationsController {
     getUnreadCount(userId: string): Promise<number>;
     markAsRead(id: string): Promise<{
         id: string;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        message: string;
         type: import(".prisma/client").$Enums.NotificationType;
         title: string;
+        message: string;
         isRead: boolean;
         requiresAck: boolean;
         acknowledgedAt: Date | null;
@@ -63,12 +63,12 @@ export declare class NotificationsController {
     }>;
     acknowledgeNotification(id: string, req: any): Promise<{
         id: string;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        message: string;
         type: import(".prisma/client").$Enums.NotificationType;
         title: string;
+        message: string;
         isRead: boolean;
         requiresAck: boolean;
         acknowledgedAt: Date | null;
@@ -80,12 +80,12 @@ export declare class NotificationsController {
     }>;
     getUnacknowledgedNotifications(userId: string): Promise<{
         id: string;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        message: string;
         type: import(".prisma/client").$Enums.NotificationType;
         title: string;
+        message: string;
         isRead: boolean;
         requiresAck: boolean;
         acknowledgedAt: Date | null;

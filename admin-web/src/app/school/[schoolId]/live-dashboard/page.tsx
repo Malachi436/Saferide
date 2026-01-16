@@ -68,27 +68,15 @@ export default function LiveDashboardPage({ params }: { params: Promise<{ school
   const [selectedBusId, setSelectedBusId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [companyId, setCompanyId] = useState<string | null>(null);
+  // The schoolId in the URL IS the companyId
+  const companyId = schoolId;
 
   const { connected, busLocations, joinBusRoom } = useSocket(companyId);
 
-  // Fetch school details to get companyId
+  // Log companyId for debugging
   useEffect(() => {
-    const fetchSchoolDetails = async () => {
-      try {
-        // Get all buses for this school to find companyId
-        const response = await apiClient.get(`/routes/school/${schoolId}`);
-        const routes = Array.isArray(response) ? response : [];
-        if (routes.length > 0 && routes[0].bus) {
-          setCompanyId(routes[0].bus.companyId);
-          console.log('[LiveDashboard] Found companyId:', routes[0].bus.companyId);
-        }
-      } catch (err) {
-        console.error('[LiveDashboard] Failed to fetch school routes:', err);
-      }
-    };
-    fetchSchoolDetails();
-  }, [schoolId]);
+    console.log('[LiveDashboard] Using companyId from URL:', companyId);
+  }, [companyId]);
 
   // Join bus rooms when trips are loaded
   useEffect(() => {

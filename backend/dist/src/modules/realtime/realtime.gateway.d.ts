@@ -7,6 +7,7 @@ export declare class RealtimeGateway implements OnGatewayConnection, OnGatewayDi
     private prisma;
     server: Server;
     private readonly redis;
+    private readonly redisSub;
     private readonly connectedUsers;
     private readonly gpsHeartbeatCounter;
     private readonly HEARTBEAT_THRESHOLD;
@@ -40,6 +41,11 @@ export declare class RealtimeGateway implements OnGatewayConnection, OnGatewayDi
     }>;
     handleJoinCompanyRoom(client: Socket, data: {
         companyId: string;
+    }): Promise<{
+        success: boolean;
+    }>;
+    handleJoinSchoolRoom(client: Socket, data: {
+        schoolId: string;
     }): Promise<{
         success: boolean;
     }>;

@@ -28,15 +28,15 @@ export declare class AdminService {
     getDriverPerformanceReport(companyId: string, range?: string): Promise<any>;
     updateCompanyFare(companyId: string, newFare: number, adminId: string, reason?: string): Promise<{
         company: {
-            id: string;
             name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             email: string;
             phone: string | null;
             address: string | null;
             baseFare: number;
             currency: string;
-            createdAt: Date;
-            updatedAt: Date;
         };
         oldFare: number;
         newFare: number;
@@ -44,8 +44,8 @@ export declare class AdminService {
         parentsNotified: number;
     }>;
     getCompanyFare(companyId: string): Promise<{
-        id: string;
         name: string;
+        id: string;
         baseFare: number;
         currency: string;
     }>;

@@ -26,15 +26,16 @@ let RealtimeGateway = class RealtimeGateway {
         this.gpsHeartbeatCounter = new Map();
         this.HEARTBEAT_THRESHOLD = 5;
         this.redis = new ioredis_1.Redis(process.env.REDIS_URL);
+        this.redisSub = new ioredis_1.Redis(process.env.REDIS_URL);
         this.initializeRedisSubscriber();
     }
     async initializeRedisSubscriber() {
-        this.redis.subscribe('bus_location_updates', (err, count) => {
+        this.redisSub.subscribe('bus_location_updates', (err, count) => {
             if (err) {
                 console.error('Redis subscription error:', err);
             }
         });
-        this.redis.on('message', (channel, message) => {
+        this.redisSub.on('message', (channel, message) => {
             if (channel === 'bus_location_updates') {
                 const data = JSON.parse(message);
                 this.broadcastLocationUpdate(data);
@@ -42,10 +43,11 @@ let RealtimeGateway = class RealtimeGateway {
         });
     }
     async handleConnection(client) {
+        console.log(`[WebSocket] Client connected: ${client.id}`);
         try {
             const token = client.handshake.auth.token;
             if (!token) {
-                console.log('[WebSocket] Client connected without token:', client.id);
+                console.log('[WebSocket] Client connected without token, allowing anonymous access');
                 return;
             }
             const payload = this.jwtService.verify(token, {
@@ -53,11 +55,10 @@ let RealtimeGateway = class RealtimeGateway {
             });
             this.connectedUsers.set(client.id, payload.sub);
             await this.joinUserRooms(client, payload);
-            console.log(`Client connected: ${client.id}, User: ${payload.sub}`);
+            console.log(`[WebSocket] Authenticated client: ${client.id}, User: ${payload.sub}`);
         }
         catch (error) {
-            console.error('WebSocket authentication error:', error.message);
-            console.log('[WebSocket] Client connected with invalid token:', client.id);
+            console.log(`[WebSocket] Client ${client.id} has expired/invalid token, allowing anonymous access`);
         }
     }
     handleDisconnect(client) {
@@ -145,12 +146,20 @@ let RealtimeGateway = class RealtimeGateway {
         const roomSize = this.server.sockets.adapter.rooms.get(`bus:${data.busId}`)?.size || 0;
         console.log(`[GPS Update] Broadcasting to ${roomSize} clients in room bus:${data.busId}`);
         this.server.to(`bus:${data.busId}`).emit('bus_location', locationData);
+        const totalClients = this.server.sockets.sockets.size;
+        console.log(`[GPS Update] Broadcasting new_location_update to ${totalClients} total connected clients`);
         this.server.emit('new_location_update', locationData);
+        console.log(`[GPS Update] Broadcast complete`);
         return { success: true };
     }
     async handleJoinCompanyRoom(client, data) {
         client.join(`company:${data.companyId}`);
         console.log(`[Socket] Client ${client.id} joined company room: ${data.companyId}`);
+        return { success: true };
+    }
+    async handleJoinSchoolRoom(client, data) {
+        client.join(`school:${data.schoolId}`);
+        console.log(`[Socket] Client ${client.id} joined school room: ${data.schoolId}`);
         return { success: true };
     }
     async handleSubscribeTripTracking(client, data) {
@@ -211,6 +220,14 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", Promise)
 ], RealtimeGateway.prototype, "handleJoinCompanyRoom", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('join_school_room'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], RealtimeGateway.prototype, "handleJoinSchoolRoom", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('subscribe_trip_tracking'),
     __param(0, (0, websockets_1.ConnectedSocket)()),

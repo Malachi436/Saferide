@@ -58,6 +58,8 @@ class ApiClient {
               this.setToken(access_token);
               if (typeof window !== 'undefined') {
                 localStorage.setItem('token', access_token);
+                // Notify WebSocket to reconnect with new token
+                window.dispatchEvent(new CustomEvent('token-refreshed', { detail: { token: access_token } }));
               }
 
               // Process queued requests

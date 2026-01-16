@@ -5,58 +5,58 @@ export declare class RoutesController {
     private readonly routeAutoService;
     constructor(routesService: RoutesService, routeAutoService: RouteAutoService);
     create(createRouteDto: any): Promise<{
-        id: string;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         schoolId: string;
-        shift: string | null;
         busId: string | null;
+        shift: string | null;
     }>;
     findAll(): Promise<{
-        id: string;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         schoolId: string;
-        shift: string | null;
         busId: string | null;
+        shift: string | null;
     }[]>;
     findOne(id: string): Promise<{
-        id: string;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         schoolId: string;
-        shift: string | null;
         busId: string | null;
+        shift: string | null;
     }>;
     findBySchool(schoolId: string): Promise<{
-        id: string;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         schoolId: string;
-        shift: string | null;
         busId: string | null;
+        shift: string | null;
     }[]>;
     update(id: string, updateRouteDto: any): Promise<{
-        id: string;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         schoolId: string;
-        shift: string | null;
         busId: string | null;
+        shift: string | null;
     }>;
     remove(id: string): Promise<{
-        id: string;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         schoolId: string;
-        shift: string | null;
         busId: string | null;
+        shift: string | null;
     }>;
     autoGenerateRoutes(schoolId: string): Promise<any>;
 }

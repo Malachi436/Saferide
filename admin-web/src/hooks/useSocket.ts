@@ -32,7 +32,9 @@ export function useSocket(companyId: string | null) {
 
     console.log('[Socket] Connecting to:', SOCKET_URL);
 
+    // Get fresh token on every connection attempt
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    console.log('[Socket] Using token:', token ? `${token.substring(0, 20)}...` : 'null');
 
     socketRef.current = io(SOCKET_URL, {
       auth: { token },
@@ -55,11 +57,26 @@ export function useSocket(companyId: string | null) {
     socketRef.current.on('disconnect', (reason) => {
       console.log('[Socket] Disconnected:', reason);
       setConnected(false);
+      
+      // If disconnected due to auth error, try reconnecting with fresh token
+      if (reason === 'io server disconnect' || reason === 'transport error') {
+        console.log('[Socket] Auth issue detected, will reconnect with fresh token');
+        setTimeout(() => {
+          disconnect();
+          connect();
+        }, 2000);
+      }
     });
 
     socketRef.current.on('connect_error', (error) => {
       console.error('[Socket] Connection error:', error.message || error);
       setConnected(false);
+      
+      // If auth error, disconnect and retry with fresh token
+      if (error.message?.includes('jwt') || error.message?.includes('expired')) {
+        console.log('[Socket] JWT expired, forcing reconnection with fresh token');
+        disconnect();
+      }
     });
 
     socketRef.current.on('error', (error) => {
@@ -118,11 +135,28 @@ export function useSocket(companyId: string | null) {
   }, []);
 
   useEffect(() => {
-    connect();
+    if (companyId) {
+      connect();
+    }
+    
+    // Listen for token refresh events
+    const handleTokenRefresh = () => {
+      console.log('[Socket] Token refreshed, reconnecting...');
+      disconnect();
+      setTimeout(() => connect(), 500);
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('token-refreshed', handleTokenRefresh);
+    }
+    
     return () => {
       disconnect();
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('token-refreshed', handleTokenRefresh);
+      }
     };
-  }, [connect, disconnect]);
+  }, [companyId, connect, disconnect]);
 
   return {
     connected,

@@ -5,7 +5,7 @@ import maplibregl, { Map, Marker, LngLatLike } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 // MapTiler Streets - Light/Day theme
-const MAPTILER_API_KEY = 'WxKZoH3RuRCv70oW6hWr';
+const MAPTILER_API_KEY = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || 'Fw6t1Q0znFzEEashouNW';
 const ROSAGO_MAP_STYLE = `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_API_KEY}`;
 // Default center: Accra, Ghana
 const DEFAULT_CENTER: LngLatLike = [-0.186964, 5.603717];

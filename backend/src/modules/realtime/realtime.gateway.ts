@@ -16,26 +16,28 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   @WebSocketServer()
   server: Server;
 
-  private readonly redis: Redis;
+  private readonly redis: Redis; // For regular commands (setex, get, etc.)
+  private readonly redisSub: Redis; // For pub/sub only
   private readonly connectedUsers = new Map<string, string>(); // socketId -> userId
   private readonly gpsHeartbeatCounter = new Map<string, number>(); // busId -> heartbeat count
   private readonly HEARTBEAT_THRESHOLD = 5; // Save to DB every 5 heartbeats
 
   constructor(private jwtService: JwtService, private prisma: PrismaService) {
-    this.redis = new Redis(process.env.REDIS_URL);
+    this.redis = new Redis(process.env.REDIS_URL); // Regular commands
+    this.redisSub = new Redis(process.env.REDIS_URL); // Subscriber only
     this.initializeRedisSubscriber();
   }
 
   private async initializeRedisSubscriber() {
-    // Subscribe to location updates
-    this.redis.subscribe('bus_location_updates', (err, count) => {
+    // Subscribe to location updates using separate client
+    this.redisSub.subscribe('bus_location_updates', (err, count) => {
       if (err) {
         console.error('Redis subscription error:', err);
       }
     });
 
     // Handle incoming messages
-    this.redis.on('message', (channel, message) => {
+    this.redisSub.on('message', (channel, message) => {
       if (channel === 'bus_location_updates') {
         const data = JSON.parse(message);
         // Broadcast to relevant users
@@ -45,13 +47,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   async handleConnection(client: Socket) {
+    console.log(`[WebSocket] Client connected: ${client.id}`);
+    
     try {
-      // Authenticate user (optional - allow connection without auth)
+      // Try to authenticate user (optional)
       const token = client.handshake.auth.token;
       if (!token) {
-        console.log('[WebSocket] Client connected without token:', client.id);
-        // Allow connection but don't join any rooms
-        return;
+        console.log('[WebSocket] Client connected without token, allowing anonymous access');
+        return; // Allow connection
       }
 
       const payload = this.jwtService.verify(token, {
@@ -64,11 +67,11 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       // Join relevant rooms
       await this.joinUserRooms(client, payload);
       
-      console.log(`Client connected: ${client.id}, User: ${payload.sub}`);
+      console.log(`[WebSocket] Authenticated client: ${client.id}, User: ${payload.sub}`);
     } catch (error) {
-      console.error('WebSocket authentication error:', error.message);
-      // Don't disconnect on auth error - allow connection
-      console.log('[WebSocket] Client connected with invalid token:', client.id);
+      // JWT expired or invalid - allow connection anyway
+      console.log(`[WebSocket] Client ${client.id} has expired/invalid token, allowing anonymous access`);
+      // Don't disconnect - client can manually join rooms
     }
   }
 
@@ -200,7 +203,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     this.server.to(`bus:${data.busId}`).emit('bus_location', locationData);
     
     // Also broadcast to all connected clients for admin dashboard
+    const totalClients = this.server.sockets.sockets.size;
+    console.log(`[GPS Update] Broadcasting new_location_update to ${totalClients} total connected clients`);
     this.server.emit('new_location_update', locationData);
+    console.log(`[GPS Update] Broadcast complete`);
     
     return { success: true };
   }
@@ -212,6 +218,16 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   ) {
     client.join(`company:${data.companyId}`);
     console.log(`[Socket] Client ${client.id} joined company room: ${data.companyId}`);
+    return { success: true };
+  }
+
+  @SubscribeMessage('join_school_room')
+  async handleJoinSchoolRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { schoolId: string },
+  ) {
+    client.join(`school:${data.schoolId}`);
+    console.log(`[Socket] Client ${client.id} joined school room: ${data.schoolId}`);
     return { success: true };
   }
 

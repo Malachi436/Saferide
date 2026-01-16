@@ -26,22 +26,22 @@ export declare class AdminController {
     getPaymentReport(companyId: string, range?: string): Promise<any>;
     getDriverPerformanceReport(companyId: string, range?: string): Promise<any>;
     getCompanyFare(companyId: string): Promise<{
-        id: string;
         name: string;
+        id: string;
         baseFare: number;
         currency: string;
     }>;
     updateCompanyFare(companyId: string, updateFareDto: UpdateFareDto, req: any): Promise<{
         company: {
-            id: string;
             name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             email: string;
             phone: string | null;
             address: string | null;
             baseFare: number;
             currency: string;
-            createdAt: Date;
-            updatedAt: Date;
         };
         oldFare: number;
         newFare: number;

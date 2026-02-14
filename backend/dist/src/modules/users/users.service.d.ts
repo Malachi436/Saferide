@@ -16,17 +16,16 @@ export declare class UsersService {
         schoolId?: string | null;
     }): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        email: string;
+        passwordHash: string;
         firstName: string;
         lastName: string;
-        email: string;
         phone: string | null;
-        companyId: string | null;
-        schoolId: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
         refreshToken: string | null;
+        schoolId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     update(id: string, data: Partial<User>): Promise<User>;
     findAll(): Promise<any[]>;

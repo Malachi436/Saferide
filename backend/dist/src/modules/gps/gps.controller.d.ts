@@ -12,21 +12,21 @@ export declare class GpsController {
     processHeartbeat(heartbeatDto: HeartbeatDto): Promise<{
         id: string;
         createdAt: Date;
-        busId: string;
         latitude: number;
         longitude: number;
-        speed: number;
+        busId: string;
         timestamp: Date;
+        speed: number;
     }>;
     getCurrentLocation(busId: string): Promise<any>;
     getRecentLocations(busId: string, startTime?: string, endTime?: string, limit?: string): Promise<{
         id: string;
         createdAt: Date;
-        busId: string;
         latitude: number;
         longitude: number;
-        speed: number;
+        busId: string;
         timestamp: Date;
+        speed: number;
     }[]>;
 }
 export {};

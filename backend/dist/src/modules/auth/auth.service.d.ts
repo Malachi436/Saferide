@@ -14,7 +14,7 @@ export declare class AuthService {
         access_token: string;
         refresh_token: string;
         role: import(".prisma/client").$Enums.Role;
-        companyId: string;
+        schoolId: string;
         userId: string;
         user: {
             id: string;
@@ -23,7 +23,7 @@ export declare class AuthService {
             lastName: string;
             phone: string;
             role: import(".prisma/client").$Enums.Role;
-            companyId: string;
+            schoolId: string;
         };
     }>;
     hashPassword(password: string): Promise<string>;

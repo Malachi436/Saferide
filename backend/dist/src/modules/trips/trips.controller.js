@@ -50,14 +50,22 @@ let TripsController = class TripsController {
         }
         return this.tripsService.findActiveByChildId(childId);
     }
-    findActiveByCompany(companyId) {
-        return this.tripsService.findActiveByCompanyId(companyId);
+    findActiveBySchool(schoolId) {
+        return this.tripsService.findActiveBySchoolId(schoolId);
     }
     update(id, updateTripDto) {
         return this.tripsService.update(id, updateTripDto);
     }
     transitionStatus(id, statusDto) {
-        return this.tripsService.transitionTripStatus(id, statusDto.status, statusDto.userId);
+        return this.tripsService.transitionTripStatus(id, statusDto.status, statusDto.userId, {
+            delayMinutes: statusDto.delayMinutes,
+            delayReason: statusDto.delayReason,
+            emergencyType: statusDto.emergencyType,
+            emergencyNote: statusDto.emergencyNote,
+        });
+    }
+    assignBackupDriver(id, body) {
+        return this.tripsService.assignBackupDriver(id, body.backupDriverId);
     }
     remove(id) {
         return this.tripsService.remove(id);
@@ -69,7 +77,7 @@ let TripsController = class TripsController {
 exports.TripsController = TripsController;
 __decorate([
     (0, common_1.Post)(),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -77,14 +85,14 @@ __decorate([
 ], TripsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], TripsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -92,7 +100,7 @@ __decorate([
 ], TripsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('child/:childId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('childId')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -100,16 +108,16 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TripsController.prototype, "findActiveByChild", null);
 __decorate([
-    (0, common_1.Get)('company/:companyId/active'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
-    __param(0, (0, common_1.Param)('companyId')),
+    (0, common_1.Get)('school/:schoolId/active'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
+    __param(0, (0, common_1.Param)('schoolId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
-], TripsController.prototype, "findActiveByCompany", null);
+], TripsController.prototype, "findActiveBySchool", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -118,13 +126,22 @@ __decorate([
 ], TripsController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/status'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], TripsController.prototype, "transitionStatus", null);
+__decorate([
+    (0, common_1.Patch)(':id/backup-driver'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], TripsController.prototype, "assignBackupDriver", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, roles_decorator_1.Roles)('PLATFORM_ADMIN'),
@@ -135,7 +152,7 @@ __decorate([
 ], TripsController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)('generate-today'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

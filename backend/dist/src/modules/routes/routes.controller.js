@@ -49,7 +49,7 @@ let RoutesController = class RoutesController {
 exports.RoutesController = RoutesController;
 __decorate([
     (0, common_1.Post)(),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -57,14 +57,14 @@ __decorate([
 ], RoutesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], RoutesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -72,7 +72,7 @@ __decorate([
 ], RoutesController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('school/:schoolId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('schoolId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -80,7 +80,7 @@ __decorate([
 ], RoutesController.prototype, "findBySchool", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -89,7 +89,7 @@ __decorate([
 ], RoutesController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -97,7 +97,7 @@ __decorate([
 ], RoutesController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)('auto-generate/:schoolId'),
-    (0, roles_decorator_1.Roles)('COMPANY_ADMIN', 'PLATFORM_ADMIN'),
+    (0, roles_decorator_1.Roles)('SCHOOL_ADMIN', 'PLATFORM_ADMIN'),
     __param(0, (0, common_1.Param)('schoolId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

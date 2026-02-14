@@ -4,40 +4,40 @@ export declare class BusesController {
     constructor(busesService: BusesService);
     create(createBusDto: any): Promise<{
         id: string;
+        schoolId: string | null;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string | null;
-        driverId: string | null;
         plateNumber: string;
         capacity: number;
+        driverId: string | null;
     }>;
     findAll(): Promise<any[]>;
-    findByCompany(companyId: string): Promise<any[]>;
+    findBySchool(schoolId: string): Promise<any[]>;
     findOne(id: string): Promise<{
         id: string;
+        schoolId: string | null;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string | null;
-        driverId: string | null;
         plateNumber: string;
         capacity: number;
+        driverId: string | null;
     }>;
     update(id: string, updateBusDto: any): Promise<{
         id: string;
+        schoolId: string | null;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string | null;
-        driverId: string | null;
         plateNumber: string;
         capacity: number;
+        driverId: string | null;
     }>;
     remove(id: string): Promise<{
         id: string;
+        schoolId: string | null;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string | null;
-        driverId: string | null;
         plateNumber: string;
         capacity: number;
+        driverId: string | null;
     }>;
 }

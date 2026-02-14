@@ -40,21 +40,20 @@ let ChildrenService = class ChildrenService {
         });
     }
     async bulkOnboard(bulkData) {
-        const { companyId, schoolId, children } = bulkData;
+        const { schoolId, children } = bulkData;
         if (!children || !Array.isArray(children) || children.length === 0) {
             throw new common_1.BadRequestException('Children array is required and must not be empty');
         }
         if (!schoolId) {
             throw new common_1.BadRequestException('School ID is required');
         }
-        const school = await this.prisma.school.findFirst({
+        const school = await this.prisma.school.findUnique({
             where: {
                 id: schoolId,
-                companyId: companyId,
             },
         });
         if (!school) {
-            throw new common_1.NotFoundException('School not found or does not belong to this company');
+            throw new common_1.NotFoundException('School not found');
         }
         const schoolCode = school.schoolCode || 'ROS';
         const createdChildren = await this.prisma.$transaction(children.map((childData) => {
@@ -215,13 +214,11 @@ let ChildrenService = class ChildrenService {
         });
         return updatedChild;
     }
-    async bulkUpdateGrades(companyId, updateDto, adminId) {
+    async bulkUpdateGrades(schoolId, updateDto, adminId) {
         if (updateDto.action === 'PROMOTE') {
             const children = await this.prisma.child.findMany({
                 where: {
-                    school: {
-                        companyId,
-                    },
+                    schoolId,
                 },
             });
             const gradeMap = {
@@ -300,8 +297,8 @@ let ChildrenService = class ChildrenService {
         });
         const admins = await this.prisma.user.findMany({
             where: {
-                companyId: child.school.companyId,
-                role: 'COMPANY_ADMIN',
+                schoolId: child.schoolId,
+                role: 'SCHOOL_ADMIN',
             },
         });
         for (const admin of admins) {
@@ -375,14 +372,12 @@ let ChildrenService = class ChildrenService {
         }
         return updatedRequest;
     }
-    async getPendingLocationChangeRequests(companyId) {
+    async getPendingLocationChangeRequests(schoolId) {
         return this.prisma.locationChangeRequest.findMany({
             where: {
                 status: 'PENDING',
                 child: {
-                    school: {
-                        companyId,
-                    },
+                    schoolId,
                 },
             },
             include: {

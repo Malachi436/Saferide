@@ -9,7 +9,7 @@ export declare class AuthController {
         access_token: string;
         refresh_token: string;
         role: import(".prisma/client").$Enums.Role;
-        companyId: string;
+        schoolId: string;
         userId: string;
         user: {
             id: string;
@@ -18,7 +18,7 @@ export declare class AuthController {
             lastName: string;
             phone: string;
             role: import(".prisma/client").$Enums.Role;
-            companyId: string;
+            schoolId: string;
         };
     }>;
     signup(signupDto: SignupDto): Promise<any>;

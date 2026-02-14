@@ -45,7 +45,7 @@ __decorate([
 ], GpsController.prototype, "processHeartbeat", null);
 __decorate([
     (0, common_1.Get)('location/:busId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER', 'PARENT'),
     __param(0, (0, common_1.Param)('busId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -53,7 +53,7 @@ __decorate([
 ], GpsController.prototype, "getCurrentLocation", null);
 __decorate([
     (0, common_1.Get)('locations/:busId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('busId')),
     __param(1, (0, common_1.Query)('startTime')),
     __param(2, (0, common_1.Query)('endTime')),

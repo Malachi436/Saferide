@@ -5,54 +5,56 @@ export declare class AdminService {
     private notificationsService;
     constructor(prisma: PrismaService, notificationsService: NotificationsService);
     getPlatformStats(): Promise<any>;
-    getCompanyStats(companyId: string, user?: any): Promise<any>;
+    getSchoolStats(schoolId: string, user?: any): Promise<any>;
     createCompany(data: any): Promise<any>;
-    createSchool(companyId: string, data: any): Promise<any>;
-    getAllCompanies(): Promise<any>;
+    createSchool(data: any): Promise<any>;
     getAllSchools(): Promise<any>;
-    getCompanySchools(companyId: string): Promise<any>;
-    getCompanyRoutes(companyId: string): Promise<any>;
-    getCompanyChildren(companyId: string): Promise<any>;
-    getChildrenPaymentStatus(companyId: string): Promise<any>;
-    getCompanyDrivers(companyId: string): Promise<any>;
+    getCompanySchools(schoolId: string): Promise<any>;
+    getSchoolRoutes(schoolId: string): Promise<any>;
+    getSchoolChildren(schoolId: string): Promise<any>;
+    getChildrenPaymentStatus(schoolId: string): Promise<any>;
+    getSchoolDrivers(schoolId: string): Promise<any>;
     saveDriverPhoto(driverId: string, file: any): Promise<any>;
     getCompanyById(companyId: string): Promise<any>;
     deleteCompany(companyId: string): Promise<any>;
     updateSchool(schoolId: string, data: any): Promise<any>;
     deleteSchool(schoolId: string): Promise<any>;
-    getCompanyAnalytics(companyId: string, range?: string): Promise<any>;
-    getCompanyTrips(companyId: string): Promise<any>;
-    getCompanyActiveTrips(companyId: string): Promise<any>;
-    getAttendanceReport(companyId: string, range?: string): Promise<any>;
-    getPaymentReport(companyId: string, range?: string): Promise<any>;
-    getDriverPerformanceReport(companyId: string, range?: string): Promise<any>;
-    updateCompanyFare(companyId: string, newFare: number, adminId: string, reason?: string): Promise<{
-        company: {
-            name: string;
+    getSchoolAnalytics(schoolId: string, range?: string): Promise<any>;
+    getSchoolTrips(schoolId: string): Promise<any>;
+    getSchoolActiveTrips(schoolId: string): Promise<any>;
+    getAttendanceReport(schoolId: string, range?: string): Promise<any>;
+    getPaymentReport(schoolId: string, range?: string): Promise<any>;
+    getDriverPerformanceReport(schoolId: string, range?: string): Promise<any>;
+    updateCompanyFare(schoolId: string, newFare: number, adminId: string, reason?: string): Promise<{
+        school: {
             id: string;
+            email: string | null;
+            phone: string | null;
             createdAt: Date;
             updatedAt: Date;
-            email: string;
-            phone: string | null;
-            address: string | null;
+            name: string;
+            schoolCode: string | null;
             baseFare: number;
             currency: string;
+            latitude: number | null;
+            longitude: number | null;
+            address: string | null;
         };
         oldFare: number;
         newFare: number;
         change: number;
         parentsNotified: number;
     }>;
-    getCompanyFare(companyId: string): Promise<{
-        name: string;
+    getSchoolFare(schoolId: string): Promise<{
         id: string;
+        name: string;
         baseFare: number;
         currency: string;
     }>;
-    getFareHistory(companyId: string): Promise<{
+    getFareHistory(schoolId: string): Promise<{
         id: string;
+        schoolId: string;
         createdAt: Date;
-        companyId: string;
         reason: string | null;
         oldFare: number;
         newFare: number;

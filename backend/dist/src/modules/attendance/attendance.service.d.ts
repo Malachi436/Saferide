@@ -12,4 +12,22 @@ export declare class AttendanceService {
     getAttendanceByTrip(tripId: string): Promise<ChildAttendance[]>;
     getAttendanceById(id: string): Promise<ChildAttendance | null>;
     markChildAsMissed(childId: string, tripId: string, recordedBy: string): Promise<ChildAttendance>;
+    verifyTripAttendance(tripId: string): Promise<{
+        totalExpected: number;
+        totalAccounted: number;
+        missing: Array<{
+            childId: string;
+            childName: string;
+            expectedStatus: string;
+        }>;
+        allAccounted: boolean;
+    }>;
+    checkForChildrenLeftOnBus(tripId: string): Promise<{
+        childrenLeftOnBus: Array<{
+            childId: string;
+            childName: string;
+            parentContact: string | null;
+        }>;
+        alertTriggered: boolean;
+    }>;
 }

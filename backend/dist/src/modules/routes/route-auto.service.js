@@ -39,11 +39,7 @@ let RouteAutoService = RouteAutoService_1 = class RouteAutoService {
         }
         const buses = await this.prisma.bus.findMany({
             where: {
-                driver: {
-                    user: {
-                        companyId: school.companyId,
-                    },
-                },
+                schoolId: schoolId
             },
         });
         if (buses.length === 0) {

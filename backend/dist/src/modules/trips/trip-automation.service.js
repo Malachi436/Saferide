@@ -78,6 +78,7 @@ let TripAutomationService = TripAutomationService_1 = class TripAutomationServic
                 driverId: schedule.driverId,
                 status: 'SCHEDULED',
                 startTime,
+                scheduledDate: startTime,
             },
         });
         this.logger.log(`✓ Created trip ${trip.id} for route ${schedule.route.name} - Driver: ${schedule.driverId}`);

@@ -39,6 +39,12 @@ let AttendanceController = class AttendanceController {
     async getAttendanceById(id) {
         return this.attendanceService.getAttendanceById(id);
     }
+    async verifyTripAttendance(tripId) {
+        return this.attendanceService.verifyTripAttendance(tripId);
+    }
+    async checkChildrenLeftOnBus(tripId) {
+        return this.attendanceService.checkForChildrenLeftOnBus(tripId);
+    }
 };
 exports.AttendanceController = AttendanceController;
 __decorate([
@@ -60,7 +66,7 @@ __decorate([
 ], AttendanceController.prototype, "updateAttendance", null);
 __decorate([
     (0, common_1.Get)('child/:childId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('childId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -68,7 +74,7 @@ __decorate([
 ], AttendanceController.prototype, "getAttendanceByChild", null);
 __decorate([
     (0, common_1.Get)('trip/:tripId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('tripId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -76,12 +82,28 @@ __decorate([
 ], AttendanceController.prototype, "getAttendanceByTrip", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AttendanceController.prototype, "getAttendanceById", null);
+__decorate([
+    (0, common_1.Get)('trip/:tripId/verify'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
+    __param(0, (0, common_1.Param)('tripId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AttendanceController.prototype, "verifyTripAttendance", null);
+__decorate([
+    (0, common_1.Get)('trip/:tripId/safety-check'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER'),
+    __param(0, (0, common_1.Param)('tripId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AttendanceController.prototype, "checkChildrenLeftOnBus", null);
 exports.AttendanceController = AttendanceController = __decorate([
     (0, common_1.Controller)('attendance'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),

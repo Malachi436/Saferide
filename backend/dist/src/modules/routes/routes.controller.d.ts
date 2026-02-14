@@ -5,58 +5,58 @@ export declare class RoutesController {
     private readonly routeAutoService;
     constructor(routesService: RoutesService, routeAutoService: RouteAutoService);
     create(createRouteDto: any): Promise<{
-        name: string;
         id: string;
+        schoolId: string;
         createdAt: Date;
         updatedAt: Date;
-        schoolId: string;
-        busId: string | null;
+        name: string;
         shift: string | null;
+        busId: string | null;
     }>;
     findAll(): Promise<{
-        name: string;
         id: string;
+        schoolId: string;
         createdAt: Date;
         updatedAt: Date;
-        schoolId: string;
-        busId: string | null;
+        name: string;
         shift: string | null;
+        busId: string | null;
     }[]>;
     findOne(id: string): Promise<{
-        name: string;
         id: string;
+        schoolId: string;
         createdAt: Date;
         updatedAt: Date;
-        schoolId: string;
-        busId: string | null;
+        name: string;
         shift: string | null;
+        busId: string | null;
     }>;
     findBySchool(schoolId: string): Promise<{
-        name: string;
         id: string;
+        schoolId: string;
         createdAt: Date;
         updatedAt: Date;
-        schoolId: string;
-        busId: string | null;
+        name: string;
         shift: string | null;
+        busId: string | null;
     }[]>;
     update(id: string, updateRouteDto: any): Promise<{
-        name: string;
         id: string;
+        schoolId: string;
         createdAt: Date;
         updatedAt: Date;
-        schoolId: string;
-        busId: string | null;
+        name: string;
         shift: string | null;
+        busId: string | null;
     }>;
     remove(id: string): Promise<{
-        name: string;
         id: string;
+        schoolId: string;
         createdAt: Date;
         updatedAt: Date;
-        schoolId: string;
-        busId: string | null;
+        name: string;
         shift: string | null;
+        busId: string | null;
     }>;
     autoGenerateRoutes(schoolId: string): Promise<any>;
 }

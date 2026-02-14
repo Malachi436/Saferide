@@ -68,6 +68,8 @@ const scheduled_routes_module_1 = require("./modules/scheduled-routes/scheduled-
 const health_module_1 = require("./modules/health/health.module");
 const email_module_1 = require("./modules/email/email.module");
 const companies_module_1 = require("./modules/companies/companies.module");
+const schools_module_1 = require("./modules/schools/schools.module");
+const school_schedule_module_1 = require("./modules/school-schedule/school-schedule.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -107,6 +109,8 @@ exports.AppModule = AppModule = __decorate([
             health_module_1.HealthModule,
             email_module_1.EmailModule,
             companies_module_1.CompaniesModule,
+            schools_module_1.SchoolsModule,
+            school_schedule_module_1.SchoolScheduleModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [],

@@ -66,17 +66,10 @@ let BusesService = class BusesService {
             },
         });
     }
-    async findByCompanyId(companyId) {
+    async findBySchoolId(schoolId) {
         return this.prisma.bus.findMany({
             where: {
-                OR: [
-                    { companyId: companyId },
-                    {
-                        driver: {
-                            user: { companyId },
-                        },
-                    },
-                ],
+                schoolId,
             },
             include: {
                 driver: {

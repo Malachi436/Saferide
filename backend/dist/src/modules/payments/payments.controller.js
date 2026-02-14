@@ -56,7 +56,7 @@ __decorate([
 ], PaymentsController.prototype, "processWebhook", null);
 __decorate([
     (0, common_1.Get)('history/:parentId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('parentId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -64,7 +64,7 @@ __decorate([
 ], PaymentsController.prototype, "getPaymentHistory", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

@@ -66,7 +66,7 @@ let DriversService = class DriversService {
         });
     }
     async create(data) {
-        const { userId, firstName, lastName, email, phone, password, license, companyId, schoolId } = data;
+        const { userId, firstName, lastName, email, phone, password, license, schoolId } = data;
         const existingDriver = await this.findByLicense(license);
         if (existingDriver) {
             throw new common_1.BadRequestException('Driver with this license already exists');
@@ -76,7 +76,7 @@ let DriversService = class DriversService {
                 where: { id: userId },
                 data: {
                     role: 'DRIVER',
-                    companyId,
+                    schoolId,
                 },
             });
             return this.prisma.driver.create({
@@ -102,7 +102,6 @@ let DriversService = class DriversService {
                     phone,
                     passwordHash,
                     role: 'DRIVER',
-                    companyId,
                     schoolId,
                 },
             });

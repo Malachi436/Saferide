@@ -36,13 +36,11 @@ let ScheduledRoutesService = class ScheduledRoutesService {
             },
         });
     }
-    async findByCompany(companyId) {
+    async findBySchool(schoolId) {
         return this.prisma.scheduledRoute.findMany({
             where: {
                 route: {
-                    school: {
-                        companyId,
-                    },
+                    schoolId,
                 },
             },
             include: {

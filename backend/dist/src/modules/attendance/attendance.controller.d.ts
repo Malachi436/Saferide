@@ -11,53 +11,71 @@ export declare class AttendanceController {
     constructor(attendanceService: AttendanceService);
     recordAttendance(recordAttendanceDto: RecordAttendanceDto): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }>;
     updateAttendance(id: string, updateDto: any): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }>;
     getAttendanceByChild(childId: string): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }[]>;
     getAttendanceByTrip(tripId: string): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
     }[]>;
     getAttendanceById(id: string): Promise<{
         id: string;
-        childId: string;
-        tripId: string;
+        createdAt: Date;
+        updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
         timestamp: Date;
         recordedBy: string;
-        createdAt: Date;
-        updatedAt: Date;
+        childId: string;
+        tripId: string;
+    }>;
+    verifyTripAttendance(tripId: string): Promise<{
+        totalExpected: number;
+        totalAccounted: number;
+        missing: Array<{
+            childId: string;
+            childName: string;
+            expectedStatus: string;
+        }>;
+        allAccounted: boolean;
+    }>;
+    checkChildrenLeftOnBus(tripId: string): Promise<{
+        childrenLeftOnBus: Array<{
+            childId: string;
+            childName: string;
+            parentContact: string | null;
+        }>;
+        alertTriggered: boolean;
     }>;
 }
 export {};

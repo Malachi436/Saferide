@@ -93,14 +93,13 @@ let AuthService = class AuthService {
             email: user.email,
             sub: user.id,
             role: user.role,
-            companyId: user.companyId,
             schoolId: user.schoolId
         };
         return {
             access_token: this.jwtService.sign(payload),
             refresh_token: await this.generateRefreshToken(user),
             role: user.role,
-            companyId: user.companyId,
+            schoolId: user.schoolId,
             userId: user.id,
             user: {
                 id: user.id,
@@ -109,7 +108,7 @@ let AuthService = class AuthService {
                 lastName: user.lastName,
                 phone: user.phone,
                 role: user.role,
-                companyId: user.companyId,
+                schoolId: user.schoolId,
             }
         };
     }
@@ -149,7 +148,6 @@ let AuthService = class AuthService {
                 email: user.email,
                 sub: user.id,
                 role: user.role,
-                companyId: user.companyId,
                 schoolId: user.schoolId
             };
             return {

@@ -58,7 +58,7 @@ __decorate([
 ], EarlyPickupController.prototype, "requestEarlyPickup", null);
 __decorate([
     (0, common_1.Put)(':requestId/approve'),
-    (0, roles_decorator_1.Roles)('DRIVER', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('DRIVER', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Param)('requestId')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -67,7 +67,7 @@ __decorate([
 ], EarlyPickupController.prototype, "approveRequest", null);
 __decorate([
     (0, common_1.Put)(':requestId/reject'),
-    (0, roles_decorator_1.Roles)('DRIVER', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('DRIVER', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Param)('requestId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -84,7 +84,7 @@ __decorate([
 ], EarlyPickupController.prototype, "cancelRequest", null);
 __decorate([
     (0, common_1.Get)('trip/:tripId/pending'),
-    (0, roles_decorator_1.Roles)('DRIVER', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('DRIVER', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Param)('tripId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -92,7 +92,7 @@ __decorate([
 ], EarlyPickupController.prototype, "getPendingRequests", null);
 __decorate([
     (0, common_1.Get)('trip/:tripId/approved'),
-    (0, roles_decorator_1.Roles)('DRIVER', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('DRIVER', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('tripId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -100,7 +100,7 @@ __decorate([
 ], EarlyPickupController.prototype, "getApprovedRequests", null);
 __decorate([
     (0, common_1.Get)('parent/:parentId'),
-    (0, roles_decorator_1.Roles)('PARENT', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PARENT', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Param)('parentId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

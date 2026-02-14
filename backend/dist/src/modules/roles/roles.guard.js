@@ -25,6 +25,28 @@ let RolesGuard = class RolesGuard {
             return true;
         }
         const { user } = context.switchToHttp().getRequest();
+        if (user.role === 'PLATFORM_ADMIN')
+            return true;
+        if (user.role === 'SCHOOL_ADMIN') {
+            const request = context.switchToHttp().getRequest();
+            let schoolId = request.params.schoolId || request.body?.schoolId || request.query?.schoolId;
+            if (schoolId === 'undefined' || schoolId === undefined || schoolId === null || schoolId === '') {
+                console.log('[RolesGuard] No schoolId in request, allowing access for data filtering');
+                return true;
+            }
+            console.log('[RolesGuard] SCHOOL_ADMIN - user.schoolId:', user.schoolId, 'request schoolId:', schoolId);
+            if (user.schoolId !== schoolId) {
+                console.log('[RolesGuard] Access denied - schoolId mismatch');
+                throw new common_1.ForbiddenException('Access denied: School admin can only access their own school data');
+            }
+            if (!user.schoolId) {
+                console.log('[RolesGuard] Access denied - user has no schoolId');
+                throw new common_1.ForbiddenException('Access denied: School admin must be assigned to a school');
+            }
+            if (requiredRoles.includes('SCHOOL_ADMIN')) {
+                return true;
+            }
+        }
         return requiredRoles.some((role) => user.role === role);
     }
 };

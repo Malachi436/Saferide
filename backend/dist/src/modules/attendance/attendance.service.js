@@ -121,6 +121,106 @@ let AttendanceService = class AttendanceService {
     async markChildAsMissed(childId, tripId, recordedBy) {
         return this.recordAttendance(childId, tripId, client_1.AttendanceStatus.MISSED, recordedBy);
     }
+    async verifyTripAttendance(tripId) {
+        const trip = await this.prisma.trip.findUnique({
+            where: { id: tripId },
+            include: {
+                route: {
+                    include: {
+                        children: {
+                            where: { isClaimed: true },
+                        },
+                    },
+                },
+                attendances: true,
+            },
+        });
+        if (!trip) {
+            throw new Error('Trip not found');
+        }
+        const expectedChildren = trip.route.children;
+        const attendedChildren = trip.attendances;
+        const missing = expectedChildren
+            .filter(child => {
+            const attendance = attendedChildren.find(a => a.childId === child.id);
+            return !attendance || attendance.status === client_1.AttendanceStatus.PENDING;
+        })
+            .map(child => ({
+            childId: child.id,
+            childName: `${child.firstName} ${child.lastName}`,
+            expectedStatus: trip.status === 'RETURN_IN_PROGRESS' ? 'DROPPED' : 'PICKED_UP',
+        }));
+        return {
+            totalExpected: expectedChildren.length,
+            totalAccounted: expectedChildren.length - missing.length,
+            missing,
+            allAccounted: missing.length === 0,
+        };
+    }
+    async checkForChildrenLeftOnBus(tripId) {
+        const verification = await this.verifyTripAttendance(tripId);
+        if (!verification.allAccounted) {
+            const childrenOnBus = await Promise.all(verification.missing.map(async (m) => {
+                const child = await this.prisma.child.findUnique({
+                    where: { id: m.childId },
+                    include: { parent: true },
+                });
+                return {
+                    childId: m.childId,
+                    childName: m.childName,
+                    parentContact: child?.parent?.phone || child?.parentPhone || null,
+                };
+            }));
+            const trip = await this.prisma.trip.findUnique({
+                where: { id: tripId },
+                include: {
+                    route: true,
+                    driver: { include: { user: true } },
+                    bus: true,
+                },
+            });
+            if (trip) {
+                const schoolAdmins = await this.prisma.user.findMany({
+                    where: {
+                        schoolId: trip.route.schoolId,
+                        role: 'SCHOOL_ADMIN',
+                    },
+                });
+                for (const admin of schoolAdmins) {
+                    await this.prisma.notification.create({
+                        data: {
+                            userId: admin.id,
+                            title: 'CRITICAL: Children Left on Bus',
+                            message: `${verification.missing.length} child(ren) may still be on bus ${trip.bus.plateNumber} on trip ${trip.route.name}. Please verify immediately.`,
+                            type: client_1.NotificationType.ALERT,
+                            requiresAck: true,
+                            relatedEntityType: 'TRIP',
+                            relatedEntityId: tripId,
+                        },
+                    });
+                }
+                await this.prisma.notification.create({
+                    data: {
+                        userId: trip.driver.userId,
+                        title: 'CRITICAL: Verify Bus is Empty',
+                        message: `Please perform a final sweep of the bus. ${verification.missing.length} child(ren) are not accounted for on trip ${trip.route.name}.`,
+                        type: client_1.NotificationType.ALERT,
+                        requiresAck: true,
+                        relatedEntityType: 'TRIP',
+                        relatedEntityId: tripId,
+                    },
+                });
+            }
+            return {
+                childrenLeftOnBus: childrenOnBus,
+                alertTriggered: true,
+            };
+        }
+        return {
+            childrenLeftOnBus: [],
+            alertTriggered: false,
+        };
+    }
 };
 exports.AttendanceService = AttendanceService;
 exports.AttendanceService = AttendanceService = __decorate([

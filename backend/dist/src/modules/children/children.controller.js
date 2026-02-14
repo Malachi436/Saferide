@@ -66,16 +66,16 @@ let ChildrenController = class ChildrenController {
         const code = await this.childrenService.generateUniqueCode();
         return { uniqueCode: code };
     }
-    bulkUpdateGrades(companyId, updateDto, req) {
+    bulkUpdateGrades(schoolId, updateDto, req) {
         const adminId = req.user.userId;
-        return this.childrenService.bulkUpdateGrades(companyId, updateDto, adminId);
+        return this.childrenService.bulkUpdateGrades(schoolId, updateDto, adminId);
     }
     requestLocationChange(req, requestDto) {
         const parentId = req.user.userId;
         return this.childrenService.requestLocationChange(parentId, requestDto);
     }
-    getPendingLocationChangeRequests(companyId) {
-        return this.childrenService.getPendingLocationChangeRequests(companyId);
+    getPendingLocationChangeRequests(schoolId) {
+        return this.childrenService.getPendingLocationChangeRequests(schoolId);
     }
     reviewLocationChangeRequest(requestId, reviewDto, req) {
         const adminId = req.user.userId;
@@ -85,7 +85,7 @@ let ChildrenController = class ChildrenController {
 exports.ChildrenController = ChildrenController;
 __decorate([
     (0, common_1.Post)(),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -93,7 +93,7 @@ __decorate([
 ], ChildrenController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)('bulk-onboard'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -101,14 +101,14 @@ __decorate([
 ], ChildrenController.prototype, "bulkOnboard", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ChildrenController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -116,7 +116,7 @@ __decorate([
 ], ChildrenController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('parent/:parentId'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('parentId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -124,7 +124,7 @@ __decorate([
 ], ChildrenController.prototype, "findByParent", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -133,7 +133,7 @@ __decorate([
 ], ChildrenController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -141,7 +141,7 @@ __decorate([
 ], ChildrenController.prototype, "remove", null);
 __decorate([
     (0, common_1.Get)('public/schools'),
-    (0, roles_decorator_1.Roles)('PARENT', 'PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PARENT', 'PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -157,15 +157,15 @@ __decorate([
 ], ChildrenController.prototype, "linkChild", null);
 __decorate([
     (0, common_1.Post)('generate-code'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ChildrenController.prototype, "generateCode", null);
 __decorate([
-    (0, common_1.Post)('company/:companyId/bulk-update-grades'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
-    __param(0, (0, common_1.Param)('companyId')),
+    (0, common_1.Post)('school/:schoolId/bulk-update-grades'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
+    __param(0, (0, common_1.Param)('schoolId')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -182,16 +182,16 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ChildrenController.prototype, "requestLocationChange", null);
 __decorate([
-    (0, common_1.Get)('company/:companyId/location-change/pending'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
-    __param(0, (0, common_1.Param)('companyId')),
+    (0, common_1.Get)('school/:schoolId/location-change/pending'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
+    __param(0, (0, common_1.Param)('schoolId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ChildrenController.prototype, "getPendingLocationChangeRequests", null);
 __decorate([
     (0, common_1.Patch)('location-change/:requestId/review'),
-    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'COMPANY_ADMIN'),
+    (0, roles_decorator_1.Roles)('PLATFORM_ADMIN', 'SCHOOL_ADMIN'),
     __param(0, (0, common_1.Param)('requestId')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),

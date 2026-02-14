@@ -15,77 +15,77 @@ export declare class ScheduledRoutesService {
         driver: {
             user: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
+                email: string;
+                passwordHash: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 phone: string | null;
-                companyId: string | null;
-                schoolId: string | null;
-                passwordHash: string;
                 role: import(".prisma/client").$Enums.Role;
                 refreshToken: string | null;
+                schoolId: string | null;
+                createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
-            license: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            license: string;
+            userId: string;
         };
         bus: {
             id: string;
+            schoolId: string | null;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string | null;
-            driverId: string | null;
             plateNumber: string;
             capacity: number;
+            driverId: string | null;
         };
         route: {
             school: {
-                name: string;
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 email: string | null;
                 phone: string | null;
-                companyId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                schoolCode: string | null;
+                baseFare: number;
+                currency: string;
                 latitude: number | null;
                 longitude: number | null;
-                schoolCode: string | null;
                 address: string | null;
             };
             stops: {
-                name: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                routeId: string;
+                name: string;
                 latitude: number;
                 longitude: number;
                 order: number;
+                routeId: string;
             }[];
         } & {
-            name: string;
             id: string;
+            schoolId: string;
             createdAt: Date;
             updatedAt: Date;
-            schoolId: string;
-            busId: string | null;
+            name: string;
             shift: string | null;
+            busId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;
@@ -94,156 +94,156 @@ export declare class ScheduledRoutesService {
         driver: {
             user: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
+                email: string;
+                passwordHash: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 phone: string | null;
-                companyId: string | null;
-                schoolId: string | null;
-                passwordHash: string;
                 role: import(".prisma/client").$Enums.Role;
                 refreshToken: string | null;
+                schoolId: string | null;
+                createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
-            license: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            license: string;
+            userId: string;
         };
         bus: {
             id: string;
+            schoolId: string | null;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string | null;
-            driverId: string | null;
             plateNumber: string;
             capacity: number;
+            driverId: string | null;
         };
         route: {
             school: {
-                name: string;
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 email: string | null;
                 phone: string | null;
-                companyId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                schoolCode: string | null;
+                baseFare: number;
+                currency: string;
                 latitude: number | null;
                 longitude: number | null;
-                schoolCode: string | null;
                 address: string | null;
             };
             stops: {
-                name: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                routeId: string;
+                name: string;
                 latitude: number;
                 longitude: number;
                 order: number;
+                routeId: string;
             }[];
         } & {
-            name: string;
             id: string;
+            schoolId: string;
             createdAt: Date;
             updatedAt: Date;
-            schoolId: string;
-            busId: string | null;
+            name: string;
             shift: string | null;
+            busId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;
     })[]>;
-    findByCompany(companyId: string): Promise<({
+    findBySchool(schoolId: string): Promise<({
         driver: {
             user: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
+                email: string;
+                passwordHash: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 phone: string | null;
-                companyId: string | null;
-                schoolId: string | null;
-                passwordHash: string;
                 role: import(".prisma/client").$Enums.Role;
                 refreshToken: string | null;
+                schoolId: string | null;
+                createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
-            license: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            license: string;
+            userId: string;
         };
         bus: {
             id: string;
+            schoolId: string | null;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string | null;
-            driverId: string | null;
             plateNumber: string;
             capacity: number;
+            driverId: string | null;
         };
         route: {
             school: {
-                name: string;
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 email: string | null;
                 phone: string | null;
-                companyId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                schoolCode: string | null;
+                baseFare: number;
+                currency: string;
                 latitude: number | null;
                 longitude: number | null;
-                schoolCode: string | null;
                 address: string | null;
             };
             stops: {
-                name: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                routeId: string;
+                name: string;
                 latitude: number;
                 longitude: number;
                 order: number;
+                routeId: string;
             }[];
         } & {
-            name: string;
             id: string;
+            schoolId: string;
             createdAt: Date;
             updatedAt: Date;
-            schoolId: string;
-            busId: string | null;
+            name: string;
             shift: string | null;
+            busId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;
@@ -252,77 +252,77 @@ export declare class ScheduledRoutesService {
         driver: {
             user: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
+                email: string;
+                passwordHash: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 phone: string | null;
-                companyId: string | null;
-                schoolId: string | null;
-                passwordHash: string;
                 role: import(".prisma/client").$Enums.Role;
                 refreshToken: string | null;
+                schoolId: string | null;
+                createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
-            license: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            license: string;
+            userId: string;
         };
         bus: {
             id: string;
+            schoolId: string | null;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string | null;
-            driverId: string | null;
             plateNumber: string;
             capacity: number;
+            driverId: string | null;
         };
         route: {
             school: {
-                name: string;
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 email: string | null;
                 phone: string | null;
-                companyId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                schoolCode: string | null;
+                baseFare: number;
+                currency: string;
                 latitude: number | null;
                 longitude: number | null;
-                schoolCode: string | null;
                 address: string | null;
             };
             stops: {
-                name: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                routeId: string;
+                name: string;
                 latitude: number;
                 longitude: number;
                 order: number;
+                routeId: string;
             }[];
         } & {
-            name: string;
             id: string;
+            schoolId: string;
             createdAt: Date;
             updatedAt: Date;
-            schoolId: string;
-            busId: string | null;
+            name: string;
             shift: string | null;
+            busId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;
@@ -331,77 +331,77 @@ export declare class ScheduledRoutesService {
         driver: {
             user: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
+                email: string;
+                passwordHash: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 phone: string | null;
-                companyId: string | null;
-                schoolId: string | null;
-                passwordHash: string;
                 role: import(".prisma/client").$Enums.Role;
                 refreshToken: string | null;
+                schoolId: string | null;
+                createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
-            license: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            license: string;
+            userId: string;
         };
         bus: {
             id: string;
+            schoolId: string | null;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string | null;
-            driverId: string | null;
             plateNumber: string;
             capacity: number;
+            driverId: string | null;
         };
         route: {
             school: {
-                name: string;
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 email: string | null;
                 phone: string | null;
-                companyId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                schoolCode: string | null;
+                baseFare: number;
+                currency: string;
                 latitude: number | null;
                 longitude: number | null;
-                schoolCode: string | null;
                 address: string | null;
             };
             stops: {
-                name: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                routeId: string;
+                name: string;
                 latitude: number;
                 longitude: number;
                 order: number;
+                routeId: string;
             }[];
         } & {
-            name: string;
             id: string;
+            schoolId: string;
             createdAt: Date;
             updatedAt: Date;
-            schoolId: string;
-            busId: string | null;
+            name: string;
             shift: string | null;
+            busId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;
@@ -419,77 +419,77 @@ export declare class ScheduledRoutesService {
         driver: {
             user: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
+                email: string;
+                passwordHash: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 phone: string | null;
-                companyId: string | null;
-                schoolId: string | null;
-                passwordHash: string;
                 role: import(".prisma/client").$Enums.Role;
                 refreshToken: string | null;
+                schoolId: string | null;
+                createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
-            license: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            license: string;
+            userId: string;
         };
         bus: {
             id: string;
+            schoolId: string | null;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string | null;
-            driverId: string | null;
             plateNumber: string;
             capacity: number;
+            driverId: string | null;
         };
         route: {
             school: {
-                name: string;
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 email: string | null;
                 phone: string | null;
-                companyId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                schoolCode: string | null;
+                baseFare: number;
+                currency: string;
                 latitude: number | null;
                 longitude: number | null;
-                schoolCode: string | null;
                 address: string | null;
             };
             stops: {
-                name: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                routeId: string;
+                name: string;
                 latitude: number;
                 longitude: number;
                 order: number;
+                routeId: string;
             }[];
         } & {
-            name: string;
             id: string;
+            schoolId: string;
             createdAt: Date;
             updatedAt: Date;
-            schoolId: string;
-            busId: string | null;
+            name: string;
             shift: string | null;
+            busId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;
@@ -498,12 +498,12 @@ export declare class ScheduledRoutesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;
@@ -512,77 +512,77 @@ export declare class ScheduledRoutesService {
         driver: {
             user: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
+                email: string;
+                passwordHash: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 phone: string | null;
-                companyId: string | null;
-                schoolId: string | null;
-                passwordHash: string;
                 role: import(".prisma/client").$Enums.Role;
                 refreshToken: string | null;
+                schoolId: string | null;
+                createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
-            license: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            license: string;
+            userId: string;
         };
         bus: {
             id: string;
+            schoolId: string | null;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string | null;
-            driverId: string | null;
             plateNumber: string;
             capacity: number;
+            driverId: string | null;
         };
         route: {
             school: {
-                name: string;
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 email: string | null;
                 phone: string | null;
-                companyId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                schoolCode: string | null;
+                baseFare: number;
+                currency: string;
                 latitude: number | null;
                 longitude: number | null;
-                schoolCode: string | null;
                 address: string | null;
             };
             stops: {
-                name: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                routeId: string;
+                name: string;
                 latitude: number;
                 longitude: number;
                 order: number;
+                routeId: string;
             }[];
         } & {
-            name: string;
             id: string;
+            schoolId: string;
             createdAt: Date;
             updatedAt: Date;
-            schoolId: string;
-            busId: string | null;
+            name: string;
             shift: string | null;
+            busId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;
@@ -591,77 +591,77 @@ export declare class ScheduledRoutesService {
         driver: {
             user: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
+                email: string;
+                passwordHash: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 phone: string | null;
-                companyId: string | null;
-                schoolId: string | null;
-                passwordHash: string;
                 role: import(".prisma/client").$Enums.Role;
                 refreshToken: string | null;
+                schoolId: string | null;
+                createdAt: Date;
+                updatedAt: Date;
             };
         } & {
             id: string;
-            license: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            license: string;
+            userId: string;
         };
         bus: {
             id: string;
+            schoolId: string | null;
             createdAt: Date;
             updatedAt: Date;
-            companyId: string | null;
-            driverId: string | null;
             plateNumber: string;
             capacity: number;
+            driverId: string | null;
         };
         route: {
             school: {
-                name: string;
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 email: string | null;
                 phone: string | null;
-                companyId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                schoolCode: string | null;
+                baseFare: number;
+                currency: string;
                 latitude: number | null;
                 longitude: number | null;
-                schoolCode: string | null;
                 address: string | null;
             };
             stops: {
-                name: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                routeId: string;
+                name: string;
                 latitude: number;
                 longitude: number;
                 order: number;
+                routeId: string;
             }[];
         } & {
-            name: string;
             id: string;
+            schoolId: string;
             createdAt: Date;
             updatedAt: Date;
-            schoolId: string;
-            busId: string | null;
+            name: string;
             shift: string | null;
+            busId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        driverId: string;
         busId: string;
         routeId: string;
-        driverId: string;
-        status: import(".prisma/client").$Enums.ScheduleStatus;
         scheduledTime: string;
         recurringDays: import(".prisma/client").$Enums.DayOfWeek[];
+        status: import(".prisma/client").$Enums.ScheduleStatus;
         autoAssignChildren: boolean;
         effectiveFrom: Date | null;
         effectiveUntil: Date | null;

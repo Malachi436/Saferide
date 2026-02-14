@@ -32,8 +32,9 @@ export default function SchoolOverviewPage({
   }, [schoolId]);
 
   const fetchStats = async () => {
+    if (!schoolId || schoolId === 'undefined') return;
     try {
-      const data = await apiClient.get(`/admin/stats/company/${schoolId}`);
+      const data = await apiClient.get(`/admin/stats/school/${schoolId}`);
       setStats(data as SchoolStats);
     } catch (err) {
       console.error('Error loading stats:', err);

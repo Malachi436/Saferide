@@ -20,26 +20,17 @@ async function main() {
   await prisma.driver.deleteMany();
   await prisma.user.deleteMany();
   await prisma.school.deleteMany();
-  await prisma.company.deleteMany();
   console.log('Database cleared!');
 
-  // Create a company
-  const company = await prisma.company.create({
-    data: {
-      name: 'SafeRide Transport Ltd',
-      email: 'admin@saferide.com',
-      phone: '+233 20 123 4567',
-      address: '123 Main Street, Accra',
-    },
-  });
-
-  console.log(`Created company: ${company.name}`);
-
-  // Create a school
+  // Create a school directly (no company needed)
   const school = await prisma.school.create({
     data: {
       name: 'Greenfield Academy',
-      companyId: company.id,
+      schoolCode: 'GFA',
+      email: 'admin@greenfield.edu',
+      phone: '+233 20 123 4567',
+      address: '45 Education Drive, Accra',
+      baseFare: 50000,
     },
   });
 
@@ -69,8 +60,8 @@ async function main() {
       firstName: 'Admin',
       lastName: 'User',
       phone: '+233 20 111 1111',
-      role: 'COMPANY_ADMIN',
-      companyId: company.id,
+      role: 'SCHOOL_ADMIN',
+      schoolId: school.id,
     },
   });
 
@@ -85,7 +76,6 @@ async function main() {
       lastName: 'Driver',
       phone: '+233 24 222 2222',
       role: 'DRIVER',
-      companyId: company.id,
       schoolId: school.id,
     },
   });
@@ -151,7 +141,7 @@ async function main() {
       lastName: 'Mensah',
       phone: '+233 50 555 5555',
       role: 'PARENT',
-      companyId: company.id,
+      schoolId: school.id,
     },
   });
 
@@ -270,6 +260,7 @@ async function main() {
       driverId: driver.id,
       status: 'SCHEDULED',
       startTime: today,
+      scheduledDate: today,
     },
   });
 
@@ -283,6 +274,7 @@ async function main() {
       driverId: driver.id,
       status: 'IN_PROGRESS',
       startTime: new Date(),
+      scheduledDate: new Date(),
     },
   });
 

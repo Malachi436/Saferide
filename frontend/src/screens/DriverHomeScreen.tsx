@@ -64,7 +64,7 @@ export const DriverHomeScreen = () => {
       return;
     }
 
-    const SOCKET_URL = 'http://172.20.10.3:3000';
+    const SOCKET_URL = 'http://192.168.1.250:3000';
     const newSocket = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling'],

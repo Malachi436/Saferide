@@ -104,7 +104,7 @@ export default function LiveDashboardPage({ params }: { params: Promise<{ school
 
   const fetchSchools = async () => {
     try {
-      const response = await apiClient.get(`/admin/company/${companyId}/schools`);
+      const response = await apiClient.get(`/admin/school/${companyId}/schools`);
       const schoolList = Array.isArray(response) ? response : [];
       setSchools(schoolList);
     } catch (err) {
@@ -117,7 +117,7 @@ export default function LiveDashboardPage({ params }: { params: Promise<{ school
     
     try {
       setLoading(true);
-      const response = await apiClient.get(`/trips/company/${companyId}/active`);
+      const response = await apiClient.get(`/trips/school/${companyId}/active`);
       const trips = Array.isArray(response) ? response : [];
       console.log('[LiveDashboard] Fetched active trips:', trips.length);
       setActiveTrips(trips);
@@ -162,7 +162,7 @@ export default function LiveDashboardPage({ params }: { params: Promise<{ school
 
   const fetchPickups = async () => {
     try {
-      const response = await apiClient.get(`/admin/company/${companyId}/children`);
+      const response = await apiClient.get(`/admin/school/${companyId}/children`);
       const children = Array.isArray(response) ? response : [];
       console.log('[LiveDashboard] Fetched children:', children.length);
       const pickupList = children

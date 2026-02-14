@@ -85,22 +85,23 @@ export default function StudentsPage({
   }, [schoolId]);
 
   const fetchData = async () => {
+    if (!schoolId || schoolId === 'undefined') return;
     try {
       setLoading(true);
       // Fetch routes
-      const routesData = await apiClient.get(`/admin/company/${schoolId}/routes`);
+      const routesData = await apiClient.get(`/admin/school/${schoolId}/routes`);
       setRoutes(Array.isArray(routesData) ? routesData : []);
 
       // Fetch children (students)
-      const childrenData = await apiClient.get(`/admin/company/${schoolId}/children`);
+      const childrenData = await apiClient.get(`/admin/school/${schoolId}/children`);
       setChildren(Array.isArray(childrenData) ? childrenData : []);
 
       // Get school info for code
-      const companyData: any = await apiClient.get(`/admin/companies/${schoolId}`);
-      if (companyData && companyData.schools && companyData.schools.length > 0) {
-        const firstSchool = companyData.schools[0];
-        setActualSchoolId(firstSchool.id);
-        setSchoolCode(firstSchool.schoolCode || firstSchool.name.substring(0, 3).toUpperCase());
+      const schoolData: any = await apiClient.get(`/admin/schools`);
+      const currentSchool = Array.isArray(schoolData) ? schoolData.find((s: any) => s.id === schoolId) : null;
+      if (currentSchool) {
+        setActualSchoolId(currentSchool.id);
+        setSchoolCode(currentSchool.schoolCode || currentSchool.name.substring(0, 3).toUpperCase());
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load students');
@@ -126,15 +127,8 @@ export default function StudentsPage({
   const handleOnboardStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!actualSchoolId) {
-      alert('❌ Error: School information not loaded. Please refresh the page.');
-      return;
-    }
-    
     try {
-      const response: any = await apiClient.post('/children/bulk-onboard', {
-        companyId: schoolId,
-        schoolId: actualSchoolId,
+      const response: any = await apiClient.post('/school/children/bulk-onboard', {
         children: [
           {
             firstName: onboardData.firstName.trim(),
@@ -143,7 +137,7 @@ export default function StudentsPage({
             grade: onboardData.grade.trim(),
             pickupType: 'HOME',
             pickupDescription: 'To be set by parent',
-            daysUntilNextPayment: parseInt(onboardData.daysUntilNextPayment.toString()),
+            daysUntilPayment: parseInt(onboardData.daysUntilNextPayment.toString()),
           },
         ],
       });
@@ -172,6 +166,20 @@ export default function StudentsPage({
       await fetchData();
     } catch (err: any) {
       alert('❌ Error: ' + (err.response?.data?.message || 'Failed to onboard student'));
+    }
+  };
+
+  const handleDeleteStudent = async (child: Child) => {
+    if (!confirm(`Are you sure you want to delete student ${child.firstName} ${child.lastName}? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await apiClient.delete(`/children/${child.id}`);
+      alert('✅ Student deleted successfully');
+      fetchData();
+    } catch (err: any) {
+      alert(`❌ Error: ${err.response?.data?.message || 'Failed to delete student'}`);
     }
   };
 
@@ -424,8 +432,8 @@ export default function StudentsPage({
                   </div>
 
                   {/* Pickup Info - Full Width Below */}
-                  <div className="mt-4 pt-4 border-t border-slate-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mt-4 pt-4 border-t border-slate-200 flex justify-between items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
                       <div>
                         <p className="text-sm text-slate-500 font-semibold mb-1">Pickup Location</p>
                         <p className="font-semibold text-slate-900">{child.pickupType}</p>
@@ -446,6 +454,12 @@ export default function StudentsPage({
                         </div>
                       )}
                     </div>
+                    <button
+                      onClick={() => handleDeleteStudent(child)}
+                      className="ml-4 bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg text-sm font-semibold transition"
+                    >
+                      Delete Student
+                    </button>
                   </div>
                 </div>
               );

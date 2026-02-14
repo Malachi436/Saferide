@@ -24,9 +24,9 @@ interface FormData {
 export default function OnboardDriverPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId } = use(params);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -43,11 +43,11 @@ export default function OnboardDriverPage({
 
   useEffect(() => {
     fetchBuses();
-  }, [companyId]);
+  }, [schoolId]);
 
   const fetchBuses = async () => {
     try {
-      const data = await apiClient.get(`/buses/company/${companyId}`);
+      const data = await apiClient.get(`/buses/school/${schoolId}`);
       setBuses(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error('Error loading buses:', err);
@@ -78,26 +78,20 @@ export default function OnboardDriverPage({
     setLoading(true);
 
     try {
-      // Step 1: Create the driver user account
-      const driverResponse = await apiClient.post('/auth/signup', {
+      // Step 1: Create the driver user account with license in one call
+      const driverResponse = await apiClient.post('/school/drivers', {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: `${formData.firstName.toLowerCase()}@${Math.random().toString(36).substring(7)}`,
-        role: 'DRIVER',
         phone: formData.phone,
-        companyId,
-      });
-
-      const driverId = (driverResponse as any).id;
-
-      // Step 2: Create driver profile with license
-      await apiClient.post('/drivers', {
-        userId: driverId,
         license: formData.license,
       });
 
-      // Step 3: Find or create bus and assign driver
+      const driver = driverResponse as any;
+      const driverUserId = driver.userId;
+
+      // Step 2: Find or create bus and assign driver
       if (formData.plateNumber) {
         let bus = buses.find((b) => b.plateNumber === formData.plateNumber);
 
@@ -106,23 +100,24 @@ export default function OnboardDriverPage({
           const busResponse: any = await apiClient.post('/buses', {
             plateNumber: formData.plateNumber,
             capacity: 50,
-            driverId,
+            schoolId: schoolId,
+            driverId: driverUserId,
           });
           bus = busResponse;
         } else {
           // Assign existing bus to driver
           await apiClient.patch(`/buses/${bus.id}`, {
-            driverId,
+            driverId: driverUserId,
           });
         }
       }
 
-      // Step 4: Upload photo if provided
+      // Step 3: Upload photo if provided
       if (formData.photo) {
         const photoFormData = new FormData();
         photoFormData.append('photo', formData.photo);
 
-        await apiClient.post(`/admin/driver/${driverId}/photo`, photoFormData, {
+        await apiClient.post(`/admin/driver/${driverUserId}/photo`, photoFormData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

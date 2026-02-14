@@ -14,43 +14,43 @@ export class RoutesController {
   ) {}
 
   @Post()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   create(@Body() createRouteDto: any) {
     return this.routesService.create(createRouteDto);
   }
 
   @Get()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   findAll() {
     return this.routesService.findAll();
   }
 
   @Get(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   findOne(@Param('id') id: string) {
     return this.routesService.findOne(id);
   }
 
   @Get('school/:schoolId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   findBySchool(@Param('schoolId') schoolId: string) {
     return this.routesService.findBySchoolId(schoolId);
   }
 
   @Patch(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   update(@Param('id') id: string, @Body() updateRouteDto: any) {
     return this.routesService.update(id, updateRouteDto);
   }
 
   @Delete(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   remove(@Param('id') id: string) {
     return this.routesService.remove(id);
   }
 
   @Post('auto-generate/:schoolId')
-  @Roles('COMPANY_ADMIN', 'PLATFORM_ADMIN')
+  @Roles('SCHOOL_ADMIN', 'PLATFORM_ADMIN')
   autoGenerateRoutes(@Param('schoolId') schoolId: string) {
     return this.routeAutoService.autoGenerateRoutes(schoolId);
   }

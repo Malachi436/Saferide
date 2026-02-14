@@ -39,27 +39,20 @@ interface Route {
   schoolId: string;
   busId?: string;
   shift?: string;
-}
-
-interface Bus {
-  id: string;
-  plateNumber: string;
-  driver?: {
+  bus?: {
     id: string;
-    user: {
-      firstName: string;
-      lastName: string;
+    plateNumber: string;
+    driver?: {
+      id: string;
+      user: {
+        firstName: string;
+        lastName: string;
+        email: string;
+      };
     };
   };
 }
 
-interface Driver {
-  id: string;
-  user: {
-    firstName: string;
-    lastName: string;
-  };
-}
 
 const DAYS_OF_WEEK = [
   'MONDAY',
@@ -76,20 +69,16 @@ export default function ScheduledRoutesPage({
 }: {
   params: Promise<{ schoolId: string }>;
 }) {
-  const { schoolId: companyId } = use(params);
+  const { schoolId } = use(params);
   
   const [scheduledRoutes, setScheduledRoutes] = useState<ScheduledRoute[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
-  const [buses, setBuses] = useState<Bus[]>([]);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<ScheduledRoute | null>(null);
   
   const [formData, setFormData] = useState({
     routeId: '',
-    driverId: '',
-    busId: '',
     scheduledTime: '07:00',
     recurringDays: [] as string[],
     effectiveFrom: '',
@@ -98,25 +87,21 @@ export default function ScheduledRoutesPage({
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (companyId) {
+    if (schoolId) {
       loadData();
     }
-  }, [companyId]);
+  }, [schoolId]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [scheduledRes, routesRes, busesRes, driversRes] = await Promise.all([
-        apiClient.get(`/scheduled-routes/company/${companyId}`),
-        apiClient.get(`/admin/company/${companyId}/routes`),
-        apiClient.get(`/buses/company/${companyId}`),
-        apiClient.get(`/admin/company/${companyId}/drivers`),
+      const [scheduledRes, routesRes] = await Promise.all([
+        apiClient.get(`/scheduled-routes/school/${schoolId}`),
+        apiClient.get(`/admin/school/${schoolId}/routes`),
       ]);
       
       setScheduledRoutes(Array.isArray(scheduledRes) ? scheduledRes : []);
       setRoutes(Array.isArray(routesRes) ? routesRes : []);
-      setBuses(Array.isArray(busesRes) ? busesRes : []);
-      setDrivers(Array.isArray(driversRes) ? driversRes : []);
     } catch (err) {
       console.error('Error loading data:', err);
     } finally {
@@ -124,12 +109,16 @@ export default function ScheduledRoutesPage({
     }
   };
 
+  // Helper to get selected route for auto-populating driver and bus
+  const getSelectedRoute = () => {
+    if (!formData.routeId) return null;
+    return routes.find(r => r.id === formData.routeId) || null;
+  };
+
   const openCreateModal = () => {
     setEditingSchedule(null);
     setFormData({
       routeId: '',
-      driverId: '',
-      busId: '',
       scheduledTime: '07:00',
       recurringDays: [],
       effectiveFrom: '',
@@ -142,8 +131,6 @@ export default function ScheduledRoutesPage({
     setEditingSchedule(schedule);
     setFormData({
       routeId: schedule.routeId,
-      driverId: schedule.driverId,
-      busId: schedule.busId,
       scheduledTime: schedule.scheduledTime,
       recurringDays: schedule.recurringDays,
       effectiveFrom: schedule.effectiveFrom?.split('T')[0] || '',
@@ -155,8 +142,8 @@ export default function ScheduledRoutesPage({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.routeId || !formData.driverId || !formData.busId) {
-      alert('Please fill all required fields');
+    if (!formData.routeId) {
+      alert('Please select a route');
       return;
     }
 
@@ -165,13 +152,28 @@ export default function ScheduledRoutesPage({
       return;
     }
 
+    // Auto-populate driver and bus from route
+    const selectedRoute = getSelectedRoute();
+    const driverId = selectedRoute?.bus?.driver?.id;
+    const busId = selectedRoute?.busId;
+
+    if (!driverId) {
+      alert('The route must have a driver assigned to create a schedule');
+      return;
+    }
+
+    if (!busId) {
+      alert('The route must have a bus assigned to create a schedule');
+      return;
+    }
+
     try {
       setSubmitting(true);
 
       const payload = {
         routeId: formData.routeId,
-        driverId: formData.driverId,
-        busId: formData.busId,
+        driverId,
+        busId,
         scheduledTime: formData.scheduledTime,
         recurringDays: formData.recurringDays,
         effectiveFrom: formData.effectiveFrom || undefined,
@@ -384,50 +386,10 @@ export default function ScheduledRoutesPage({
                     <option value="">Select route...</option>
                     {routes.map((route) => (
                       <option key={route.id} value={route.id}>
-                        {route.name}
+                        {route.name} {route.bus ? `(Bus: ${route.bus.plateNumber}${route.bus.driver ? ', Driver: ' + route.bus.driver.user.firstName + ' ' + route.bus.driver.user.lastName : ''})` : '(No bus assigned)'}
                       </option>
                     ))}
                   </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Driver *
-                    </label>
-                    <select
-                      value={formData.driverId}
-                      onChange={(e) => setFormData(prev => ({ ...prev, driverId: e.target.value }))}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    >
-                      <option value="">Select driver...</option>
-                      {drivers.map((driver) => (
-                        <option key={driver.id} value={driver.id}>
-                          {driver.user.firstName} {driver.user.lastName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Bus *
-                    </label>
-                    <select
-                      value={formData.busId}
-                      onChange={(e) => setFormData(prev => ({ ...prev, busId: e.target.value }))}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    >
-                      <option value="">Select bus...</option>
-                      {buses.map((bus) => (
-                        <option key={bus.id} value={bus.id}>
-                          {bus.plateNumber}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
 
                 <div className="mb-4">

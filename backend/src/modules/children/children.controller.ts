@@ -13,49 +13,49 @@ export class ChildrenController {
   constructor(private readonly childrenService: ChildrenService, private prisma: PrismaService) {}
 
   @Post()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT')
   create(@Body() createChildDto: any) {
     return this.childrenService.create(createChildDto);
   }
 
   @Post('bulk-onboard')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   bulkOnboard(@Body() bulkOnboardDto: any) {
     return this.childrenService.bulkOnboard(bulkOnboardDto);
   }
 
   @Get()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   findAll() {
     return this.childrenService.findAll();
   }
 
   @Get(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT')
   findOne(@Param('id') id: string) {
     return this.childrenService.findOne(id);
   }
 
   @Get('parent/:parentId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT')
   findByParent(@Param('parentId') parentId: string) {
     return this.childrenService.findByParentId(parentId);
   }
 
   @Patch(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT')
   update(@Param('id') id: string, @Body() updateChildDto: any) {
     return this.childrenService.update(id, updateChildDto);
   }
 
   @Delete(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   remove(@Param('id') id: string) {
     return this.childrenService.remove(id);
   }
 
   @Get('public/schools')
-  @Roles('PARENT', 'PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PARENT', 'PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   async getSchools() {
     return this.prisma.school.findMany({
       select: {
@@ -78,22 +78,22 @@ export class ChildrenController {
 
   // Generate unique code for child (Admin only)
   @Post('generate-code')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   async generateCode() {
     const code = await this.childrenService.generateUniqueCode();
     return { uniqueCode: code };
   }
 
   // Bulk update grades (Annual promotions)
-  @Post('company/:companyId/bulk-update-grades')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Post('school/:schoolId/bulk-update-grades')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   bulkUpdateGrades(
-    @Param('companyId') companyId: string,
+    @Param('schoolId') schoolId: string,
     @Body() updateDto: BulkUpdateGradesDto,
     @Req() req: any,
   ) {
     const adminId = req.user.userId;
-    return this.childrenService.bulkUpdateGrades(companyId, updateDto, adminId);
+    return this.childrenService.bulkUpdateGrades(schoolId, updateDto, adminId);
   }
 
   // Request location change (Parent)
@@ -105,15 +105,15 @@ export class ChildrenController {
   }
 
   // Get pending location change requests (Admin)
-  @Get('company/:companyId/location-change/pending')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  getPendingLocationChangeRequests(@Param('companyId') companyId: string) {
-    return this.childrenService.getPendingLocationChangeRequests(companyId);
+  @Get('school/:schoolId/location-change/pending')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  getPendingLocationChangeRequests(@Param('schoolId') schoolId: string) {
+    return this.childrenService.getPendingLocationChangeRequests(schoolId);
   }
 
   // Review location change request (Admin)
   @Patch('location-change/:requestId/review')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   reviewLocationChangeRequest(
     @Param('requestId') requestId: string,
     @Body() reviewDto: ReviewLocationChangeDto,

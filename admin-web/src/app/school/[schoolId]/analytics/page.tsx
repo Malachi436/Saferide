@@ -38,9 +38,9 @@ type DateRange = 'daily' | 'weekly' | 'monthly';
 export default function CompanyAnalyticsPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId: companyId } = use(params);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -51,9 +51,10 @@ export default function CompanyAnalyticsPage({
   }, [companyId, dateRange]);
 
   const fetchAnalytics = async () => {
+    if (!companyId || companyId === 'undefined') return;
     try {
       setLoading(true);
-      const response = await apiClient.get(`/admin/company/${companyId}/analytics?range=${dateRange}`);
+      const response = await apiClient.get(`/admin/school/${companyId}/analytics?range=${dateRange}`);
       if (response && typeof response === 'object') {
         setAnalytics(response as AnalyticsData);
       }

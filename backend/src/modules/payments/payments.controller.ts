@@ -34,13 +34,13 @@ export class PaymentsController {
   }
 
   @Get('history/:parentId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT')
   async getPaymentHistory(@Param('parentId') parentId: string) {
     return this.paymentsService.getPaymentHistory(parentId);
   }
 
   @Get(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT')
   async getPaymentById(@Param('id') id: string) {
     return this.paymentsService.getPaymentById(id);
   }

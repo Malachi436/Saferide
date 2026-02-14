@@ -135,4 +135,150 @@ export class AttendanceService {
   async markChildAsMissed(childId: string, tripId: string, recordedBy: string): Promise<ChildAttendance> {
     return this.recordAttendance(childId, tripId, AttendanceStatus.MISSED, recordedBy);
   }
+
+  /**
+   * Verify all children on a trip are accounted for
+   * Returns list of children who haven't been marked as picked up/dropped
+   */
+  async verifyTripAttendance(tripId: string): Promise<{
+    totalExpected: number;
+    totalAccounted: number;
+    missing: Array<{
+      childId: string;
+      childName: string;
+      expectedStatus: string;
+    }>;
+    allAccounted: boolean;
+  }> {
+    // Get trip with all expected children
+    const trip = await this.prisma.trip.findUnique({
+      where: { id: tripId },
+      include: {
+        route: {
+          include: {
+            children: {
+              where: { isClaimed: true },
+            },
+          },
+        },
+        attendances: true,
+      },
+    });
+
+    if (!trip) {
+      throw new Error('Trip not found');
+    }
+
+    const expectedChildren = trip.route.children;
+    const attendedChildren = trip.attendances;
+
+    // Find children not yet marked as picked up or dropped
+    const missing = expectedChildren
+      .filter(child => {
+        const attendance = attendedChildren.find(a => a.childId === child.id);
+        // Child is missing if no attendance or still pending
+        return !attendance || attendance.status === AttendanceStatus.PENDING;
+      })
+      .map(child => ({
+        childId: child.id,
+        childName: `${child.firstName} ${child.lastName}`,
+        expectedStatus: trip.status === 'RETURN_IN_PROGRESS' ? 'DROPPED' : 'PICKED_UP',
+      }));
+
+    return {
+      totalExpected: expectedChildren.length,
+      totalAccounted: expectedChildren.length - missing.length,
+      missing,
+      allAccounted: missing.length === 0,
+    };
+  }
+
+  /**
+   * Alert when child remains on bus after trip ends
+   * This is a critical safety feature - triggers emergency notification
+   */
+  async checkForChildrenLeftOnBus(tripId: string): Promise<{
+    childrenLeftOnBus: Array<{
+      childId: string;
+      childName: string;
+      parentContact: string | null;
+    }>;
+    alertTriggered: boolean;
+  }> {
+    const verification = await this.verifyTripAttendance(tripId);
+    
+    if (!verification.allAccounted) {
+      // Get parent contact info for missing children
+      const childrenOnBus = await Promise.all(
+        verification.missing.map(async (m) => {
+          const child = await this.prisma.child.findUnique({
+            where: { id: m.childId },
+            include: { parent: true },
+          });
+          return {
+            childId: m.childId,
+            childName: m.childName,
+            parentContact: child?.parent?.phone || child?.parentPhone || null,
+          };
+        })
+      );
+
+      // Create critical alert notification to school admin
+      const trip = await this.prisma.trip.findUnique({
+        where: { id: tripId },
+        include: {
+          route: true,
+          driver: { include: { user: true } },
+          bus: true,
+        },
+      });
+
+      if (trip) {
+        // Notify school admin
+        const schoolAdmins = await this.prisma.user.findMany({
+          where: {
+            schoolId: trip.route.schoolId,
+            role: 'SCHOOL_ADMIN',
+          },
+        });
+
+        for (const admin of schoolAdmins) {
+          await this.prisma.notification.create({
+            data: {
+              userId: admin.id,
+              title: 'CRITICAL: Children Left on Bus',
+              message: `${verification.missing.length} child(ren) may still be on bus ${trip.bus.plateNumber} on trip ${trip.route.name}. Please verify immediately.`,
+              type: NotificationType.ALERT,
+              requiresAck: true,
+              relatedEntityType: 'TRIP',
+              relatedEntityId: tripId,
+            },
+          });
+        }
+
+        // Also notify driver
+        await this.prisma.notification.create({
+          data: {
+            userId: trip.driver.userId,
+            title: 'CRITICAL: Verify Bus is Empty',
+            message: `Please perform a final sweep of the bus. ${verification.missing.length} child(ren) are not accounted for on trip ${trip.route.name}.`,
+            type: NotificationType.ALERT,
+            requiresAck: true,
+            relatedEntityType: 'TRIP',
+            relatedEntityId: tripId,
+          },
+        });
+      }
+
+      return {
+        childrenLeftOnBus: childrenOnBus,
+        alertTriggered: true,
+      };
+    }
+
+    return {
+      childrenLeftOnBus: [],
+      alertTriggered: false,
+    };
+  }
 }

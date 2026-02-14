@@ -70,9 +70,10 @@ export default function BusesPage({
   }, [schoolId]);
 
   const fetchBuses = async () => {
+    if (!schoolId || schoolId === 'undefined') return;
     try {
       setLoading(true);
-      const data = await apiClient.get<Bus[]>(`/buses/company/${schoolId}`);
+      const data = await apiClient.get<Bus[]>(`/buses/school/${schoolId}`);
       setBuses(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load buses');
@@ -83,7 +84,7 @@ export default function BusesPage({
 
   const fetchDrivers = async () => {
     try {
-      const data = await apiClient.get<Driver[]>(`/admin/company/${schoolId}/drivers`);
+      const data = await apiClient.get<Driver[]>(`/admin/school/${schoolId}/drivers`);
       setDrivers(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error('Error loading drivers:', err);
@@ -92,7 +93,7 @@ export default function BusesPage({
 
   const fetchRoutes = async () => {
     try {
-      const data: any = await apiClient.get(`/admin/company/${schoolId}/routes`);
+      const data: any = await apiClient.get(`/admin/school/${schoolId}/routes`);
       setRoutes(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error('Error loading routes:', err);
@@ -103,7 +104,7 @@ export default function BusesPage({
     try {
       setLoadingChildren(true);
       // Get all children for this company
-      const allChildren: any = await apiClient.get(`/admin/company/${schoolId}/children`);
+      const allChildren: any = await apiClient.get(`/admin/school/${schoolId}/children`);
       
       // Filter children whose route is assigned to this bus
       const children = Array.isArray(allChildren) ? allChildren.filter((child: any) => {
@@ -145,7 +146,7 @@ export default function BusesPage({
       await apiClient.post('/buses', {
         plateNumber: formData.plateNumber.trim().toUpperCase(),
         capacity: parseInt(formData.capacity.toString()),
-        companyId: schoolId,  // Add company ownership
+        schoolId: schoolId,
         driverId: null,
       });
       alert(`✅ Bus ${formData.plateNumber.toUpperCase()} added successfully!`);

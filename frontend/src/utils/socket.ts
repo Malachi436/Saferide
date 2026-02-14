@@ -10,9 +10,9 @@ import { Platform } from 'react-native';
 
 // Socket URL - Backend NestJS server
 // Use your computer's local network IP (check with ipconfig on Windows)
-// For physical device testing: Use WiFi IP (e.g., 172.20.10.3)
+// For physical device testing: Use WiFi IP (e.g., 192.168.1.250)
 // For emulator/simulator: Use localhost or 10.0.2.2 (Android) or localhost (iOS)
-const SOCKET_URL = 'http://172.20.10.3:3000';
+const SOCKET_URL = 'http://192.168.1.250:3000';
 
 class SocketService {
   private socket: Socket | null = null;

@@ -30,13 +30,13 @@ export class GpsController {
   }
 
   @Get('location/:busId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER', 'PARENT')
   async getCurrentLocation(@Param('busId') busId: string) {
     return this.gpsService.getCurrentLocation(busId);
   }
 
   @Get('locations/:busId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   async getRecentLocations(
     @Param('busId') busId: string,
     @Query('startTime') startTime?: string,

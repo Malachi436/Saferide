@@ -16,25 +16,25 @@ export class TripsController {
   ) {}
 
   @Post()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   create(@Body() createTripDto: any) {
     return this.tripsService.create(createTripDto);
   }
 
   @Get()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   findAll() {
     return this.tripsService.findAll();
   }
 
   @Get(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   findOne(@Param('id') id: string) {
     return this.tripsService.findOne(id);
   }
 
   @Get('child/:childId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT')
   async findActiveByChild(
     @Param('childId') childId: string,
     @Req() req,
@@ -58,22 +58,52 @@ export class TripsController {
     return this.tripsService.findActiveByChildId(childId);
   }
 
-  @Get('company/:companyId/active')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  findActiveByCompany(@Param('companyId') companyId: string) {
-    return this.tripsService.findActiveByCompanyId(companyId);
+  @Get('school/:schoolId/active')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  findActiveBySchool(@Param('schoolId') schoolId: string) {
+    return this.tripsService.findActiveBySchoolId(schoolId);
   }
 
   @Patch(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   update(@Param('id') id: string, @Body() updateTripDto: any) {
     return this.tripsService.update(id, updateTripDto);
   }
 
   @Patch(':id/status')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
-  transitionStatus(@Param('id') id: string, @Body() statusDto: any) {
-    return this.tripsService.transitionTripStatus(id, statusDto.status, statusDto.userId);
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
+  transitionStatus(
+    @Param('id') id: string, 
+    @Body() statusDto: {
+      status: string;
+      userId: string;
+      delayMinutes?: number;
+      delayReason?: string;
+      emergencyType?: string;
+      emergencyNote?: string;
+    },
+  ) {
+    return this.tripsService.transitionTripStatus(
+      id, 
+      statusDto.status as any, 
+      statusDto.userId,
+      {
+        delayMinutes: statusDto.delayMinutes,
+        delayReason: statusDto.delayReason,
+        emergencyType: statusDto.emergencyType,
+        emergencyNote: statusDto.emergencyNote,
+      }
+    );
+  }
+
+  // Assign backup driver to a trip
+  @Patch(':id/backup-driver')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  assignBackupDriver(
+    @Param('id') id: string,
+    @Body() body: { backupDriverId: string },
+  ) {
+    return this.tripsService.assignBackupDriver(id, body.backupDriverId);
   }
 
   @Delete(':id')
@@ -83,7 +113,7 @@ export class TripsController {
   }
 
   @Post('generate-today')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   async generateTodayTrips() {
     return await this.tripAutomationService.generateTripsManually();
   }

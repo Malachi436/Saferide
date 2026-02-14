@@ -1,4 +1,4 @@
-export type UserRole = 'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'platform_admin' | 'company_admin';
+export type UserRole = 'PLATFORM_ADMIN' | 'SCHOOL_ADMIN' | 'DRIVER' | 'PARENT' | 'platform_admin' | 'school_admin';
 
 export interface User {
   id: string;
@@ -6,7 +6,7 @@ export interface User {
   firstName: string;
   lastName: string;
   role: UserRole;
-  companyId?: string;
+  schoolId?: string;
 }
 
 export interface LoginResponse {
@@ -14,7 +14,7 @@ export interface LoginResponse {
   refresh_token: string;
   user: User;
   role: string;
-  companyId?: string;
+  schoolId?: string;
   userId: string;
 }
 

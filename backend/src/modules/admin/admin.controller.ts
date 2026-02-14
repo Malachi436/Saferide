@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Delete, Put, Query, UploadedFile, UseInterceptors, Req, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Delete, Put, Query, UploadedFile, UseInterceptors, Req, Patch, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { Roles } from '../roles/roles.decorator';
@@ -17,10 +17,10 @@ export class AdminController {
     return this.adminService.getPlatformStats();
   }
 
-  @Get('stats/company/:companyId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyStats(@Param('companyId') companyId: string, @Req() req: any) {
-    return this.adminService.getCompanyStats(companyId, req.user);
+  @Get('stats/school/:schoolId')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolStats(@Param('schoolId') schoolId: string, @Req() req: any) {
+    return this.adminService.getSchoolStats(schoolId, req.user);
   }
 
   @Post('company')
@@ -29,56 +29,57 @@ export class AdminController {
     return this.adminService.createCompany(createCompanyDto);
   }
 
-  @Post('school/:companyId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async createSchool(@Param('companyId') companyId: string, @Body() createSchoolDto: any) {
-    return this.adminService.createSchool(companyId, createSchoolDto);
+  @Post('school')
+  @Roles('PLATFORM_ADMIN')
+  async createSchool(@Body() createSchoolDto: any) {
+    return this.adminService.createSchool(createSchoolDto);
   }
 
   @Get('companies')
   @Roles('PLATFORM_ADMIN')
   async getAllCompanies() {
-    return this.adminService.getAllCompanies();
+    // Companies are no longer supported
+    throw new BadRequestException('Companies are no longer supported');
   }
 
   @Get('schools')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   async getAllSchools() {
     return this.adminService.getAllSchools();
   }
 
-  @Get('company/:companyId/schools')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanySchools(@Param('companyId') companyId: string) {
-    return this.adminService.getCompanySchools(companyId);
+  @Get('school/:schoolId/schools')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getCompanySchools(@Param('schoolId') schoolId: string) {
+    return this.adminService.getCompanySchools(schoolId);
   }
 
-  @Get('company/:companyId/routes')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyRoutes(@Param('companyId') companyId: string) {
-    return this.adminService.getCompanyRoutes(companyId);
+  @Get('school/:schoolId/routes')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolRoutes(@Param('schoolId') schoolId: string) {
+    return this.adminService.getSchoolRoutes(schoolId);
   }
 
-  @Get('company/:companyId/children')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyChildren(@Param('companyId') companyId: string) {
-    return this.adminService.getCompanyChildren(companyId);
+  @Get('school/:schoolId/children')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolChildren(@Param('schoolId') schoolId: string) {
+    return this.adminService.getSchoolChildren(schoolId);
   }
 
-  @Get('company/:companyId/children/payments')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getChildrenPayments(@Param('companyId') companyId: string) {
-    return this.adminService.getChildrenPaymentStatus(companyId);
+  @Get('school/:schoolId/children/payments')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getChildrenPayments(@Param('schoolId') schoolId: string) {
+    return this.adminService.getChildrenPaymentStatus(schoolId);
   }
 
-  @Get('company/:companyId/drivers')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyDrivers(@Param('companyId') companyId: string) {
-    return this.adminService.getCompanyDrivers(companyId);
+  @Get('school/:schoolId/drivers')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolDrivers(@Param('schoolId') schoolId: string) {
+    return this.adminService.getSchoolDrivers(schoolId);
   }
 
   @Post('driver/:driverId/photo')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   @UseInterceptors(FileInterceptor('photo'))
   async uploadDriverPhoto(
     @Param('driverId') driverId: string,
@@ -88,97 +89,97 @@ export class AdminController {
   }
 
   @Get('companies/:companyId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN')
   async getCompanyById(@Param('companyId') companyId: string) {
-    return this.adminService.getCompanyById(companyId);
+    throw new BadRequestException('Companies are no longer supported');
   }
 
   @Delete('company/:companyId')
   @Roles('PLATFORM_ADMIN')
   async deleteCompany(@Param('companyId') companyId: string) {
-    return this.adminService.deleteCompany(companyId);
+    throw new BadRequestException('Companies are no longer supported');
   }
 
   @Put('school/:schoolId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   async updateSchool(@Param('schoolId') schoolId: string, @Body() updateSchoolDto: any) {
     return this.adminService.updateSchool(schoolId, updateSchoolDto);
   }
 
   @Delete('school/:schoolId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   async deleteSchool(@Param('schoolId') schoolId: string) {
     return this.adminService.deleteSchool(schoolId);
   }
 
-  @Get('company/:companyId/analytics')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyAnalytics(@Param('companyId') companyId: string, @Query('range') range?: string) {
-    return this.adminService.getCompanyAnalytics(companyId, range);
+  @Get('school/:schoolId/analytics')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolAnalytics(@Param('schoolId') schoolId: string, @Query('range') range?: string) {
+    return this.adminService.getSchoolAnalytics(schoolId, range);
   }
 
-  @Get('company/:companyId/trips')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyTrips(@Param('companyId') companyId: string) {
-    return this.adminService.getCompanyTrips(companyId);
+  @Get('school/:schoolId/trips')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolTrips(@Param('schoolId') schoolId: string) {
+    return this.adminService.getSchoolTrips(schoolId);
   }
 
-  @Get('company/:companyId/trips/active')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyActiveTrips(@Param('companyId') companyId: string) {
-    return this.adminService.getCompanyActiveTrips(companyId);
+  @Get('school/:schoolId/trips/active')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolActiveTrips(@Param('schoolId') schoolId: string) {
+    return this.adminService.getSchoolActiveTrips(schoolId);
   }
 
-  @Get('company/:companyId/reports/attendance')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getAttendanceReport(@Param('companyId') companyId: string, @Query('range') range?: string) {
-    return this.adminService.getAttendanceReport(companyId, range);
+  @Get('school/:schoolId/reports/attendance')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getAttendanceReport(@Param('schoolId') schoolId: string, @Query('range') range?: string) {
+    return this.adminService.getAttendanceReport(schoolId, range);
   }
 
-  @Get('company/:companyId/reports/payments')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getPaymentReport(@Param('companyId') companyId: string, @Query('range') range?: string) {
-    return this.adminService.getPaymentReport(companyId, range);
+  @Get('school/:schoolId/reports/payments')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getPaymentReport(@Param('schoolId') schoolId: string, @Query('range') range?: string) {
+    return this.adminService.getPaymentReport(schoolId, range);
   }
 
-  @Get('company/:companyId/reports/driver-performance')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getDriverPerformanceReport(@Param('companyId') companyId: string, @Query('range') range?: string) {
-    return this.adminService.getDriverPerformanceReport(companyId, range);
+  @Get('school/:schoolId/reports/driver-performance')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getDriverPerformanceReport(@Param('schoolId') schoolId: string, @Query('range') range?: string) {
+    return this.adminService.getDriverPerformanceReport(schoolId, range);
   }
 
   // Fare Management
-  @Get('company/:companyId/fare')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyFare(@Param('companyId') companyId: string) {
-    return this.adminService.getCompanyFare(companyId);
+  @Get('school/:schoolId/fare')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolFare(@Param('schoolId') schoolId: string) {
+    return this.adminService.getSchoolFare(schoolId);
   }
 
-  @Patch('company/:companyId/fare')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async updateCompanyFare(
-    @Param('companyId') companyId: string,
+  @Patch('school/:schoolId/fare')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async updateSchoolFare(
+    @Param('schoolId') schoolId: string,
     @Body() updateFareDto: UpdateFareDto,
     @Req() req: any,
   ) {
     const adminId = req.user.userId;
     return this.adminService.updateCompanyFare(
-      companyId,
+      schoolId,
       updateFareDto.newFare,
       adminId,
       updateFareDto.reason,
     );
   }
 
-  @Get('company/:companyId/fare/history')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getFareHistory(@Param('companyId') companyId: string) {
-    return this.adminService.getFareHistory(companyId);
+  @Get('school/:schoolId/fare/history')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getFareHistory(@Param('schoolId') schoolId: string) {
+    return this.adminService.getFareHistory(schoolId);
   }
 
-  @Get('company/:companyId/payment-plans')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  async getCompanyPaymentPlans(@Param('companyId') companyId: string) {
+  @Get('school/:schoolId/payment-plans')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  async getSchoolPaymentPlans(@Param('schoolId') schoolId: string) {
     // TODO: Implement payment plans feature
     // For now, return empty array to prevent 404 error
     return [];

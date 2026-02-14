@@ -62,7 +62,6 @@ export class AuthService {
       email: user.email, 
       sub: user.id,
       role: user.role,
-      companyId: user.companyId,
       schoolId: user.schoolId
     };
     
@@ -70,7 +69,7 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       refresh_token: await this.generateRefreshToken(user),
       role: user.role,
-      companyId: user.companyId,
+      schoolId: user.schoolId,
       userId: user.id,
       user: {
         id: user.id,
@@ -79,7 +78,7 @@ export class AuthService {
         lastName: user.lastName,
         phone: user.phone,
         role: user.role,
-        companyId: user.companyId,
+        schoolId: user.schoolId,
       }
     };
   }
@@ -131,7 +130,6 @@ export class AuthService {
         email: user.email, 
         sub: user.id,
         role: user.role,
-        companyId: user.companyId,
         schoolId: user.schoolId
       };
       

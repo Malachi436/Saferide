@@ -5,7 +5,6 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { apiClient } from '@/lib/api-client';
 
 interface PlatformStats {
-  totalCompanies: number;
   totalSchools: number;
   totalUsers: number;
   totalDrivers: number;
@@ -51,10 +50,6 @@ export default function PlatformAnalyticsPage() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-lg border border-slate-200 p-6">
-                <p className="text-slate-600 text-sm font-semibold">Total Companies</p>
-                <p className="text-3xl font-bold text-blue-600 mt-2">{stats?.totalCompanies || 0}</p>
-              </div>
-              <div className="bg-white rounded-lg border border-slate-200 p-6">
                 <p className="text-slate-600 text-sm font-semibold">Total Schools</p>
                 <p className="text-3xl font-bold text-teal-600 mt-2">{stats?.totalSchools || 0}</p>
               </div>
@@ -88,8 +83,8 @@ export default function PlatformAnalyticsPage() {
               <h2 className="text-xl font-bold text-slate-900 mb-4">System Health</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Active Companies</p>
-                  <p className="text-2xl font-bold text-green-600">{stats?.totalCompanies || 0}</p>
+                  <p className="text-sm text-slate-600 mb-1">Active Schools</p>
+                  <p className="text-2xl font-bold text-green-600">{stats?.totalSchools || 0}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-600 mb-1">Fleet Size</p>

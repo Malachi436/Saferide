@@ -50,13 +50,10 @@ export class RouteAutoService {
     }
 
     // 3. Get available buses to determine capacity
+    // For school-centric model, use school-owned buses
     const buses = await this.prisma.bus.findMany({
       where: {
-        driver: {
-          user: {
-            companyId: school.companyId,
-          },
-        },
+        schoolId: schoolId // School-owned buses only
       },
     });
 

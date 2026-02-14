@@ -49,9 +49,9 @@ interface GenerationResult {
 export default function AutoGenerateRoutesPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId } = use(params);
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -65,7 +65,7 @@ export default function AutoGenerateRoutesPage({
   const fetchSchools = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get<School[]>(`/admin/company/${companyId}/schools`);
+      const data = await apiClient.get<School[]>(`/admin/school/${schoolId}/schools`);
       setSchools(data || []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load schools');

@@ -14,14 +14,14 @@ export interface BusLocation {
   timestamp?: string;
 }
 
-export function useSocket(companyId: string | null) {
+export function useSocket(schoolId: string | null) {
   const [connected, setConnected] = useState(false);
   const [busLocations, setBusLocations] = useState<{ [busId: string]: BusLocation }>({});
   const socketRef = useRef<Socket | null>(null);
 
   const connect = useCallback(() => {
-    if (!companyId) {
-      console.log('[Socket] No companyId, skipping connection');
+    if (!schoolId) {
+      console.log('[Socket] No schoolId, skipping connection');
       return;
     }
 
@@ -49,9 +49,9 @@ export function useSocket(companyId: string | null) {
       console.log('[Socket] Connected:', socketRef.current?.id);
       setConnected(true);
 
-      // Join company room
-      socketRef.current?.emit('join_company_room', { companyId });
-      console.log('[Socket] Joined company room:', companyId);
+      // Join school room
+      socketRef.current?.emit('join_school_room', { schoolId });
+      console.log('[Socket] Joined school room:', schoolId);
     });
 
     socketRef.current.on('disconnect', (reason) => {
@@ -116,7 +116,7 @@ export function useSocket(companyId: string | null) {
     socketRef.current.onAny((eventName, ...args) => {
       console.log('[Socket] Event received:', eventName, args);
     });
-  }, [companyId]);
+  }, [schoolId]);
 
   const disconnect = useCallback(() => {
     if (socketRef.current) {
@@ -135,7 +135,7 @@ export function useSocket(companyId: string | null) {
   }, []);
 
   useEffect(() => {
-    if (companyId) {
+    if (schoolId) {
       connect();
     }
     
@@ -156,7 +156,7 @@ export function useSocket(companyId: string | null) {
         window.removeEventListener('token-refreshed', handleTokenRefresh);
       }
     };
-  }, [companyId, connect, disconnect]);
+  }, [schoolId, connect, disconnect]);
 
   return {
     connected,

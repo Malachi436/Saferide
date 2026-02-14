@@ -80,7 +80,7 @@ export default function RoutesPage({
   const loadRoutes = async () => {
     try {
       setLoading(true);
-      const data: any = await apiClient.get(`/admin/company/${companyId}/routes`);
+      const data: any = await apiClient.get(`/admin/school/${companyId}/routes`);
       setRoutes(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error loading routes:', err);
@@ -119,8 +119,8 @@ export default function RoutesPage({
     try {
       // Load buses and schools in parallel
       const [busesRes, schoolsRes] = await Promise.all([
-        apiClient.get(`/buses/company/${companyId}`),
-        apiClient.get(`/admin/company/${companyId}/schools`)
+        apiClient.get(`/buses/school/${companyId}`),
+        apiClient.get(`/admin/school/${companyId}/schools`)
       ]);
 
       const buses = Array.isArray(busesRes) ? busesRes : [];

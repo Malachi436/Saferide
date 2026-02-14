@@ -18,7 +18,7 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   async createNotification(@Body() createNotificationDto: CreateNotificationDto) {
     return this.notificationsService.createNotification(
       createNotificationDto.userId,
@@ -29,19 +29,19 @@ export class NotificationsController {
   }
 
   @Get('user/:userId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT', 'DRIVER')
   async getUserNotifications(@Param('userId') userId: string) {
     return this.notificationsService.getUserNotifications(userId);
   }
 
   @Get('unread-count/:userId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT', 'DRIVER')
   async getUnreadCount(@Param('userId') userId: string) {
     return this.notificationsService.getUnreadCount(userId);
   }
 
   @Patch(':id/read')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT', 'DRIVER')
   async markAsRead(@Param('id') id: string) {
     return this.notificationsService.markAsRead(id);
   }

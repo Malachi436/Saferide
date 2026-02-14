@@ -64,9 +64,9 @@ interface Driver {
 export default function TripsPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId } = use(params);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [activeTrips, setActiveTrips] = useState<Trip[]>([]);
   const [todayTrips, setTodayTrips] = useState<Trip[]>([]);
@@ -86,16 +86,17 @@ export default function TripsPage({
 
   useEffect(() => {
     fetchTrips();
-  }, [companyId]);
+  }, [schoolId]);
 
   const fetchTrips = async () => {
+    if (!schoolId || schoolId === 'undefined') return;
     try {
       setLoading(true);
       const [allTrips, active, busesData, driversData] = await Promise.all([
-        apiClient.get(`/admin/company/${companyId}/trips`),
-        apiClient.get(`/admin/company/${companyId}/trips/active`),
-        apiClient.get(`/buses/company/${companyId}`),
-        apiClient.get(`/admin/company/${companyId}/drivers`),
+        apiClient.get(`/admin/school/${schoolId}/trips`),
+        apiClient.get(`/admin/school/${schoolId}/trips/active`),
+        apiClient.get(`/buses/school/${schoolId}`),
+        apiClient.get(`/admin/school/${schoolId}/drivers`),
       ]);
       setTrips((allTrips as Trip[]) || []);
       setActiveTrips((active as Trip[]) || []);

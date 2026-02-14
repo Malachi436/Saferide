@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Validate role is admin (check for uppercase roles from backend)
       const role = userData.role?.toUpperCase() || '';
-      if (role !== 'PLATFORM_ADMIN' && role !== 'COMPANY_ADMIN') {
+      if (role !== 'PLATFORM_ADMIN' && role !== 'SCHOOL_ADMIN') {
         throw new Error('Unauthorized: Admin access required');
       }
 

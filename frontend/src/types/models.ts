@@ -62,6 +62,8 @@ export interface School {
   name: string;
   location: Location;
   companyId?: string;
+  baseFare?: number;
+  currency?: string;
 }
 
 export interface Bus {
@@ -71,7 +73,8 @@ export interface Bus {
   driverId?: string;
   routeId?: string;
   currentLocation?: Location;
-  companyId: string;
+  companyId?: string;
+  schoolId?: string;
 }
 
 export interface Route {
@@ -79,7 +82,8 @@ export interface Route {
   name: string;
   busId: string;
   stops: RouteStop[];
-  companyId: string;
+  schoolId: string;
+  companyId?: string;
 }
 
 export interface RouteStop {

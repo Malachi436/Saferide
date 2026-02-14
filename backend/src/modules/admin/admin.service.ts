@@ -14,7 +14,6 @@ export class AdminService {
 
   async getPlatformStats(): Promise<any> {
     const [
-      totalCompanies,
       totalSchools,
       totalUsers,
       totalDrivers,
@@ -23,7 +22,6 @@ export class AdminService {
       totalRoutes,
       totalTrips,
     ] = await Promise.all([
-      this.prisma.company.count(),
       this.prisma.school.count(),
       this.prisma.user.count(),
       this.prisma.driver.count(),
@@ -34,7 +32,6 @@ export class AdminService {
     ]);
 
     return {
-      totalCompanies,
       totalSchools,
       totalUsers,
       totalDrivers,
@@ -45,14 +42,14 @@ export class AdminService {
     };
   }
 
-  async getCompanyStats(companyId: string, user?: any): Promise<any> {
-    // If user is COMPANY_ADMIN, verify they belong to this company
-    if (user && user.role === 'COMPANY_ADMIN' && user.companyId !== companyId) {
-      throw new NotFoundException('Company not found');
+  async getSchoolStats(schoolId: string, user?: any): Promise<any> {
+    // Verify school exists
+    const school = await this.prisma.school.findUnique({ where: { id: schoolId } });
+    if (!school) {
+      throw new NotFoundException('School not found');
     }
 
     const [
-      totalSchools,
       totalUsers,
       totalDrivers,
       totalChildren,
@@ -60,17 +57,15 @@ export class AdminService {
       totalRoutes,
       totalTrips,
     ] = await Promise.all([
-      this.prisma.school.count({ where: { companyId } }),
-      this.prisma.user.count({ where: { companyId } }),
-      this.prisma.driver.count({ where: { user: { companyId } } }),
-      this.prisma.child.count({ where: { school: { companyId } } }),
-      this.prisma.bus.count({ where: { driver: { user: { companyId } } } }),
-      this.prisma.route.count({ where: { school: { companyId } } }),
-      this.prisma.trip.count({ where: { bus: { driver: { user: { companyId } } } } }),
+      this.prisma.user.count({ where: { schoolId } }),
+      this.prisma.driver.count({ where: { user: { schoolId } } }),
+      this.prisma.child.count({ where: { schoolId } }),
+      this.prisma.bus.count({ where: { schoolId } }),
+      this.prisma.route.count({ where: { schoolId } }),
+      this.prisma.trip.count({ where: { route: { schoolId } } }),
     ]);
 
     return {
-      totalSchools,
       totalUsers,
       totalDrivers,
       totalChildren,
@@ -81,84 +76,52 @@ export class AdminService {
   }
 
   async createCompany(data: any): Promise<any> {
-    const { name, email, phone, address, adminName, adminEmail, adminPassword, schoolName, schoolCode } = data;
-    
-    const company = await this.prisma.company.create({
-      data: {
-        name,
-        email,
-        phone,
-        address,
-      },
+    // Companies are no longer supported
+    throw new BadRequestException('Companies are no longer supported. Schools are now independent.');
+  }
+
+  async createSchool(data: any): Promise<any> {
+    // Extract admin credentials if provided
+    const { adminEmail, adminPassword, adminFirstName, adminLastName, ...schoolData } = data;
+
+    // Create the school first
+    const school = await this.prisma.school.create({
+      data: schoolData,
     });
 
-    if (adminEmail && adminPassword) {
+    // If admin credentials are provided, create a school admin user
+    if (adminEmail && adminPassword && adminFirstName && adminLastName) {
       const passwordHash = await bcrypt.hash(adminPassword, 10);
+      
       await this.prisma.user.create({
         data: {
-          firstName: adminName?.split(' ')[0] || 'Admin',
-          lastName: adminName?.split(' ')[1] || 'User',
           email: adminEmail,
           passwordHash,
-          role: 'COMPANY_ADMIN',
-          companyId: company.id,
+          firstName: adminFirstName,
+          lastName: adminLastName,
+          role: 'SCHOOL_ADMIN',
+          schoolId: school.id,
         },
       });
     }
 
-    // If schoolName provided, create first school
-    if (schoolName) {
-      await this.prisma.school.create({
-        data: {
-          name: schoolName,
-          schoolCode: schoolCode || null,
-          companyId: company.id,
-        },
-      });
-    }
-
-    return company;
-  }
-
-  async createSchool(companyId: string, data: any): Promise<any> {
-    return this.prisma.school.create({
-      data: {
-        ...data,
-        companyId,
-      },
-    });
-  }
-
-  async getAllCompanies(): Promise<any> {
-    return this.prisma.company.findMany({
-      include: {
-        users: true,
-        schools: true,
-      },
-    });
+    return school;
   }
 
   async getAllSchools(): Promise<any> {
+    return this.prisma.school.findMany();
+  }
+
+  async getCompanySchools(schoolId: string): Promise<any> {
     return this.prisma.school.findMany({
-      include: {
-        company: { select: { id: true, name: true } },
-      },
+      where: { id: schoolId },
     });
   }
 
-  async getCompanySchools(companyId: string): Promise<any> {
-    return this.prisma.school.findMany({
-      where: { companyId },
-      include: {
-        company: { select: { id: true, name: true } },
-      },
-    });
-  }
-
-  async getCompanyRoutes(companyId: string): Promise<any> {
+  async getSchoolRoutes(schoolId: string): Promise<any> {
     return this.prisma.route.findMany({
       where: {
-        school: { companyId },
+        schoolId,
       },
       include: {
         school: {
@@ -197,10 +160,10 @@ export class AdminService {
     });
   }
 
-  async getCompanyChildren(companyId: string): Promise<any> {
+  async getSchoolChildren(schoolId: string): Promise<any> {
     return this.prisma.child.findMany({
       where: {
-        school: { companyId },
+        schoolId,
       },
       select: {
         id: true,
@@ -236,16 +199,28 @@ export class AdminService {
             name: true,
           },
         },
+        route: {
+          select: {
+            id: true,
+            name: true,
+            bus: {
+              select: {
+                id: true,
+                plateNumber: true,
+              },
+            },
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },
     });
   }
 
-  async getChildrenPaymentStatus(companyId: string): Promise<any> {
+  async getChildrenPaymentStatus(schoolId: string): Promise<any> {
     const children = await this.prisma.child.findMany({
       where: {
-        school: { companyId },
+        schoolId,
       },
       select: {
         id: true,
@@ -263,10 +238,10 @@ export class AdminService {
     }));
   }
 
-  async getCompanyDrivers(companyId: string): Promise<any> {
+  async getSchoolDrivers(schoolId: string): Promise<any> {
     return this.prisma.driver.findMany({
       where: {
-        user: { companyId },
+        user: { schoolId },
       },
       include: {
         user: {
@@ -306,68 +281,13 @@ export class AdminService {
   }
 
   async getCompanyById(companyId: string): Promise<any> {
-    const company = await this.prisma.company.findUnique({
-      where: { id: companyId },
-      include: {
-        users: true,
-        schools: true,
-      },
-    });
-
-    if (!company) return null;
-
-    const buses = await this.prisma.bus.findMany({
-      where: { driver: { user: { companyId } } },
-    });
-
-    const drivers = await this.prisma.driver.findMany({
-      where: { user: { companyId } },
-      include: { user: true },
-    });
-
-    return {
-      ...company,
-      buses,
-      drivers,
-    };
+    // Companies are no longer supported
+    throw new BadRequestException('Companies are no longer supported');
   }
 
   async deleteCompany(companyId: string): Promise<any> {
-    await this.prisma.childAttendance.deleteMany({
-      where: { trip: { bus: { driver: { user: { companyId } } } } },
-    });
-
-    await this.prisma.trip.deleteMany({
-      where: { bus: { driver: { user: { companyId } } } },
-    });
-
-    await this.prisma.scheduledRoute.deleteMany({
-      where: { driver: { user: { companyId } } },
-    });
-
-    await this.prisma.bus.deleteMany({
-      where: { driver: { user: { companyId } } },
-    });
-
-    await this.prisma.driver.deleteMany({
-      where: { user: { companyId } },
-    });
-
-    await this.prisma.route.deleteMany({
-      where: { school: { companyId } },
-    });
-
-    await this.prisma.school.deleteMany({
-      where: { companyId },
-    });
-
-    await this.prisma.user.deleteMany({
-      where: { companyId },
-    });
-
-    return this.prisma.company.delete({
-      where: { id: companyId },
-    });
+    // Companies are no longer supported
+    throw new BadRequestException('Companies are no longer supported');
   }
 
   async updateSchool(schoolId: string, data: any): Promise<any> {
@@ -393,7 +313,7 @@ export class AdminService {
     });
   }
 
-  async getCompanyAnalytics(companyId: string, range?: string): Promise<any> {
+  async getSchoolAnalytics(schoolId: string, range?: string): Promise<any> {
     // Calculate date filter based on range
     const now = new Date();
     let startDate: Date;
@@ -411,65 +331,38 @@ export class AdminService {
         break;
     }
 
-    const [totalTrips, completedTrips, inProgressTrips, totalChildren, activeChildren, totalPayments, successfulPayments, missedPickups, onTimeTrips] = await Promise.all([
+    const [totalTrips, completedTrips, inProgressTrips, totalChildren, activeChildren] = await Promise.all([
       this.prisma.trip.count({
         where: { 
-          bus: { driver: { user: { companyId } } },
+          route: { schoolId },
           createdAt: { gte: startDate },
         },
       }),
       this.prisma.trip.count({
         where: {
-          bus: { driver: { user: { companyId } } },
+          route: { schoolId },
           status: 'COMPLETED',
           createdAt: { gte: startDate },
         },
       }),
       this.prisma.trip.count({
         where: {
-          bus: { driver: { user: { companyId } } },
+          route: { schoolId },
           status: 'IN_PROGRESS',
           createdAt: { gte: startDate },
         },
       }),
       this.prisma.child.count({
-        where: { school: { companyId } },
+        where: { schoolId },
       }),
       this.prisma.child.count({
         where: {
-          school: { companyId },
-          attendance: {
-            some: {
-              trip: {
-                status: 'IN_PROGRESS',
-              },
-            },
-          },
-        },
-      }),
-      this.prisma.paymentIntent.count({
-        where: {
-          parent: { companyId },
-          createdAt: { gte: startDate },
-        },
-      }),
-      this.prisma.paymentIntent.count({
-        where: {
-          parent: { companyId },
-          status: 'succeeded',
-          createdAt: { gte: startDate },
-        },
-      }),
-      this.prisma.childAttendance.count({
-        where: {
-          trip: { bus: { driver: { user: { companyId } } } },
-          status: 'MISSED',
-          createdAt: { gte: startDate },
+          schoolId,
         },
       }),
       this.prisma.trip.count({
         where: {
-          bus: { driver: { user: { companyId } } },
+          route: { schoolId },
           status: 'COMPLETED',
           createdAt: { gte: startDate },
         },
@@ -477,8 +370,7 @@ export class AdminService {
     ]);
 
     const tripCompletionRate = totalTrips > 0 ? (completedTrips / totalTrips) * 100 : 0;
-    const paymentSuccessRate = totalPayments > 0 ? (successfulPayments / totalPayments) * 100 : 0;
-    const attendanceRate = totalChildren > 0 ? ((totalChildren - missedPickups) / totalChildren) * 100 : 100;
+    const attendanceRate = totalChildren > 0 ? (activeChildren / totalChildren) * 100 : 100;
 
     return {
       trips: {
@@ -491,26 +383,16 @@ export class AdminService {
         total: totalChildren,
         active: activeChildren,
       },
-      payments: {
-        total: totalPayments,
-        successful: successfulPayments,
-        successRate: paymentSuccessRate,
-      },
       attendance: {
-        missedPickups,
         rate: attendanceRate,
-      },
-      performance: {
-        onTimeTrips,
-        tripCompletionRate,
       },
     };
   }
 
-  async getCompanyTrips(companyId: string): Promise<any> {
+  async getSchoolTrips(schoolId: string): Promise<any> {
     return this.prisma.trip.findMany({
       where: {
-        bus: { driver: { user: { companyId } } },
+        route: { schoolId },
       },
       include: {
         bus: {
@@ -552,10 +434,10 @@ export class AdminService {
     });
   }
 
-  async getCompanyActiveTrips(companyId: string): Promise<any> {
+  async getSchoolActiveTrips(schoolId: string): Promise<any> {
     return this.prisma.trip.findMany({
       where: {
-        bus: { driver: { user: { companyId } } },
+        route: { schoolId },
         status: 'IN_PROGRESS',
       },
       include: {
@@ -594,7 +476,7 @@ export class AdminService {
     });
   }
 
-  async getAttendanceReport(companyId: string, range?: string): Promise<any> {
+  async getAttendanceReport(schoolId: string, range?: string): Promise<any> {
     // Calculate date filter based on range
     const now = new Date();
     let startDate: Date;
@@ -614,7 +496,7 @@ export class AdminService {
 
     const attendances = await this.prisma.childAttendance.findMany({
       where: {
-        trip: { bus: { driver: { user: { companyId } } } },
+        trip: { route: { schoolId } },
         timestamp: {
           gte: startDate,
         },
@@ -680,7 +562,7 @@ export class AdminService {
     }));
   }
 
-  async getPaymentReport(companyId: string, range?: string): Promise<any> {
+  async getPaymentReport(schoolId: string, range?: string): Promise<any> {
     // Calculate date filter based on range
     const now = new Date();
     let startDate: Date;
@@ -698,9 +580,16 @@ export class AdminService {
         break;
     }
 
+    // Get all parents of children in this school
+    const children = await this.prisma.child.findMany({
+      where: { schoolId },
+      select: { parentId: true },
+    });
+    const parentIds = [...new Set(children.map(c => c.parentId))];
+
     const payments = await this.prisma.paymentIntent.findMany({
       where: {
-        parent: { companyId },
+        parentId: { in: parentIds },
         createdAt: {
           gte: startDate,
         },
@@ -734,7 +623,7 @@ export class AdminService {
     }));
   }
 
-  async getDriverPerformanceReport(companyId: string, range?: string): Promise<any> {
+  async getDriverPerformanceReport(schoolId: string, range?: string): Promise<any> {
     // Calculate date filter based on range
     const now = new Date();
     let startDate: Date;
@@ -754,7 +643,7 @@ export class AdminService {
 
     const drivers = await this.prisma.driver.findMany({
       where: {
-        user: { companyId },
+        user: { schoolId },
       },
       include: {
         user: {
@@ -822,27 +711,27 @@ export class AdminService {
   }
 
   // Fare Management
-  async updateCompanyFare(companyId: string, newFare: number, adminId: string, reason?: string) {
-    const company = await this.prisma.company.findUnique({
-      where: { id: companyId },
+  async updateCompanyFare(schoolId: string, newFare: number, adminId: string, reason?: string) {
+    const school = await this.prisma.school.findUnique({
+      where: { id: schoolId },
     });
 
-    if (!company) {
-      throw new NotFoundException('Company not found');
+    if (!school) {
+      throw new NotFoundException('School not found');
     }
 
-    const oldFare = company.baseFare;
+    const oldFare = school.baseFare;
 
-    // Update company fare
-    const updatedCompany = await this.prisma.company.update({
-      where: { id: companyId },
+    // Update school fare
+    const updatedSchool = await this.prisma.school.update({
+      where: { id: schoolId },
       data: { baseFare: newFare },
     });
 
     // Record fare history
     await this.prisma.fareHistory.create({
       data: {
-        companyId,
+        schoolId,
         oldFare,
         newFare,
         changedBy: adminId,
@@ -850,15 +739,13 @@ export class AdminService {
       },
     });
 
-    // Notify all parents in this company
+    // Notify all parents in this school
     const parents = await this.prisma.user.findMany({
       where: {
         role: 'PARENT',
         parentChildren: {
           some: {
-            school: {
-              companyId,
-            },
+            schoolId,
           },
         },
       },
@@ -880,7 +767,7 @@ export class AdminService {
     }
 
     return {
-      company: updatedCompany,
+      school: updatedSchool,
       oldFare,
       newFare,
       change: newFare - oldFare,
@@ -888,9 +775,9 @@ export class AdminService {
     };
   }
 
-  async getCompanyFare(companyId: string) {
-    const company = await this.prisma.company.findUnique({
-      where: { id: companyId },
+  async getSchoolFare(schoolId: string) {
+    const school = await this.prisma.school.findUnique({
+      where: { id: schoolId },
       select: {
         id: true,
         name: true,
@@ -899,16 +786,16 @@ export class AdminService {
       },
     });
 
-    if (!company) {
-      throw new NotFoundException('Company not found');
+    if (!school) {
+      throw new NotFoundException('School not found');
     }
 
-    return company;
+    return school;
   }
 
-  async getFareHistory(companyId: string) {
+  async getFareHistory(schoolId: string) {
     return this.prisma.fareHistory.findMany({
-      where: { companyId },
+      where: { schoolId },
       orderBy: { createdAt: 'desc' },
       take: 50, // Last 50 changes
     });

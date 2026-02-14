@@ -27,7 +27,7 @@ export class DriversService {
 
   async create(data: any): Promise<Driver> {
     // Extract fields from data
-    const { userId, firstName, lastName, email, phone, password, license, companyId, schoolId } = data;
+    const { userId, firstName, lastName, email, phone, password, license, schoolId } = data;
 
     // Check if driver with this license already exists
     const existingDriver = await this.findByLicense(license);
@@ -37,12 +37,12 @@ export class DriversService {
 
     // If userId is provided, use existing user; otherwise create new user
     if (userId) {
-      // Update existing user with DRIVER role and companyId
+      // Update existing user with DRIVER role and schoolId
       await this.prisma.user.update({
         where: { id: userId },
         data: {
           role: 'DRIVER',
-          companyId,
+          schoolId,
         },
       });
 
@@ -76,7 +76,6 @@ export class DriversService {
           phone,
           passwordHash,
           role: 'DRIVER',
-          companyId,
           schoolId,
         },
       });

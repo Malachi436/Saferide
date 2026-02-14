@@ -22,9 +22,9 @@ interface School {
 export default function SchoolsPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId } = use(params);
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,12 +41,12 @@ export default function SchoolsPage({
 
   useEffect(() => {
     fetchSchools();
-  }, [companyId]);
+  }, [schoolId]);
 
   const fetchSchools = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get<School[]>(`/admin/company/${companyId}/schools`);
+      const data = await apiClient.get<School[]>(`/admin/school/${schoolId}/schools`);
       setSchools(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load schools');
@@ -71,7 +71,7 @@ export default function SchoolsPage({
       if (editingSchool) {
         await apiClient.put(`/admin/school/${editingSchool.id}`, payload);
       } else {
-        await apiClient.post(`/admin/school/${companyId}`, payload);
+        await apiClient.post(`/admin/school/${schoolId}`, payload);
       }
 
       resetForm();

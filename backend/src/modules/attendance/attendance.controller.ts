@@ -39,20 +39,34 @@ export class AttendanceController {
   }
 
   @Get('child/:childId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'PARENT')
   async getAttendanceByChild(@Param('childId') childId: string) {
     return this.attendanceService.getAttendanceByChild(childId);
   }
 
   @Get('trip/:tripId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   async getAttendanceByTrip(@Param('tripId') tripId: string) {
     return this.attendanceService.getAttendanceByTrip(tripId);
   }
 
   @Get(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   async getAttendanceById(@Param('id') id: string) {
     return this.attendanceService.getAttendanceById(id);
+  }
+
+  // Verify all children on a trip are accounted for
+  @Get('trip/:tripId/verify')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
+  async verifyTripAttendance(@Param('tripId') tripId: string) {
+    return this.attendanceService.verifyTripAttendance(tripId);
+  }
+
+  // Check for children left on bus (critical safety feature)
+  @Get('trip/:tripId/safety-check')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
+  async checkChildrenLeftOnBus(@Param('tripId') tripId: string) {
+    return this.attendanceService.checkForChildrenLeftOnBus(tripId);
   }
 }

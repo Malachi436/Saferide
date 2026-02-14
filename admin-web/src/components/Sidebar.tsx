@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const companyId = user?.companyId;
+  const schoolId = user?.schoolId; // Use schoolId instead of companyId
 
   if (!user) return null;
 
@@ -20,16 +20,16 @@ export function Sidebar() {
         { label: 'Analytics', href: '/platform/analytics' },
       ]
     : [
-        { label: 'Overview', href: `/school/${companyId}/overview` },
-        { label: 'Live Dashboard', href: `/school/${companyId}/live-dashboard` },
-        { label: 'Students', href: `/school/${companyId}/children` },
-        { label: 'Drivers', href: `/school/${companyId}/drivers` },
-        { label: 'Buses', href: `/school/${companyId}/buses` },
-        { label: 'Routes', href: `/school/${companyId}/routes` },
-        { label: 'Scheduled Routes', href: `/school/${companyId}/scheduled-routes` },
-        { label: 'Trips', href: `/school/${companyId}/trips` },
-        { label: 'Payments (Hubtel)', href: `/school/${companyId}/payments` },
-        { label: 'Reports', href: `/school/${companyId}/reports` },
+        { label: 'Dashboard', href: `/school/${schoolId}/dashboard` },
+        { label: 'Live Dashboard', href: `/school/${schoolId}/live-dashboard` },
+        { label: 'Students', href: `/school/${schoolId}/children` },
+        { label: 'Drivers', href: `/school/${schoolId}/drivers` },
+        { label: 'Buses', href: `/school/${schoolId}/buses` },
+        { label: 'Routes', href: `/school/${schoolId}/routes` },
+        { label: 'Scheduled Routes', href: `/school/${schoolId}/scheduled-routes` },
+        { label: 'Trips', href: `/school/${schoolId}/trips` },
+        { label: 'Payments (Hubtel)', href: `/school/${schoolId}/payments` },
+        { label: 'Reports', href: `/school/${schoolId}/reports` },
       ];
 
   return (

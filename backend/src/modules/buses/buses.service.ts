@@ -61,18 +61,11 @@ export class BusesService {
     });
   }
 
-  async findByCompanyId(companyId: string): Promise<any[]> {
+  async findBySchoolId(schoolId: string): Promise<any[]> {
     return this.prisma.bus.findMany({
 
       where: {
-        OR: [
-          { companyId: companyId },
-          {
-            driver: {
-              user: { companyId },
-            },
-          },
-        ],
+        schoolId,
       },
       include: {
         driver: {

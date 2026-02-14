@@ -26,7 +26,7 @@ export class EarlyPickupController {
   }
 
   @Put(':requestId/approve')
-  @Roles('DRIVER', 'COMPANY_ADMIN')
+  @Roles('DRIVER', 'SCHOOL_ADMIN')
   async approveRequest(
     @Param('requestId') requestId: string,
     @Req() req: any,
@@ -36,7 +36,7 @@ export class EarlyPickupController {
   }
 
   @Put(':requestId/reject')
-  @Roles('DRIVER', 'COMPANY_ADMIN')
+  @Roles('DRIVER', 'SCHOOL_ADMIN')
   async rejectRequest(
     @Param('requestId') requestId: string,
     @Body() data: { reason?: string },
@@ -53,19 +53,19 @@ export class EarlyPickupController {
   }
 
   @Get('trip/:tripId/pending')
-  @Roles('DRIVER', 'COMPANY_ADMIN')
+  @Roles('DRIVER', 'SCHOOL_ADMIN')
   async getPendingRequests(@Param('tripId') tripId: string) {
     return this.earlyPickupService.getPendingRequestsForTrip(tripId);
   }
 
   @Get('trip/:tripId/approved')
-  @Roles('DRIVER', 'COMPANY_ADMIN', 'PARENT')
+  @Roles('DRIVER', 'SCHOOL_ADMIN', 'PARENT')
   async getApprovedRequests(@Param('tripId') tripId: string) {
     return this.earlyPickupService.getApprovedRequestsForTrip(tripId);
   }
 
   @Get('parent/:parentId')
-  @Roles('PARENT', 'COMPANY_ADMIN')
+  @Roles('PARENT', 'SCHOOL_ADMIN')
   async getParentRequests(@Param('parentId') parentId: string) {
     return this.earlyPickupService.getParentRequests(parentId);
   }

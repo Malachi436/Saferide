@@ -11,9 +11,9 @@ type DateRange = 'daily' | 'weekly' | 'monthly';
 export default function ReportsPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId: companyId } = use(params);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [dateRange, setDateRange] = useState<DateRange>('weekly');
@@ -60,7 +60,7 @@ export default function ReportsPage({
       setLoading(true);
       setError('');
 
-      const endpoint = `/admin/company/${companyId}/reports/${type}?range=${dateRange}`;
+      const endpoint = `/admin/school/${companyId}/reports/${type}?range=${dateRange}`;
       const response = await apiClient.get(endpoint);
       const data = Array.isArray(response) ? response : [];
 

@@ -6,9 +6,10 @@ import { use } from 'react';
 export default function PaymentPlansPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId: _ } = use(params); // companyId will be used after Hubtle API integration
+  // schoolId would be used for API calls in the future
+  use(params);
 
   return (
     <DashboardLayout>

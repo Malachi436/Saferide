@@ -5,9 +5,9 @@ import { socketService } from './socket';
 
 // API configuration - Backend NestJS server
 // Use your computer's local network IP (check with ipconfig on Windows)
-// For physical device testing: Use WiFi IP (e.g., 172.20.10.3)
+// For physical device testing: Use WiFi IP (e.g., 192.168.1.250)
 // For emulator/simulator: Use localhost or 10.0.2.2 (Android) or localhost (iOS)
-const API_BASE_URL = 'http://172.20.10.3:3000';
+const API_BASE_URL = 'http://192.168.1.250:3000';
 
 interface ApiRequestConfig {
   headers?: Record<string, string>;

@@ -26,6 +26,8 @@ import { ScheduledRoutesModule } from './modules/scheduled-routes/scheduled-rout
 import { HealthModule } from './modules/health/health.module';
 import { EmailModule } from './modules/email/email.module';
 import { CompaniesModule } from './modules/companies/companies.module';
+import { SchoolsModule } from './modules/schools/schools.module';
+import { SchoolScheduleModule } from './modules/school-schedule/school-schedule.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { CompaniesModule } from './modules/companies/companies.module';
     HealthModule,
     EmailModule,
     CompaniesModule,
+    SchoolsModule,
+        SchoolScheduleModule,
   ],
   controllers: [AppController],
   providers: [],

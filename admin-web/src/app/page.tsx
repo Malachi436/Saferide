@@ -20,13 +20,14 @@ export default function Home() {
         if (role === 'PLATFORM_ADMIN') {
           console.log('[Home Page] Redirecting to /platform/overview');
           router.push('/platform/overview');
-        } else if (role === 'COMPANY_ADMIN') {
-          if (user.companyId) {
-            console.log('[Home Page] Redirecting to /school/' + user.companyId + '/overview');
-            router.push(`/school/${user.companyId}/overview`);
+        } else if (role === 'SCHOOL_ADMIN' || role === 'COMPANY_ADMIN') {
+          // For both SCHOOL_ADMIN and COMPANY_ADMIN, use schoolId for navigation
+          if (user.schoolId) {
+            console.log('[Home Page] Redirecting to /school/' + user.schoolId + '/overview');
+            router.push(`/school/${user.schoolId}/overview`);
           } else {
-            console.error('[Home Page] School admin has no companyId!');
-            alert('Error: School admin account is missing school ID');
+            console.error('[Home Page] Admin account is missing school ID');
+            alert('Error: Admin account is missing school ID');
           }
         } else {
           console.error('[Home Page] Unknown role:', role);

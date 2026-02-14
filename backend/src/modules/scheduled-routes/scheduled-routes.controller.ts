@@ -11,7 +11,7 @@ export class ScheduledRoutesController {
   constructor(private readonly scheduledRoutesService: ScheduledRoutesService) {}
 
   @Post()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   create(@Body() data: {
     routeId: string;
     driverId: string;
@@ -29,19 +29,19 @@ export class ScheduledRoutesController {
   }
 
   @Get()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   findAll() {
     return this.scheduledRoutesService.findAll();
   }
 
-  @Get('company/:companyId')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
-  findByCompany(@Param('companyId') companyId: string) {
-    return this.scheduledRoutesService.findByCompany(companyId);
+  @Get('school/:schoolId')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
+  findBySchool(@Param('schoolId') schoolId: string) {
+    return this.scheduledRoutesService.findBySchool(schoolId);
   }
 
   @Get('today')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   findToday() {
     const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
     const today = days[new Date().getDay()] as DayOfWeek;
@@ -49,13 +49,13 @@ export class ScheduledRoutesController {
   }
 
   @Get(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   findOne(@Param('id') id: string) {
     return this.scheduledRoutesService.findOne(id);
   }
 
   @Put(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   update(@Param('id') id: string, @Body() data: any) {
     if (data.effectiveFrom) {
       data.effectiveFrom = new Date(data.effectiveFrom);
@@ -67,19 +67,19 @@ export class ScheduledRoutesController {
   }
 
   @Put(':id/suspend')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   suspend(@Param('id') id: string) {
     return this.scheduledRoutesService.suspend(id);
   }
 
   @Put(':id/activate')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   activate(@Param('id') id: string) {
     return this.scheduledRoutesService.activate(id);
   }
 
   @Delete(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   delete(@Param('id') id: string) {
     return this.scheduledRoutesService.delete(id);
   }

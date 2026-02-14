@@ -37,7 +37,7 @@ export class ChildrenService {
   }
 
   async bulkOnboard(bulkData: any): Promise<{ created: number; children: Child[] }> {
-    const { companyId, schoolId, children } = bulkData;
+    const { schoolId, children } = bulkData;
 
     if (!children || !Array.isArray(children) || children.length === 0) {
       throw new BadRequestException('Children array is required and must not be empty');
@@ -47,16 +47,15 @@ export class ChildrenService {
       throw new BadRequestException('School ID is required');
     }
 
-    // Verify school exists and belongs to company
-    const school = await this.prisma.school.findFirst({
+    // Verify school exists
+    const school = await this.prisma.school.findUnique({
       where: {
         id: schoolId,
-        companyId: companyId,
       },
     });
 
     if (!school) {
-      throw new NotFoundException('School not found or does not belong to this company');
+      throw new NotFoundException('School not found');
     }
 
     const schoolCode = school.schoolCode || 'ROS';
@@ -263,14 +262,12 @@ export class ChildrenService {
   }
 
   // Bulk update grades (for annual promotions)
-  async bulkUpdateGrades(companyId: string, updateDto: BulkUpdateGradesDto, adminId: string) {
+  async bulkUpdateGrades(schoolId: string, updateDto: BulkUpdateGradesDto, adminId: string) {
     if (updateDto.action === 'PROMOTE') {
-      // Get all children in the company
+      // Get all children in the school
       const children = await this.prisma.child.findMany({
         where: {
-          school: {
-            companyId,
-          },
+          schoolId,
         },
       });
 
@@ -372,8 +369,8 @@ export class ChildrenService {
     // Notify company admins
     const admins = await this.prisma.user.findMany({
       where: {
-        companyId: child.school.companyId,
-        role: 'COMPANY_ADMIN',
+        schoolId: child.schoolId,
+        role: 'SCHOOL_ADMIN',
       },
     });
 
@@ -465,15 +462,13 @@ export class ChildrenService {
     return updatedRequest;
   }
 
-  // Get pending location change requests for a company
-  async getPendingLocationChangeRequests(companyId: string) {
+  // Get pending location change requests for a school
+  async getPendingLocationChangeRequests(schoolId: string) {
     return this.prisma.locationChangeRequest.findMany({
       where: {
         status: 'PENDING',
         child: {
-          school: {
-            companyId,
-          },
+          schoolId,
         },
       },
       include: {

@@ -17,9 +17,9 @@ interface FareHistory {
 export default function FareManagementPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId: companyId } = use(params);
   const [currentFare, setCurrentFare] = useState<number>(0);
   const [currency, setCurrency] = useState('UGX');
   const [newFare, setNewFare] = useState('');
@@ -35,11 +35,11 @@ export default function FareManagementPage({
   const fetchFareData = async () => {
     try {
       setLoading(true);
-      const fareData: any = await apiClient.get(`/admin/company/${companyId}/fare`);
+      const fareData: any = await apiClient.get(`/admin/school/${companyId}/fare`);
       setCurrentFare(fareData.baseFare || 0);
       setCurrency(fareData.currency || 'UGX');
 
-      const historyData: any = await apiClient.get(`/admin/company/${companyId}/fare/history`);
+      const historyData: any = await apiClient.get(`/admin/school/${companyId}/fare/history`);
       setHistory(Array.isArray(historyData) ? historyData : []);
     } catch (err) {
       console.error('Error loading fare data:', err);
@@ -57,7 +57,7 @@ export default function FareManagementPage({
 
     try {
       setUpdating(true);
-      await apiClient.patch(`/admin/company/${companyId}/fare`, {
+      await apiClient.patch(`/admin/school/${companyId}/fare`, {
         newFare: fareValue,
         reason,
       });

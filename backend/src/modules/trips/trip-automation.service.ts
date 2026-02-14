@@ -91,6 +91,7 @@ export class TripAutomationService {
         driverId: schedule.driverId,
         status: 'SCHEDULED',
         startTime,
+        scheduledDate: startTime,
       },
     });
 

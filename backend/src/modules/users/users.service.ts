@@ -36,7 +36,6 @@ export class UsersService {
         lastName: data.lastName,
         phone: data.phone ?? null,
         role: data.role,
-        companyId: data.companyId ?? null,
         schoolId: data.schoolId ?? null,
       },
     });
@@ -58,7 +57,6 @@ export class UsersService {
         lastName: true,
         phone: true,
         role: true,
-        companyId: true,
         schoolId: true,
         createdAt: true,
         updatedAt: true,

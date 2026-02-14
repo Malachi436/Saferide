@@ -30,9 +30,9 @@ interface LocationRequest {
 export default function LocationRequestsPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId: companyId } = use(params);
   const [requests, setRequests] = useState<LocationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<LocationRequest | null>(null);
@@ -46,7 +46,7 @@ export default function LocationRequestsPage({
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const data: any = await apiClient.get(`/children/company/${companyId}/location-change/pending`);
+      const data: any = await apiClient.get(`/children/school/${companyId}/location-change/pending`);
       setRequests(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error loading requests:', err);

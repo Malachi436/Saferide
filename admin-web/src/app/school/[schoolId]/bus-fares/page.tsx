@@ -2,7 +2,7 @@
 
 import { use, useState } from 'react';
 
-export default function BusFaresPage({ params }: { params: Promise<{ companyId: string }> }) {
+export default function BusFaresPage({ params }: { params: Promise<{ schoolId: string }> }) {
   use(params);
   const [dailyFare, setDailyFare] = useState('25.00');
   const [weeklyFare, setWeeklyFare] = useState('125.00');

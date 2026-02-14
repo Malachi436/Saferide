@@ -55,9 +55,10 @@ export default function DriversPage({
   }, [schoolId]);
 
   const fetchDrivers = async () => {
+    if (!schoolId || schoolId === 'undefined') return;
     try {
       setLoading(true);
-      const data = await apiClient.get(`/admin/company/${schoolId}/drivers`);
+      const data = await apiClient.get(`/admin/school/${schoolId}/drivers`);
       setDrivers(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load drivers');
@@ -71,14 +72,13 @@ export default function DriversPage({
     e.preventDefault();
     try {
       // Create user and driver
-      await apiClient.post('/drivers', {
+      await apiClient.post('/school/drivers', {
         email: formData.email.trim(),
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         phone: formData.phone.trim(),
         password: formData.password,
         license: formData.license.trim(),
-        companyId: schoolId,
       });
 
       alert(`✅ Driver ${formData.firstName} ${formData.lastName} added successfully!`);
@@ -130,6 +130,20 @@ export default function DriversPage({
   const openDetails = (driver: Driver) => {
     setSelectedDriver(driver);
     setShowDetails(true);
+  };
+
+  const handleDeleteDriver = async (driver: Driver) => {
+    if (!confirm(`Are you sure you want to delete driver ${driver.user.firstName} ${driver.user.lastName}? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await apiClient.delete(`/drivers/${driver.id}`);
+      alert('✅ Driver deleted successfully');
+      fetchDrivers();
+    } catch (err: any) {
+      alert(`❌ Error: ${err.response?.data?.message || 'Failed to delete driver'}`);
+    }
   };
 
   const closeDetails = () => {
@@ -346,6 +360,12 @@ export default function DriversPage({
                     className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition"
                   >
                     View Details
+                  </button>
+                  <button
+                    onClick={() => handleDeleteDriver(driver)}
+                    className="w-full mt-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-4 py-2 rounded-lg transition"
+                  >
+                    Delete Driver
                   </button>
                 </div>
               </div>

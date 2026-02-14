@@ -109,6 +109,7 @@ export class TripDailyGenerationWorker {
             busId: scheduledRoute.busId,
             driverId: scheduledRoute.driverId,
             status: 'SCHEDULED',
+            scheduledDate: new Date(),
           },
         });
         

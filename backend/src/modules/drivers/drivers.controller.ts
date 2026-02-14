@@ -10,13 +10,13 @@ export class DriversController {
   constructor(private readonly driversService: DriversService) {}
 
   @Post()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   create(@Body() createDriverDto: any) {
     return this.driversService.create(createDriverDto);
   }
 
   @Get()
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   findAll() {
     return this.driversService.findAll();
   }
@@ -38,19 +38,19 @@ export class DriversController {
   }
 
   @Get(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN', 'DRIVER')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN', 'DRIVER')
   findOne(@Param('id') id: string) {
     return this.driversService.findOne(id);
   }
 
   @Patch(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   update(@Param('id') id: string, @Body() updateDriverDto: any) {
     return this.driversService.update(id, updateDriverDto);
   }
 
   @Delete(':id')
-  @Roles('PLATFORM_ADMIN', 'COMPANY_ADMIN')
+  @Roles('PLATFORM_ADMIN', 'SCHOOL_ADMIN')
   remove(@Param('id') id: string) {
     return this.driversService.remove(id);
   }

@@ -38,9 +38,9 @@ interface GroupedParent {
 export default function ChildrenManagementPage({
   params,
 }: {
-  params: Promise<{ companyId: string }>;
+  params: Promise<{ schoolId: string }>;
 }) {
-  const { companyId } = use(params);
+  const { schoolId: companyId } = use(params);
   const [children, setChildren] = useState<Child[]>([]);
   const [schools, setSchools] = useState<any[]>([]);
   const [routes, setRoutes] = useState<any[]>([]);
@@ -71,7 +71,7 @@ export default function ChildrenManagementPage({
   const fetchChildren = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get(`/admin/company/${companyId}/children`);
+      const data = await apiClient.get(`/admin/school/${companyId}/children`);
       setChildren(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error loading children:', err);
@@ -82,7 +82,7 @@ export default function ChildrenManagementPage({
 
   const fetchSchools = async () => {
     try {
-      const data = await apiClient.get(`/admin/company/${companyId}/schools`);
+      const data = await apiClient.get(`/admin/school/${companyId}/schools`);
       setSchools(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error loading schools:', err);
@@ -91,7 +91,7 @@ export default function ChildrenManagementPage({
 
   const fetchRoutes = async () => {
     try {
-      const data: any = await apiClient.get(`/admin/company/${companyId}/routes`);
+      const data: any = await apiClient.get(`/admin/school/${companyId}/routes`);
       setRoutes(Array.isArray(data) ? data : []);
     } catch (err) {
       // Routes API not implemented yet - this is expected
